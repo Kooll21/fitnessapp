@@ -255,19 +255,38 @@
     }
 
         function saveWorkout() {
-            const workoutContainer = document.getElementById('workoutSuggestions');
-            const savedWorkoutsList = document.getElementById('savedWorkoutsList');
+    const workoutContainer = document.getElementById('workoutSuggestions');
+    const savedWorkoutsList = document.getElementById('savedWorkoutsList');
+    const savedWorkoutsSection = document.getElementById('savedWorkouts');
+    const exercises = workoutContainer.querySelectorAll('.exercise');
+    
+    const listItem = document.createElement('li');
+    listItem.innerHTML = `<h3>Сохраненная тренировка</h3>`;
 
-            const workoutContent = workoutContainer.innerHTML;
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `<button onclick="removeSavedWorkout(this)">Удалить</button> <div>${workoutContent}</div>`;
-            savedWorkoutsList.appendChild(listItem);
-        }
+    exercises.forEach((exercise, index) => {
+        const exerciseName = exercise.querySelector('h4').innerText;
+        const weightInput = exercise.querySelector('input[type="number"]').value || '0'; // Corrected weight input selection
+        
+        const exerciseEntry = document.createElement('div');
+        exerciseEntry.innerHTML = `
+            <label>
+                <input type="checkbox" class="completed-checkbox"> 
+                ${exerciseName} - Вес: ${weightInput} кг
+            </label>
+        `;
+        listItem.appendChild(exerciseEntry);
+    });
 
-        function removeSavedWorkout(button) {
-            const listItem = button.parentElement;
-            listItem.remove();
-        }
+    const deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Удалить';
+    deleteButton.onclick = function () { listItem.remove(); };
+    listItem.appendChild(deleteButton);
+
+    savedWorkoutsList.appendChild(listItem);
+
+    // Ensure the saved workouts section is visible
+    savedWorkoutsSection.style.display = 'block';
+}
     </script>
 </body>
 </html>
