@@ -1,0 +1,190 @@
+Чтобы пользователь видел 9 упражнений вместо текущих, нужно изменить функцию `generateWorkout`, чтобы она выводила только 9 упражнений из выбранного набора. Я добавлю проверку, которая ограничивает количество выводимых упражнений до 9.
+
+Вот обновленный код:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фитнес-трекер</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Фитнес-трекер</h1>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="showSection('workouts')">Тренировки</a></li>
+                <li><a href="#" onclick="showSection('calendar')">Календарь</a></li>
+                <li><a href="#" onclick="showSection('plans')">Программы</a></li>
+                <li><a href="#" onclick="showSection('nutrition')">Питание</a></li>
+                <li><a href="#" onclick="showSection('progress')">Прогресс</a></li>
+                <li><a href="#" onclick="showSection('timer')">Таймер</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="workouts" class="content-section">
+            <h2>Тренировки</h2>
+            <form id="workoutForm">
+                <label for="trainingType">Выберите тип тренировки:</label>
+                <select id="trainingType">
+                    <option value="bicepsChest">Бицепс и грудь</option>
+                    <option value="tricepsBack">Трицепс и спина</option>
+                    <option value="legsAbs">Ноги и пресс</option>
+                    <option value="shouldersAbs">Плечи и пресс</option>
+                    <option value="chestBack">Грудь и спина</option>
+                    <option value="fullBody">Полное тело</option>
+                </select>
+                <button type="button" onclick="generateWorkout()">Получить упражнения</button>
+            </form>
+
+            <div id="workoutSuggestions">
+                <!-- Сюда будут выводиться предложения для тренировки -->
+            </div>
+
+            <button id="saveWorkout" style="display: none;" onclick="saveWorkout()">Сохранить тренировку</button>
+        </section>
+
+        <section id="savedWorkouts" class="content-section" style="display: none;">
+            <h2>Сохраненные тренировки</h2>
+            <ul id="savedWorkoutsList">
+                <!-- Сюда будут добавляться сохраненные тренировки -->
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        const workoutDatabase = {
+            bicepsChest: [
+                [
+                     { exercise: "Жим штанги лёжа", reps: 8, sets: 4, type: "main", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Жим гантелей лёжа", reps: 10, sets: 4, type: "main", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Отжимания от пола", reps: 12, sets: 3, type: "secondary", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Жим штанги на наклонной скамье", reps: 10, sets: 4, type: "main", muscles: "Верхняя часть большой грудной, передний пучок дельт, трицепс" },
+        { exercise: "Жим гантелей на наклонной скамье", reps: 12, sets: 3, type: "secondary", muscles: "Верхняя часть большой грудной, передний пучок дельт, трицепс" },
+        { exercise: "Отжимания на брусьях", reps: 10, sets: 3, type: "accessory", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Разведения гантелей на скамье", reps: 12, sets: 3, type: "secondary", muscles: "Средняя и нижняя часть большой грудной, передний пучок дельт" },
+        { exercise: "Кроссоверы на тренажёре", reps: 12, sets: 3, type: "accessory", muscles: "Средняя и нижняя часть большой грудной" },
+        { exercise: "Пуловер с гантелей", reps: 10, sets: 4, type: "main", muscles: "Большая грудная (вся), латиссімус" },
+        { exercise: "Жим на тренажёре", reps: 12, sets: 3, type: "main", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Тяга верхнего блока к груди", reps: 12, sets: 3, type: "secondary", muscles: "Широчайшие, бицепсы" },
+        { exercise: "Тяга штанги в наклоне", reps: 8, sets: 4, type: "secondary", muscles: "Широчайшие, трапеции, задний пучок дельт, бицепс" },
+        { exercise: "Отжимания с узким хватом", reps: 10, sets: 3, type: "accessory", muscles: "Вся грудная (с акцентом на внутреннюю часть), трицепс" },
+        { exercise: "Жим штанги из-за головы", reps: 8, sets: 4, type: "main", muscles: "Передний пучок дельт, верхняя грудная (если хват широкий)" },
+        { exercise: "Отжимания с приподнятыми ногами", reps: 12, sets: 3, type: "secondary", muscles: "Верхняя часть большой грудной, передний пучок дельт, трицепс" },
+        { exercise: "Разведения гантелей стоя", reps: 12, sets: 3, type: "accessory", muscles: "Средний пучок дельт" },
+        { exercise: "Жим гантелей сидя", reps: 10, sets: 4, type: "main", muscles: "Вся грудная (с акцентом на верхнюю часть), передний пучок дельт" },
+        { exercise: "Флайс на тренажёре", reps: 12, sets: 3, type: "secondary", muscles: "Средняя и нижняя часть большой грудной" },
+        { exercise: "Жим гантелей на горизонтальной скамье с поворотом", reps: 10, sets: 4, type: "main", muscles: "Вся грудная, передний пучок дельт" },
+        { exercise: "Отжимания с широкой постановкой рук", reps: 12, sets: 3, type: "secondary", muscles: "Вся грудная (с акцентом на внешнюю часть), передний пучок дельт" },
+        { exercise: "Жим штанги в упоре лёжа", reps: 8, sets: 4, type: "main", muscles: "Вся грудная, передний пучок дельт" },
+        { exercise: "Разведения гантелей в наклоне", reps: 12, sets: 3, type: "secondary", muscles: "Средняя часть грудных, задний пучок дельт" },
+        { exercise: "Блок с верхним хватом для груди", reps: 12, sets: 3, type: "accessory", muscles: "Средняя часть грудных" },
+        { exercise: "Жим штанги на скамье с положительным углом", reps: 10, sets: 4, type: "main", muscles: "Верхняя грудная, передний пучок дельт" },
+        { exercise: "Гребля на тренажёре для груди", reps: 10, sets: 4, type: "secondary", muscles: "Вся грудная (с акцентом на внутреннюю часть)" }
+    ]
+            ],
+            tricepsBack: [
+                [
+                    { exercise: "Тяга штанги в наклоне", reps: 8, sets: 4, type: "main", muscles: "Спина, бицепсы" },
+                    { exercise: "Подтягивания широким хватом", reps: 10, sets: 4, type: "main", muscles: "Спина, бицепсы" },
+                    { exercise: "Тяга гантели одной рукой", reps: 12, sets: 4, type: "secondary", muscles: "Спина, бицепсы" },
+                    { exercise: "Тяга верхнего блока", reps: 12, sets: 3, type: "secondary", muscles: "Спина, бицепсы" },
+                    { exercise: "Гиперэкстензии", reps: 15, sets: 3, type: "accessory", muscles: "Спина, ягодицы, задняя поверхность бедра" },
+                    { exercise: "Обратные гиперэкстензии", reps: 12, sets: 3, type: "secondary", muscles: "Ягодицы, поясница" }
+                ]
+            ],
+            legsAbs: [
+                [
+                    { exercise: "Приседания со штангой", reps: 8, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы, спина" },
+                    { exercise: "Жим ногами в тренажёре", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы" },
+                    { exercise: "Мертвая тяга", reps: 10, sets: 4, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы, спина" },
+                    { exercise: "Приседания на одной ноге", reps: 10, sets: 3, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+                    { exercise: "Скручивания на пресс", reps: 20, sets: 3, type: "accessory", muscles: "Пресс" },
+                    { exercise: "Румынская тяга с гантелями", reps: 10, sets: 3, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы" },
+                    { exercise: "Подъемы на носки в тренажёре", reps: 12, sets: 4, type: "accessory", muscles: "Икроножные" }
+                ]
+            ],
+            shouldersAbs: [
+                [
+                    { exercise: "Жим гантелей сидя", reps: 8, sets: 4, type: "main", muscles: "Плечи, трицепсы" },
+                    { exercise: "Разведения гантелей в стороны", reps: 12, sets: 4, type: "main", muscles: "Плечи" },
+                    { exercise: "Тяга штанги к подбородку", reps: 10, sets: 4, type: "secondary", muscles: "Плечи, трапеции" },
+                    { exercise: "Отжимания с опорой на ноги", reps: 12, sets: 3, type: "secondary", muscles: "Грудные, плечи, трицепсы" },
+                    { exercise: "Боковая планка", reps: 30, sets: 3, type: "accessory", muscles: "Пресс, косые мышцы живота" },
+                    { exercise: "Пресс с использованием мяча", reps: 20, sets: 3, type: "accessory", muscles: "Пресс" }
+                ]
+            ],
+            fullBody: [
+                [
+                    { exercise: "Приседания со штангой", reps: 8, sets: 4, type: "main", muscles: "Ноги, ягодицы, спина" },
+                    { exercise: "Жим штанги лёжа", reps: 8, sets: 4, type: "main", muscles: "Грудные, плечи, трицепсы" },
+                    { exercise: "Тяга штанги в наклоне", reps: 10, sets: 4, type: "secondary", muscles: "Спина, бицепсы" },
+                    { exercise: "Отжимания от пола", reps: 12, sets: 3, type: "secondary", muscles: "Грудные, плечи, трицепсы" }
+                ]
+            ]
+        };
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // обмен элементов
+            }
+        }
+
+        function generateWorkout() {
+            const trainingType = document.getElementById('trainingType').value;
+            const workout = workoutDatabase[trainingType][0]; // Доступ к первому набору упражнений
+            shuffleArray(workout); // Перемешиваем упражнения
+
+            const workoutContainer = document.getElementById('workoutSuggestions');
+            workoutContainer.innerHTML = "";
+
+            // Ограничиваем количество выводимых упражнений до 9
+            const exercisesToShow = workout.slice(0, 9);
+
+                    exercisesToShow.forEach((exercise, index) => {
+            workoutContainer.innerHTML += `
+                <div class="exercise">
+                    <h4>${index + 1}. ${exercise.exercise}</h4>
+                    <p>Повторения: ${exercise.reps}, Подходы: ${exercise.sets}</p>
+                    <p>Тип: ${exercise.type}</p>
+                    <p>Мышцы: ${exercise.muscles}</p>
+                </div>
+            `;
+        });
+
+        document.getElementById('saveWorkout').style.display = 'block';
+    }
+
+        function saveWorkout() {
+            const workoutContainer = document.getElementById('workoutSuggestions');
+            const savedWorkoutsList = document.getElementById('savedWorkoutsList');
+
+            const workoutContent = workoutContainer.innerHTML;
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<button onclick="removeSavedWorkout(this)">Удалить</button> <div>${workoutContent}</div>`;
+            savedWorkoutsList.appendChild(listItem);
+        }
+
+        function removeSavedWorkout(button) {
+            const listItem = button.parentElement;
+            listItem.remove();
+        }
+    </script>
+</body>
+</html>
+```
+
+Теперь, при генерации тренировки, будет отображаться только 9 упражнений из выбранного типа тренировки.
