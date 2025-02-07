@@ -254,19 +254,24 @@
         document.getElementById('saveWorkout').style.display = 'block';
     }
 
-        function saveWorkout() {
+       function saveWorkout() {
     const workoutContainer = document.getElementById('workoutSuggestions');
-    const savedWorkoutsList = document.getElementById('savedWorkoutsList');
     const savedWorkoutsSection = document.getElementById('savedWorkouts');
+    const savedWorkoutsList = document.getElementById('savedWorkoutsList');
     const exercises = workoutContainer.querySelectorAll('.exercise');
-    
+
+    if (exercises.length === 0) {
+        alert("Нет упражнений для сохранения!");
+        return;
+    }
+
     const listItem = document.createElement('li');
     listItem.innerHTML = `<h3>Сохраненная тренировка</h3>`;
 
     exercises.forEach((exercise, index) => {
         const exerciseName = exercise.querySelector('h4').innerText;
-        const weightInput = exercise.querySelector('input[type="number"]').value || '0'; // Corrected weight input selection
-        
+        const weightInput = exercise.querySelector('.weight-input') ? exercise.querySelector('.weight-input').value : '0';
+
         const exerciseEntry = document.createElement('div');
         exerciseEntry.innerHTML = `
             <label>
@@ -279,15 +284,21 @@
 
     const deleteButton = document.createElement('button');
     deleteButton.innerText = 'Удалить';
-    deleteButton.onclick = function () { listItem.remove(); };
+    deleteButton.onclick = function () {
+        listItem.remove();
+        if (savedWorkoutsList.children.length === 0) {
+            savedWorkoutsSection.style.display = 'none'; // Hide section if empty
+        }
+        workoutContainer.style.display = 'block'; // Show workout suggestions again
+    };
     listItem.appendChild(deleteButton);
 
     savedWorkoutsList.appendChild(listItem);
-// Hide the workout suggestions
-    workoutContainer.style.display = 'none';
-    // Ensure the saved workouts section is visible
-    savedWorkoutsSection.style.display = 'block';
+
+    savedWorkoutsSection.style.display = 'block'; // Show saved workouts section
+    workoutContainer.style.display = 'none'; // Hide workout suggestions
 }
+
     </script>
 </body>
 </html>
