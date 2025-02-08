@@ -48,6 +48,26 @@
       display: none; /* Hide by default */
     }
   </style>
+  <script type="module">
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+    
+    const auth = getAuth();
+
+    // Log out function with redirect
+    window.logoutUser = function() {
+      signOut(auth)
+        .then(() => {
+          // Successful logout
+          console.log('User logged out');
+          
+          // Redirect to index.html after logout
+          window.location.href = 'index.html';  // Redirects to the index page
+        })
+        .catch((error) => {
+          console.error('Error logging out:', error);
+        });
+    };
+  </script>
 </head>
 
 <body>
