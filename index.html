@@ -254,7 +254,7 @@
         document.getElementById('saveWorkout').style.display = 'block';
     }
 
-       function saveWorkout() {
+      function saveWorkout() {
     const workoutContainer = document.getElementById('workoutSuggestions');
     const savedWorkoutsSection = document.getElementById('savedWorkouts');
     const savedWorkoutsList = document.getElementById('savedWorkoutsList');
@@ -270,7 +270,7 @@
 
     exercises.forEach((exercise, index) => {
         const exerciseName = exercise.querySelector('h4').innerText;
-        const weightInput = exercise.querySelector('.weight-input') ? exercise.querySelector('.weight-input').value : '0';
+        const weightInput = exercise.querySelector(`input[id="weight${index}"]`).value || '0'; // Исправленный селектор
 
         const exerciseEntry = document.createElement('div');
         exerciseEntry.innerHTML = `
@@ -287,16 +287,15 @@
     deleteButton.onclick = function () {
         listItem.remove();
         if (savedWorkoutsList.children.length === 0) {
-            savedWorkoutsSection.style.display = 'none'; // Hide section if empty
+            savedWorkoutsSection.style.display = 'none';
         }
-        workoutContainer.style.display = 'block'; // Show workout suggestions again
+        workoutContainer.style.display = 'block';
     };
     listItem.appendChild(deleteButton);
 
     savedWorkoutsList.appendChild(listItem);
-
-    savedWorkoutsSection.style.display = 'block'; // Show saved workouts section
-    workoutContainer.style.display = 'none'; // Hide workout suggestions
+    savedWorkoutsSection.style.display = 'block';
+    workoutContainer.style.display = 'none';
 }
 
     </script>
