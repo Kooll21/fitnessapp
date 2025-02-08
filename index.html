@@ -159,7 +159,254 @@
             </ul>
         </section>
     </main>
+<script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
 
+        const workoutDatabase = {
+            bicepsChest: [
+                [
+                    { exercise: "Жим штанги лёжа", reps: 8, sets: 4, type: "main", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Жим гантелей лёжа", reps: 10, sets: 4, type: "main", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Отжимания от пола", reps: 12, sets: 3, type: "secondary", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Жим штанги на наклонной скамье", reps: 10, sets: 4, type: "main", muscles: "Верхняя часть большой грудной, передний пучок дельт, трицепс" },
+        { exercise: "Жим гантелей на наклонной скамье", reps: 12, sets: 3, type: "secondary", muscles: "Верхняя часть большой грудной, передний пучок дельт, трицепс" },
+        { exercise: "Отжимания на брусьях", reps: 10, sets: 3, type: "accessory", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Разведения гантелей на скамье", reps: 12, sets: 3, type: "secondary", muscles: "Средняя и нижняя часть большой грудной, передний пучок дельт" },
+        { exercise: "Кроссоверы на тренажёре", reps: 12, sets: 3, type: "accessory", muscles: "Средняя и нижняя часть большой грудной" },
+        { exercise: "Пуловер с гантелей", reps: 10, sets: 4, type: "main", muscles: "Большая грудная (вся), латиссімус" },
+        { exercise: "Жим на тренажёре", reps: 12, sets: 3, type: "main", muscles: "Большая грудная (все части), передний пучок дельт, трицепс" },
+        { exercise: "Тяга верхнего блока к груди", reps: 12, sets: 3, type: "secondary", muscles: "Широчайшие, бицепсы" },
+        { exercise: "Тяга штанги в наклоне", reps: 8, sets: 4, type: "secondary", muscles: "Широчайшие, трапеции, задний пучок дельт, бицепс" },
+        { exercise: "Отжимания с узким хватом", reps: 10, sets: 3, type: "accessory", muscles: "Вся грудная (с акцентом на внутреннюю часть), трицепс" },
+        { exercise: "Жим штанги из-за головы", reps: 8, sets: 4, type: "main", muscles: "Передний пучок дельт, верхняя грудная (если хват широкий)" },
+        { exercise: "Отжимания с приподнятыми ногами", reps: 12, sets: 3, type: "secondary", muscles: "Верхняя часть большой грудной, передний пучок дельт, трицепс" },
+        { exercise: "Разведения гантелей стоя", reps: 12, sets: 3, type: "accessory", muscles: "Средний пучок дельт" },
+        { exercise: "Жим гантелей сидя", reps: 10, sets: 4, type: "main", muscles: "Вся грудная (с акцентом на верхнюю часть), передний пучок дельт" },
+        { exercise: "Флайс на тренажёре", reps: 12, sets: 3, type: "secondary", muscles: "Средняя и нижняя часть большой грудной" },
+        { exercise: "Жим гантелей на горизонтальной скамье с поворотом", reps: 10, sets: 4, type: "main", muscles: "Вся грудная, передний пучок дельт" },
+        { exercise: "Отжимания с широкой постановкой рук", reps: 12, sets: 3, type: "secondary", muscles: "Вся грудная (с акцентом на внешнюю часть), передний пучок дельт" },
+        { exercise: "Жим штанги в упоре лёжа", reps: 8, sets: 4, type: "main", muscles: "Вся грудная, передний пучок дельт" },
+        { exercise: "Разведения гантелей в наклоне", reps: 12, sets: 3, type: "secondary", muscles: "Средняя часть грудных, задний пучок дельт" },
+        { exercise: "Блок с верхним хватом для груди", reps: 12, sets: 3, type: "accessory", muscles: "Средняя часть грудных" },
+        { exercise: "Жим штанги на скамье с положительным углом", reps: 10, sets: 4, type: "main", muscles: "Верхняя грудная, передний пучок дельт" },
+        { exercise: "Гребля на тренажёре для груди", reps: 10, sets: 4, type: "secondary", muscles: "Вся грудная (с акцентом на внутреннюю часть)" }
+                ]
+            ],
+            tricepsBack: [
+                [
+                    { exercise: "Тяга штанги в наклоне", reps: 8, sets: 4, type: "main", muscles: "Спина (широчайшие, трапеции), бицепсы" },
+            { exercise: "Подтягивания широким хватом", reps: 10, sets: 4, type: "main", muscles: "Спина (широчайшие, ромбовидные), бицепсы" },
+            { exercise: "Тяга гантели одной рукой", reps: 12, sets: 4, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), бицепсы" },
+            { exercise: "Тяга верхнего блока", reps: 12, sets: 3, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), бицепсы" },
+            { exercise: "Подтягивания с дополнительным весом", reps: 8, sets: 3, type: "main", muscles: "Спина (широчайшие, трапеции), бицепсы" },
+            { exercise: "Тяга Т-грифа", reps: 8, sets: 4, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), трапеции, бицепсы" },
+            { exercise: "Отжимания на брусьях", reps: 12, sets: 4, type: "main", muscles: "Трицепсы, грудные, передние дельты" },
+            { exercise: "Жим штанги узким хватом", reps: 10, sets: 4, type: "main", muscles: "Трицепсы, грудные (внутренняя часть), передние дельты" },
+            { exercise: "Разгибания рук на верхнем блоке", reps: 12, sets: 4, type: "secondary", muscles: "Трицепсы" },
+            { exercise: "Французский жим с гантелями", reps: 12, sets: 4, type: "secondary", muscles: "Трицепсы" },
+            { exercise: "Отжимания от пола с узким хватом", reps: 15, sets: 3, type: "secondary", muscles: "Трицепсы, грудные" },
+            { exercise: "Жим лежа с узким хватом", reps: 10, sets: 4, type: "secondary", muscles: "Трицепсы, грудные (внутренняя часть), плечи" },
+            { exercise: "Тяга штанги в наклоне", reps: 8, sets: 4, type: "main", muscles: "Спина (широчайшие, трапеции), бицепсы" },
+            { exercise: "Подтягивания узким хватом", reps: 10, sets: 4, type: "main", muscles: "Спина (широчайшие, ромбовидные), бицепсы" },
+            { exercise: "Тяга гантели одной рукой", reps: 12, sets: 4, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), бицепсы" },
+            { exercise: "Тяга верхнего блока", reps: 12, sets: 3, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), бицепсы" },
+            { exercise: "Подтягивания с дополнительным весом", reps: 8, sets: 3, type: "main", muscles: "Спина (широчайшие, трапеции), бицепсы" },
+            { exercise: "Тяга Т-грифа", reps: 8, sets: 4, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), трапеции, бицепсы" }
+                
+                ]
+            ],
+            legsAbs: [
+                [
+                     { exercise: "Жим ногами в тренажёре", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Мертвая тяга", reps: 10, sets: 4, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы, спина" },
+    { exercise: "Приседания на одной ноге", reps: 10, sets: 3, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Скручивания на пресс", reps: 20, sets: 3, type: "accessory", muscles: "Пресс" },
+    { exercise: "Румынская тяга с гантелями", reps: 10, sets: 3, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы" },
+    { exercise: "Подъемы на носки в тренажёре", reps: 12, sets: 4, type: "accessory", muscles: "Икроножные" },
+    { exercise: "Приседания со штангой", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Сумо-приседания", reps: 12, sets: 4, type: "secondary", muscles: "Внутренняя поверхность бедра, ягодицы" },
+    { exercise: "Шагающие выпады", reps: 12, sets: 3, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Выпады назад с гантелями", reps: 10, sets: 4, type: "secondary", muscles: "Ягодицы, задняя поверхность бедра" },
+    { exercise: "Тяга сумо с гантелями", reps: 12, sets: 3, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы" },
+    { exercise: "Жим ногами в тренажёре узким хватом", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы" },
+    { exercise: "Подъемы на платформу", reps: 12, sets: 4, type: "secondary", muscles: "Икроножные, ягодицы" },
+    { exercise: "Глубокие приседания с гантелями", reps: 10, sets: 4, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Приседания с широкой постановкой ног", reps: 10, sets: 4, type: "secondary", muscles: "Ягодицы, внутренняя поверхность бедра" },
+    { exercise: "Приседания с прыжком", reps: 15, sets: 3, type: "accessory", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Болгарские приседания", reps: 10, sets: 4, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Тяга Т-грифа", reps: 8, sets: 4, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы, спина" },
+    { exercise: "Подъемы на носки стоя", reps: 15, sets: 4, type: "accessory", muscles: "Икроножные" },
+    { exercise: "Сгибания ног в тренажёре", reps: 12, sets: 4, type: "secondary", muscles: "Задняя поверхность бедра" },
+    { exercise: "Приседания в тренажёре Смита", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Скручивания на пресс с подъемом ног", reps: 20, sets: 3, type: "accessory", muscles: "Пресс" },
+    { exercise: "Жим ногами в тренажёре с широкой постановкой ног", reps: 10, sets: 4, type: "main", muscles: "Внутренняя поверхность бедра, ягодицы" },
+    { exercise: "Подъемы на платформу с гантелями", reps: 12, sets: 3, type: "secondary", muscles: "Икроножные, ягодицы" },
+    { exercise: "Махи ногами в тренажёре", reps: 12, sets: 4, type: "accessory", muscles: "Ягодицы" },
+    { exercise: "Тяга гантели одной ногой", reps: 12, sets: 3, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы" },
+    { exercise: "Шаги на ступеньку с гантелями", reps: 10, sets: 3, type: "secondary", muscles: "Ягодицы, квадрицепсы" },
+    { exercise: "Махи ногами назад", reps: 15, sets: 3, type: "accessory", muscles: "Ягодицы" },
+    { exercise: "Приседания на тренажёре с подъёмом пяток", reps: 12, sets: 4, type: "accessory", muscles: "Икроножные, квадрицепсы" },
+    { exercise: "Разгибания ног в тренажёре", reps: 12, sets: 4, type: "secondary", muscles: "Квадрицепсы" },
+    { exercise: "Рывки с гантелями", reps: 10, sets: 4, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Подъемы на носки сидя", reps: 15, sets: 4, type: "accessory", muscles: "Икроножные" },
+    { exercise: "Выпады вперед с гантелями", reps: 12, sets: 3, type: "secondary", muscles: "Ягодицы, квадрицепсы" },
+    { exercise: "Приседания с гантелями на плечах", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Боковые выпады", reps: 12, sets: 3, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Тяга на прямых ногах", reps: 12, sets: 3, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы" }
+
+                ]
+            ],
+            shouldersAbs: [
+                [
+                    { exercise: "Жим гантелей сидя", reps: 8, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Жим штанги из-за головы", reps: 8, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Армейский жим", reps: 8, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Разведения гантелей в стороны", reps: 12, sets: 4, type: "main", muscles: "Средняя дельтовидная мышца" },
+    { exercise: "Махи гантелями в наклоне", reps: 12, sets: 4, type: "secondary", muscles: "Задняя дельтовидная мышца" },
+    { exercise: "Подъём гантелей перед собой", reps: 12, sets: 3, type: "secondary", muscles: "Передняя дельтовидная мышца" },
+    { exercise: "Тяга штанги к подбородку", reps: 10, sets: 4, type: "secondary", muscles: "Средняя дельтовидная мышца, трапеции" },
+    { exercise: "Отжимания с опорой на ноги", reps: 12, sets: 3, type: "secondary", muscles: "Грудные мышцы, передняя дельтовидная мышца, трицепсы" },
+    { exercise: "Разведения гантелей в стороны в наклоне", reps: 12, sets: 4, type: "secondary", muscles: "Задняя дельтовидная мышца" },
+    { exercise: "Подъём гирь над головой", reps: 10, sets: 4, type: "secondary", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Шраги с гантелями", reps: 12, sets: 4, type: "accessory", muscles: "Трапеции" },
+    { exercise: "Жим Арнольда", reps: 10, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Боковая планка", reps: 30, sets: 3, type: "accessory", muscles: "Прямые и косые мышцы живота, стабилизаторы корпуса" },
+    { exercise: "Скручивания на пресс", reps: 20, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" },
+    { exercise: "Обратные скручивания", reps: 15, sets: 3, type: "accessory", muscles: "Нижняя часть прямых мышц живота" },
+    { exercise: "Подъём ног в висе", reps: 15, sets: 3, type: "accessory", muscles: "Нижняя часть прямых мышц живота, косые мышцы живота" },
+    { exercise: "Русские скручивания с гирей", reps: 20, sets: 3, type: "accessory", muscles: "Косые мышцы живота" },
+    { exercise: "Пресс с использованием мяча", reps: 20, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" },
+    { exercise: "Планка на предплечьях", reps: 40, sets: 3, type: "accessory", muscles: "Прямые мышцы живота, стабилизаторы корпуса" },
+    { exercise: "Планка с подъёмом руки", reps: 30, sets: 3, type: "accessory", muscles: "Прямые и косые мышцы живота, стабилизаторы корпуса" },
+    { exercise: "Велосипед", reps: 20, sets: 3, type: "accessory", muscles: "Косые мышцы живота, нижняя часть прямых мышц живота" },
+    { exercise: "Подъём корпуса на наклонной скамье", reps: 15, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" },
+    { exercise: "Планка с касанием плеча", reps: 20, sets: 3, type: "accessory", muscles: "Прямые и косые мышцы живота, стабилизаторы корпуса" },
+    { exercise: "Динамическая планка", reps: 30, sets: 3, type: "accessory", muscles: "Прямые мышцы живота, передняя дельтовидная мышца" },
+    { exercise: "Повороты корпуса с грифом", reps: 15, sets: 3, type: "accessory", muscles: "Косые мышцы живота" },
+    { exercise: "Пресс с мячом за головой", reps: 20, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" },
+    { exercise: "Подъём ног в упоре на брусьях", reps: 15, sets: 3, type: "accessory", muscles: "Нижняя часть прямых мышц живота" },
+    { exercise: "Скручивания с канатом в кроссовере", reps: 15, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" }
+                ]
+            ],
+            fullBody: [
+                [
+                     { exercise: "Приседания со штангой", reps: 8, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы, задняя поверхность бедра, мышцы кора, поясница" },
+    { exercise: "Жим штанги лёжа", reps: 8, sets: 4, type: "main", muscles: "Грудные, передняя дельтовидная мышца, трицепсы" },
+    { exercise: "Тяга штанги в наклоне", reps: 10, sets: 4, type: "main", muscles: "Широчайшие мышцы спины, трапеции, ромбовидные, задняя дельтовидная мышца, бицепсы" },
+    { exercise: "Становая тяга", reps: 8, sets: 4, type: "main", muscles: "Ягодицы, задняя поверхность бедра, поясница, трапеции, предплечья" },
+    { exercise: "Жим гантелей сидя", reps: 8, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Отжимания от пола", reps: 12, sets: 3, type: "secondary", muscles: "Грудные мышцы, передняя дельтовидная мышца, трицепсы" },
+    { exercise: "Подтягивания широким хватом", reps: 10, sets: 4, type: "main", muscles: "Широчайшие мышцы спины, бицепсы, трапеции" },
+    { exercise: "Выпады с гантелями", reps: 12, sets: 4, type: "secondary", muscles: "Квадрицепсы, ягодицы, задняя поверхность бедра" },
+    { exercise: "Тяга верхнего блока", reps: 12, sets: 3, type: "secondary", muscles: "Широчайшие мышцы спины, ромбовидные, бицепсы" },
+    { exercise: "Подъём на носки стоя", reps: 15, sets: 4, type: "accessory", muscles: "Икроножные, камбаловидные" },
+    { exercise: "Русские скручивания", reps: 20, sets: 3, type: "accessory", muscles: "Косые мышцы живота" },
+    { exercise: "Фронтальные приседания", reps: 8, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы, мышцы кора" },
+    { exercise: "Жим штанги из-за головы", reps: 8, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Тяга гантелей в наклоне", reps: 12, sets: 4, type: "secondary", muscles: "Широчайшие мышцы спины, задняя дельтовидная мышца, бицепсы" },
+    { exercise: "Подъём корпуса на пресс", reps: 20, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" },
+    { exercise: "Тяга Т-грифа", reps: 10, sets: 4, type: "secondary", muscles: "Широчайшие мышцы спины, трапеции, бицепсы" },
+    { exercise: "Махи гантелями в стороны", reps: 12, sets: 4, type: "secondary", muscles: "Средняя дельтовидная мышца" },
+    { exercise: "Обратные гиперэкстензии", reps: 12, sets: 3, type: "secondary", muscles: "Ягодицы, поясница" },
+    { exercise: "Планка", reps: 40, sets: 3, type: "accessory", muscles: "Прямые и косые мышцы живота, мышцы стабилизаторы кора" },
+    { exercise: "Жим Арнольда", reps: 10, sets: 4, type: "main", muscles: "Передняя и средняя дельтовидные мышцы, трицепсы" },
+    { exercise: "Болгарские сплит-приседания", reps: 10, sets: 4, type: "secondary", muscles: "Квадрицепсы, ягодицы, задняя поверхность бедра" },
+    { exercise: "Шраги с гантелями", reps: 12, sets: 4, type: "accessory", muscles: "Трапеции" },
+    { exercise: "Махи гантелями назад в наклоне", reps: 12, sets: 4, type: "secondary", muscles: "Задняя дельтовидная мышца" },
+    { exercise: "Жим ногами в тренажёре", reps: 10, sets: 4, type: "main", muscles: "Квадрицепсы, ягодицы" },
+    { exercise: "Румынская тяга", reps: 10, sets: 4, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы, поясница" },
+    { exercise: "Гиперэкстензии", reps: 15, sets: 3, type: "accessory", muscles: "Поясница, ягодицы, задняя поверхность бедра" },
+    { exercise: "Скручивания на пресс", reps: 20, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" },
+    { exercise: "Подтягивания узким хватом", reps: 10, sets: 4, type: "secondary", muscles: "Широчайшие мышцы спины, бицепсы" },
+    { exercise: "Отжимания на брусьях", reps: 12, sets: 4, type: "main", muscles: "Трицепсы, грудные мышцы, передняя дельтовидная мышца" }
+                ]
+            ]
+        };
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // обмен элементов
+            }
+        }
+
+         function generateWorkout() {
+        const trainingType = document.getElementById('trainingType').value;
+        const workout = workoutDatabase[trainingType][0]; // Доступ к первому набору упражнений
+        shuffleArray(workout); // Перемешиваем упражнения
+
+        const workoutContainer = document.getElementById('workoutSuggestions');
+        workoutContainer.innerHTML = "";
+
+        // Ограничиваем количество выводимых упражнений до 9
+        const exercisesToShow = workout.slice(0, 9);
+
+        exercisesToShow.forEach((exercise, index) => {
+            workoutContainer.innerHTML += `
+                <div class="exercise">
+                    <h4>${index + 1}. ${exercise.exercise}</h4>
+                    <p>Повторения: ${exercise.reps}, Подходы: ${exercise.sets}</p>
+                    <p>Тип: ${exercise.type}</p>
+                    <p>Мышцы: ${exercise.muscles}</p>
+                     <label for="weight${index}">Вес снаряда (кг):</label>
+                        <input type="number" id="weight${index}" name="weight${index}" placeholder="Введите вес" />
+                </div>
+            `;
+        });
+
+        document.getElementById('saveWorkout').style.display = 'block';
+    }
+
+      function saveWorkout() {
+    const workoutContainer = document.getElementById('workoutSuggestions');
+    const savedWorkoutsSection = document.getElementById('savedWorkouts');
+    const savedWorkoutsList = document.getElementById('savedWorkoutsList');
+    const exercises = workoutContainer.querySelectorAll('.exercise');
+
+    if (exercises.length === 0) {
+        alert("Нет упражнений для сохранения!");
+        return;
+    }
+
+    const listItem = document.createElement('li');
+    listItem.innerHTML = `<h3>Сохраненная тренировка</h3>`;
+
+    exercises.forEach((exercise, index) => {
+        const exerciseName = exercise.querySelector('h4').innerText;
+        const weightInput = exercise.querySelector(`input[id="weight${index}"]`).value || '0'; // Исправленный селектор
+
+        const exerciseEntry = document.createElement('div');
+        exerciseEntry.innerHTML = `
+            <label>
+                <input type="checkbox" class="completed-checkbox"> 
+                ${exerciseName} - Вес: ${weightInput} кг
+            </label>
+        `;
+        listItem.appendChild(exerciseEntry);
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.innerText = 'Удалить';
+    deleteButton.onclick = function () {
+        listItem.remove();
+        if (savedWorkoutsList.children.length === 0) {
+            savedWorkoutsSection.style.display = 'none';
+        }
+        workoutContainer.style.display = 'block';
+    };
+    listItem.appendChild(deleteButton);
+
+    savedWorkoutsList.appendChild(listItem);
+    savedWorkoutsSection.style.display = 'block';
+    workoutContainer.style.display = 'none';
+}
+
+    </script>
     <script>
         // Dynamically load the menu from menu.html
         fetch('menu.html')
