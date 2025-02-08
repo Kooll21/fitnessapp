@@ -1,95 +1,110 @@
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Firebase Authentication Example for Register and Login">
-<title>Firebase Authentication Example</title>
-<script type="module">
-    // Import the necessary Firebase SDKs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Authentication Example</title>
+  <script type="module">
+    // Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-analytics.js";
-    
-    // Firebase configuration
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+
+    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
       authDomain: "fitnessapp-f519f.firebaseapp.com",
       projectId: "fitnessapp-f519f",
-      storageBucket: "fitnessapp-f519f.firebasestorage.app",
+      storageBucket: "fitnessapp-f519f.appspot.com",
       messagingSenderId: "1000735476286",
-      appId: "1:1000735476286:web:4a62a875917834dd215f6",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
       measurementId: "G-MJ8K8ZNQM4"
     };
-    
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const analytics = getAnalytics(app);
-    
-    // Register new user
-    function register() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+
+    // Function for registering a user
+    function registerUser(email, password) {
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          const user = userCredential.user;
-          document.getElementById("authStatus").innerText = `Registration successful! Welcome, ${user.email}`;
+          console.log('User registered:', userCredential.user);
+          document.getElementById('status').textContent = 'Registration successful!';
         })
         .catch((error) => {
-          document.getElementById("authStatus").innerText = `Error: ${error.message}`;
+          console.error('Error registering user:', error);
+          document.getElementById('status').textContent = 'Error registering: ' + error.message;
         });
     }
-    
-    // Login existing user
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+
+    // Function for logging in a user
+    function loginUser(email, password) {
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          const user = userCredential.user;
-          document.getElementById("authStatus").innerText = `Logged in as ${user.email}`;
+          console.log('User logged in:', userCredential.user);
+          document.getElementById('status').textContent = 'Login successful!';
         })
         .catch((error) => {
-          document.getElementById("authStatus").innerText = `Error: ${error.message}`;
+          console.error('Error logging in user:', error);
+          document.getElementById('status').textContent = 'Error logging in: ' + error.message;
         });
     }
-    
-    // Logout user
-    function logout() {
+
+    // Function for logging out the user
+    function logoutUser() {
       signOut(auth)
         .then(() => {
-          document.getElementById("authStatus").innerText = `You have logged out.`;
+          console.log('User logged out');
+          document.getElementById('status').textContent = 'You have logged out.';
         })
         .catch((error) => {
-          document.getElementById("authStatus").innerText = `Error: ${error.message}`;
+          console.error('Error logging out user:', error);
+          document.getElementById('status').textContent = 'Error logging out: ' + error.message;
         });
     }
-    
-    // Monitor authentication state changes
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("authStatus").innerText = `You are logged in as ${user.email}`;
-      } else {
-        document.getElementById("authStatus").innerText = `You are not logged in.`;
-      }
-    });
-</script>
-<h2>Firebase Authentication: Register/Login</h2>
 
-<form>
+    // Attach event listeners to buttons
+    window.onload = function () {
+      document.getElementById('registerBtn').addEventListener('click', function() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        registerUser(email, password);
+      });
+
+      document.getElementById('loginBtn').addEventListener('click', function() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        loginUser(email, password);
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        logoutUser();
+      });
+    };
+  </script>
+</head>
+<body>
+  <h1>Firebase Authentication Example</h1>
+
+  <!-- Input fields for email and password -->
   <div>
     <label for="email">Email:</label>
-    <input id="email" placeholder="Enter your email" required type="email" />
+    <input type="email" id="email" required>
   </div>
 
   <div>
     <label for="password">Password:</label>
-    <input id="password" placeholder="Enter your password" required type="password" />
+    <input type="password" id="password" required>
   </div>
 
+  <!-- Action buttons -->
   <div>
-    <button type="button" onclick="register()">Register</button>
-    <button type="button" onclick="login()">Login</button>
-    <button type="button" onclick="logout()">Logout</button>
+    <button id="registerBtn">Register</button>
+    <button id="loginBtn">Login</button>
+    <button id="logoutBtn">Logout</button>
   </div>
-</form>
 
-<p id="authStatus" aria-live="polite">Status: You are not logged in.</p>
+  <!-- Status display -->
+  <div id="status"></div>
+</body>
+</html>
