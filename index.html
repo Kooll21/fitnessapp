@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness Tracker - Тренировочный План</title>
-
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
@@ -128,8 +127,8 @@
 </head>
 <body>
 
-
-
+    <!-- Dynamic menu will be loaded here -->
+    <div id="navbar-container"></div>
 
     <main>
         <section>
@@ -162,152 +161,37 @@
     </main>
 
     <script>
-        const workoutDatabase = {
-            bicepsChest: [
-                [
-                    { exercise: "Жим штанги на скамье с положительным углом", reps: 10, sets: 4, type: "main", muscles: "Верхняя грудная, передний пучок дельт" },
-                    { exercise: "Гребля на тренажёре для груди", reps: 10, sets: 4, type: "secondary", muscles: "Вся грудная (с акцентом на внутреннюю часть)" }
-                ]
-            ],
-            tricepsBack: [
-                [
-                    { exercise: "Подтягивания с дополнительным весом", reps: 8, sets: 3, type: "main", muscles: "Спина (широчайшие, трапеции), бицепсы" },
-                    { exercise: "Тяга Т-грифа", reps: 8, sets: 4, type: "secondary", muscles: "Спина (широчайшие, ромбовидные), трапеции, бицепсы" }
-                ]
-            ],
-            legsAbs: [
-                [
-                    { exercise: "Боковые выпады", reps: 12, sets: 3, type: "secondary", muscles: "Квадрицепсы, ягодицы" },
-                    { exercise: "Тяга на прямых ногах", reps: 12, sets: 3, type: "secondary", muscles: "Задняя поверхность бедра, ягодицы" }
-                ]
-            ],
-            shouldersAbs: [
-                [
-                    { exercise: "Подъём ног в упоре на брусьях", reps: 15, sets: 3, type: "accessory", muscles: "Нижняя часть прямых мышц живота" },
-                    { exercise: "Скручивания с канатом в кроссовере", reps: 15, sets: 3, type: "accessory", muscles: "Прямые мышцы живота" }
-                ]
-            ],
-            fullBody: [
-                [
-                    { exercise: "Подтягивания узким хватом", reps: 10, sets: 4, type: "secondary", muscles: "Широчайшие мышцы спины, бицепсы" },
-                    { exercise: "Отжимания на брусьях", reps: 12, sets: 4, type: "main", muscles: "Трицепсы, грудные мышцы, передняя дельтовидная мышца" }
-                ]
-            ]
-        };
+        // Dynamically load the menu from menu.html
+        fetch('menu.html')
+          .then(response => response.text())
+          .then(html => {
+            document.getElementById('navbar-container').innerHTML = html;
+            // Reinitialize Firebase after menu has loaded
+            initializeFirebase();
+          })
+          .catch(error => console.error('Error loading the menu:', error));
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]]; // обмен элементов
+        function initializeFirebase() {
+          const app = initializeApp(firebaseConfig);
+          const auth = getAuth(app);
+
+          onAuthStateChanged(auth, (user) => {
+            const userStatus = document.getElementById("user-status");
+            const loginLink = document.getElementById("login-link");
+            const logoutBtn = document.getElementById("logout-btn");
+
+            if (user) {
+              userStatus.textContent = `Welcome, ${user.email}`;
+              loginLink.style.display = 'none';
+              logoutBtn.style.display = 'block';
+            } else {
+              userStatus.textContent = 'Please log in';
+              loginLink.style.display = 'inline-block';
+              logoutBtn.style.display = 'none';
             }
-        }
-
-        function generateWorkout() {
-            const trainingType = document.getElementById('trainingType').value;
-            const workout = workoutDatabase[trainingType][0]; // Доступ к первому набору упражнений
-            shuffleArray(workout); // Перемешиваем упражнения
-
-            const workoutContainer = document.getElementById('workoutSuggestions');
-            workoutContainer.innerHTML = "";
-
-            // Ограничиваем количество выводимых упражнений до 9
-            const exercisesToShow = workout.slice(0, 9);
-
-            exercisesToShow.forEach((exercise, index) => {
-                workoutContainer.innerHTML += `
-                    <div class="exercise">
-                        <h4>${index + 1}. ${exercise.exercise}</h4>
-                        <p>Повторения: ${exercise.reps}, Подходы: ${exercise.sets}</p>
-                        <p>Тип: ${exercise.type}</p>
-                        <p>Мышцы: ${exercise.muscles}</p>
-                        <label for="weight${index}">Вес снаряда (кг):</label>
-                        <input type="number" id="weight${index}" name="weight${index}" placeholder="Введите вес" />
-                    </div>
-                `;
-            });
-
-            document.getElementById('saveWorkout').style.display = 'block';
-        }
-
-        function saveWorkout() {
-            const workoutContainer = document.getElementById('workoutSuggestions');
-            const savedWorkoutsSection = document.getElementById('savedWorkouts');
-            const savedWorkoutsList = document.getElementById('savedWorkoutsList');
-            const exercises = workoutContainer.querySelectorAll('.exercise');
-
-            if (exercises.length === 0) {
-                alert("Нет упражнений для сохранения!");
-                return;
-            }
-
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `<h3>Сохраненная тренировка</h3>`;
-
-            exercises.forEach((exercise, index) => {
-                const exerciseName = exercise.querySelector('h4').innerText;
-                const weightInput = exercise.querySelector(`input[id="weight${index}"]`).value || '0'; // Исправленный селектор
-
-                const exerciseEntry = document.createElement('div');
-                exerciseEntry.innerHTML = `
-                    <label>
-                        <input type="checkbox" class="completed-checkbox"> 
-                        ${exerciseName} - Вес: ${weightInput} кг
-                    </label>
-                `;
-                listItem.appendChild(exerciseEntry);
-            });
-
-            const deleteButton = document.createElement('button');
-            deleteButton.innerText = 'Удалить';
-            deleteButton.onclick = function () {
-                listItem.remove();
-                if (savedWorkoutsList.children.length === 0) {
-                    savedWorkoutsSection.style.display = 'none';
-                }
-                workoutContainer.style.display = 'block';
-            };
-            listItem.appendChild(deleteButton);
-
-            savedWorkoutsList.appendChild(listItem);
-            savedWorkoutsSection.style.display = 'block';
-            workoutContainer.style.display = 'none';
+          });
         }
     </script>
-    
-    <script>
-    // Dynamically load the menu from menu.html
-    fetch('menu.html')
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById('navbar-container').innerHTML = html;
-        // Reinitialize Firebase after menu has loaded
-        initializeFirebase();
-      })
-      .catch(error => console.error('Error loading the menu:', error));
-
-    function initializeFirebase() {
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-
-      onAuthStateChanged(auth, (user) => {
-        const userStatus = document.getElementById("user-status");
-        const loginLink = document.getElementById("login-link");
-        const logoutBtn = document.getElementById("logout-btn");
-
-        if (user) {
-          // User is logged in
-          userStatus.textContent = `Welcome, ${user.email}`;
-          loginLink.style.display = 'none';
-          logoutBtn.style.display = 'block';
-        } else {
-          // User is logged out
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-        }
-      });
-    }
-  </script>
 
 </body>
 </html>
