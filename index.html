@@ -39,18 +39,23 @@
         });
     }
 
-    // Function for logging in a user
-    function loginUser(email, password) {
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          console.log('User logged in:', userCredential.user);
-          document.getElementById('status').textContent = 'Login successful!';
-        })
-        .catch((error) => {
-          console.error('Error logging in user:', error);
-          document.getElementById('status').textContent = 'Error logging in: ' + error.message;
-        });
-    }
+    // Login function
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Login successful
+                    alert("Login successful!");
+                    window.location.href = "admin.html"; // Redirect to admin page
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    alert(errorMessage);
+                });
+        }
 
     // Function for logging out the user
     function logoutUser() {
