@@ -49,25 +49,27 @@
     }
   </style>
   <script type="module">
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    
-    const auth = getAuth();
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+  
+  const auth = getAuth();
 
-    // Log out function with redirect
-    window.logoutUser = function() {
-      signOut(auth)
-        .then(() => {
-          // Log successful logout
-          console.log('User logged out');
-          
-          // Redirect to index.html after logout using assign
-          window.location.assign('index.html');  // Use assign to navigate to the page
-        })
-        .catch((error) => {
-          console.error('Error logging out:', error);
-        });
-    };
-  </script>
+  // Log out function with added debug logs
+  window.logoutUser = function() {
+    console.log('Logout initiated');  // Check if the function is being called
+
+    signOut(auth)
+      .then(() => {
+        console.log('User logged out');  // Confirm logout was successful
+
+        // Redirect to index.html after logout
+        console.log('Redirecting to index.html...');
+        window.location.assign('index.html');  // Use assign to navigate to the page
+      })
+      .catch((error) => {
+        console.error('Error logging out:', error);  // Log any errors
+      });
+  };
+</script>
 </head>
 
 <body>
