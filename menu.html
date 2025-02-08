@@ -49,27 +49,25 @@
     }
   </style>
   <script type="module">
-  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
   
-  const auth = getAuth();
+    const auth = getAuth();
 
-  // Log out function with added debug logs
-  window.logoutUser = function() {
-    console.log('Logout initiated');  // Check if the function is being called
+    // Log out function
+    window.logoutUser = function() {
+      console.log('Logout initiated');  // Check if the function is being called
 
-    signOut(auth)
-      .then(() => {
-        console.log('User logged out');  // Confirm logout was successful
-
-        // Redirect to index.html after logout
-        console.log('Redirecting to index.html...');
-        window.location.assign('index.html');  // Use assign to navigate to the page
-      })
-      .catch((error) => {
-        console.error('Error logging out:', error);  // Log any errors
-      });
-  };
-</script>
+      signOut(auth)
+        .then(() => {
+          console.log('User logged out');  // Confirm logout was successful
+          
+          // No need to redirect here, we do it in the onclick handler directly
+        })
+        .catch((error) => {
+          console.error('Error logging out:', error);  // Log any errors
+        });
+    };
+  </script>
 </head>
 
 <body>
@@ -86,7 +84,7 @@
       </li>
       <li class="navbar-item" id="user-status">Please log in</li>
       <li class="navbar-item" id="login-link"><a href="login.html" class="navbar-link">Login</a></li>
-      <li class="navbar-item" id="logout-btn" onclick="logoutUser(); window.location.replace('index.html');" style="display: none;">Logout</li>
+      <li class="navbar-item" id="logout-btn" onclick="logoutUser(); window.location.assign('index.html');" style="display: none;">Logout</li>
     </ul>
   </nav>
 </body>
