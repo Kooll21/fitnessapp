@@ -55,6 +55,16 @@
         }
       });
     };
+
+    // Function to show a specific content section
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+      });
+      // Show selected section
+      document.getElementById(sectionId).style.display = 'block';
+    }
   </script>
 </head>
 <body>
@@ -67,7 +77,6 @@
   <div id="workoutHistory" style="display: none;">
     <h2>Your Workout History</h2>
     <p>This is where your workout history will be displayed.</p>
-    <!-- Later, you can fetch workout data from a database or local storage -->
   </div>
 
   <!-- Placeholder for Stats -->
@@ -83,46 +92,48 @@
 
   <!-- Status display -->
   <div id="status"></div>
-    <!-- Content sections (hidden initially) -->
-    <div id="workouts" class="content-section" style="display:none;">
-        <h2>Тренировки</h2>
-        <p>Details about workouts.</p>
-    </div>
 
-    <div id="calendar" class="content-section" style="display:none;">
-        <h2>Календарь</h2>
-        <p>Details about calendar.</p>
-    </div>
+  <!-- Navigation for content sections -->
+  <nav>
+    <ul>
+      <li><a href="#" onclick="showSection('workouts')">Workouts</a></li>
+      <li><a href="#" onclick="showSection('calendar')">Calendar</a></li>
+      <li><a href="#" onclick="showSection('plans')">Plans</a></li>
+      <li><a href="#" onclick="showSection('nutrition')">Nutrition</a></li>
+      <li><a href="#" onclick="showSection('progress')">Progress</a></li>
+      <li><a href="#" onclick="showSection('timer')">Timer</a></li>
+    </ul>
+  </nav>
 
-    <div id="plans" class="content-section" style="display:none;">
-        <h2>Программы</h2>
-        <p>Details about plans.</p>
-    </div>
+  <!-- Content sections (hidden initially) -->
+  <div id="workouts" class="content-section" style="display:none;">
+    <h2>Workouts</h2>
+    <p>Details about workouts.</p>
+  </div>
 
-    <div id="nutrition" class="content-section" style="display:none;">
-        <h2>Питание</h2>
-        <p>Details about nutrition.</p>
-    </div>
+  <div id="calendar" class="content-section" style="display:none;">
+    <h2>Calendar</h2>
+    <p>Details about calendar.</p>
+  </div>
 
-    <div id="progress" class="content-section" style="display:none;">
-        <h2>Прогресс</h2>
-        <p>Details about progress.</p>
-    </div>
+  <div id="plans" class="content-section" style="display:none;">
+    <h2>Plans</h2>
+    <p>Details about plans.</p>
+  </div>
 
-    <div id="timer" class="content-section" style="display:none;">
-        <h2>Таймер</h2>
-        <p>Details about timer.</p>
-    </div>
+  <div id="nutrition" class="content-section" style="display:none;">
+    <h2>Nutrition</h2>
+    <p>Details about nutrition.</p>
+  </div>
 
-    <script>
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            // Show selected section
-            document.getElementById(sectionId).style.display = 'block';
-        }
-    </script>
+  <div id="progress" class="content-section" style="display:none;">
+    <h2>Progress</h2>
+    <p>Details about progress.</p>
+  </div>
+
+  <div id="timer" class="content-section" style="display:none;">
+    <h2>Timer</h2>
+    <p>Details about timer.</p>
+  </div>
 </body>
 </html>
