@@ -3,137 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Admin Page</title>
-  <script type="module">
-    // Import Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-      authDomain: "fitnessapp-f519f.firebaseapp.com",
-      projectId: "fitnessapp-f519f",
-      storageBucket: "fitnessapp-f519f.appspot.com",
-      messagingSenderId: "1000735476286",
-      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-      measurementId: "G-MJ8K8ZNQM4"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Function to handle user sign out
-    function logoutUser() {
-      signOut(auth)
-        .then(() => {
-          console.log('User logged out');
-          window.location.href = 'login.html';  // Redirect to login page after logout
-        })
-        .catch((error) => {
-          console.error('Error logging out user:', error);
-          document.getElementById('status').textContent = 'Error logging out: ' + error.message;
-        });
-    }
-
-    // Check if user is authenticated and show admin page content
-    window.onload = function () {
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log('User is logged in:', user);
-          // Show user info
-          document.getElementById('welcomeMessage').textContent = `Welcome, ${user.email}`;
-          document.getElementById('logoutBtn').style.display = 'block';  // Show logout button
-          
-          // Here you can load additional data like workout history, etc.
-          document.getElementById('workoutHistory').style.display = 'block';  // Placeholder for workout history
-
-        } else {
-          // If no user is logged in, redirect to login page
-          window.location.href = 'login.html';
-        }
-      });
-    };
-
-    // Function to show a specific content section
-    function showSection(sectionId) {
-      // Hide all sections
-      document.querySelectorAll('.content-section').forEach(section => {
-        section.style.display = 'none';
-      });
-      // Show selected section
-      document.getElementById(sectionId).style.display = 'block';
-    }
-  </script>
+  <title>Admin Page</title>
 </head>
 <body>
-  <h1>User Admin Page</h1>
-  
-  <!-- Welcome Message for Logged-in User -->
-  <div id="welcomeMessage"></div>
 
-  <!-- Placeholder for User's Workout History -->
-  <div id="workoutHistory" style="display: none;">
-    <h2>Your Workout History</h2>
-    <p>This is where your workout history will be displayed.</p>
-  </div>
+  <!-- Placeholder for dynamic menu -->
+  <div id="navbar-container"></div>
 
-  <!-- Placeholder for Stats -->
-  <div id="stats" style="display: none;">
-    <h2>Your Workout Stats</h2>
-    <p>Placeholder for stats (e.g., total workouts, calories burned, etc.).</p>
-  </div>
+  <h1>Welcome to the Admin Page</h1>
+  <p>This is the admin section of the application.</p>
 
-  <!-- Logout Button -->
-  <div>
-    <button id="logoutBtn" style="display: none;" onclick="logoutUser()">Logout</button>
-  </div>
+  <script>
+    // Dynamically load the menu from menu.html
+    fetch('menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('navbar-container').innerHTML = html;
+      })
+      .catch(error => console.error('Error loading the menu:', error));
+  </script>
 
-  <!-- Status display -->
-  <div id="status"></div>
-
-  <!-- Navigation for content sections -->
-  <nav>
-    <ul>
-      <li><a href="#" onclick="showSection('workouts')">Workouts</a></li>
-      <li><a href="#" onclick="showSection('calendar')">Calendar</a></li>
-      <li><a href="#" onclick="showSection('plans')">Plans</a></li>
-      <li><a href="#" onclick="showSection('nutrition')">Nutrition</a></li>
-      <li><a href="#" onclick="showSection('progress')">Progress</a></li>
-      <li><a href="#" onclick="showSection('timer')">Timer</a></li>
-    </ul>
-  </nav>
-
-  <!-- Content sections (hidden initially) -->
-  <div id="workouts" class="content-section" style="display:none;">
-    <h2>Workouts</h2>
-    <p>Details about workouts.</p>
-  </div>
-
-  <div id="calendar" class="content-section" style="display:none;">
-    <h2>Calendar</h2>
-    <p>Details about calendar.</p>
-  </div>
-
-  <div id="plans" class="content-section" style="display:none;">
-    <h2>Plans</h2>
-    <p>Details about plans.</p>
-  </div>
-
-  <div id="nutrition" class="content-section" style="display:none;">
-    <h2>Nutrition</h2>
-    <p>Details about nutrition.</p>
-  </div>
-
-  <div id="progress" class="content-section" style="display:none;">
-    <h2>Progress</h2>
-    <p>Details about progress.</p>
-  </div>
-
-  <div id="timer" class="content-section" style="display:none;">
-    <h2>Timer</h2>
-    <p>Details about timer.</p>
-  </div>
 </body>
 </html>
