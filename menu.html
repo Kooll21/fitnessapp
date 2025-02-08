@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tracker</title>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+      authDomain: "fitnessapp-f519f.firebaseapp.com",
+      projectId: "fitnessapp-f519f",
+      storageBucket: "fitnessapp-f519f.appspot.com",
+      messagingSenderId: "1000735476286",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+      measurementId: "G-MJ8K8ZNQM4"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Check authentication state
+    onAuthStateChanged(auth, (user) => {
+      const userStatus = document.getElementById("user-status");
+      const loginLink = document.getElementById("login-link");
+      const logoutBtn = document.getElementById("logout-btn");
+
+      if (user) {
+        // User is logged in
+        userStatus.textContent = `Welcome, ${user.email}`;
+        loginLink.style.display = 'none';
+        logoutBtn.style.display = 'block';
+      } else {
+        // User is logged out
+        userStatus.textContent = 'Please log in';
+        loginLink.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+      }
+    });
+
+    // Log out function
+    function logoutUser() {
+      signOut(auth)
+        .then(() => {
+          console.log('User logged out');
+          // Manually update UI when user logs out
+          document.getElementById("user-status").textContent = 'Please log in';
+          document.getElementById("login-link").style.display = 'inline-block';
+          document.getElementById("logout-btn").style.display = 'none';
+        })
+        .catch((error) => {
+          console.error('Error logging out user:', error);
+        });
+    }
+  </script>
+
+  <!-- Internal CSS for styling -->
+  <style>
+    /* General Reset for Margin and Padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background-color: #333;
+      padding: 10px 0;
+    }
+
+    .navbar-list {
+      display: flex;
+      justify-content: center;
+      list-style-type: none;
+    }
+
+    .navbar-item {
+      margin: 0 20px;
+    }
+
+    .navbar-link {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 500;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .navbar-link:hover {
+      color: #f1c40f;
+      transform: translateY(-3px);
+    }
+
+    .navbar-link:active {
+      color: #d35400;
+    }
+
+    /* Add responsive styles */
+    @media (max-width: 768px) {
+      .navbar-list {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .navbar-item {
+        margin: 10px 0;
+      }
+    }
+
+    /* User status text */
+    #user-status {
+      color: white;
+      font-size: 16px;
+      margin-right: 20px;
+    }
+
+    /* Logout Button */
+    #logout-btn {
+      display: none;
+      color: white;
+      background-color: #f1c40f;
+      padding: 5px 15px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #logout-btn:hover {
+      background-color: #d35400;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation Menu -->
+  <nav class="navbar">
+    <ul class="navbar-list">
+      <li class="navbar-item"><a href="workouts.html" class="navbar-link">Workouts</a></li>
+      <li class="navbar-item"><a href="calendar.html" class="navbar-link">Calendar</a></li>
+      <li class="navbar-item"><a href="plans.html" class="navbar-link">Plans</a></li>
+      <li class="navbar-item"><a href="nutrition.html" class="navbar-link">Nutrition</a></li>
+      <li class="navbar-item"><a href="progress.html" class="navbar-link">Progress</a></li>
+      <li class="navbar-item"><a href="timer.html" class="navbar-link">Timer</a></li>
+      <li class="navbar-item" id="user-status">Please log in</li>
+      <li class="navbar-item" id="login-link"><a href="login.html" class="navbar-link">Login</a></li>
+      <li class="navbar-item" id="logout-btn" onclick="logoutUser()">Logout</li>
+    </ul>
+  </nav>
+
+  <!-- Your page content here -->
+  <h1>Welcome to the Fitness Tracker</h1>
+  <p>This is your fitness journey.</p>
+
+</body>
+</html>
