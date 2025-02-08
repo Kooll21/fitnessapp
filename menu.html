@@ -61,7 +61,7 @@
           console.log('User logged out');
           
           // Redirect to index.html after logout
-          window.location.href = 'index.html';  // Redirects to the index page
+          window.location.replace('index.html');  // Use replace to ensure it doesn't stay in history
         })
         .catch((error) => {
           console.error('Error logging out:', error);
