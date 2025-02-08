@@ -1,7 +1,8 @@
+// menu.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
 
-// Firebase configuration
+// Firebase initialization
 const firebaseConfig = {
   apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
   authDomain: "fitnessapp-f519f.firebaseapp.com",
@@ -12,40 +13,23 @@ const firebaseConfig = {
   measurementId: "G-MJ8K8ZNQM4"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Ensure script runs after menu is loaded
-document.addEventListener("DOMContentLoaded", () => {
+// Firebase authentication state listener
+document.addEventListener("DOMContentLoaded", function () {
+  const adminButton = document.getElementById("admin-panel-btn");
   const userStatus = document.getElementById("user-status");
-  const loginLink = document.getElementById("login-link");
-  const logoutBtn = document.getElementById("logout-btn");
-  const adminPanel = document.getElementById("admin-panel");
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      // User is logged in
       userStatus.textContent = `Welcome, ${user.email}`;
-      loginLink.style.display = "none";
-      logoutBtn.style.display = "block";
-      adminPanel.style.display = "block"; // Show admin panel
+      adminButton.style.display = 'block'; // Show the button
     } else {
-      userStatus.textContent = "Please log in";
-      loginLink.style.display = "inline-block";
-      logoutBtn.style.display = "none";
-      adminPanel.style.display = "none"; // Hide admin panel
+      // User is logged out
+      userStatus.textContent = 'Please log in';
+      adminButton.style.display = 'none'; // Hide the button
     }
   });
-
-  // Log out function
-  window.logoutUser = function () {
-    signOut(auth).then(() => {
-      userStatus.textContent = "Please log in";
-      loginLink.style.display = "inline-block";
-      logoutBtn.style.display = "none";
-      adminPanel.style.display = "none";
-    }).catch((error) => {
-      console.error("Error logging out user:", error);
-    });
-  };
 });
