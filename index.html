@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Фитнес-трекер</title>
     <link rel="stylesheet" href="styles.css">
+    <div id="auth">
+    <h2>Вход / Регистрация</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Пароль">
+    <button onclick="register()">Регистрация</button>
+    <button onclick="login()">Войти</button>
+    <button onclick="logout()">Выйти</button>
+    <p id="authStatus"></p>
+</div>
     <script type="module">
     // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
