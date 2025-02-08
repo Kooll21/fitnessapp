@@ -59,6 +59,50 @@
         });
     };
   </script>
+  <style>
+    .navbar {
+      background-color: #333;
+      padding: 10px 0;
+    }
+    .navbar-list {
+      display: flex;
+      justify-content: center;
+      list-style-type: none;
+    }
+    .navbar-item {
+      margin: 0 20px;
+    }
+    .navbar-link {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 500;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    .navbar-link:hover {
+      color: #f1c40f;
+      transform: translateY(-3px);
+    }
+    .navbar-link:active {
+      color: #d35400;
+    }
+    #logout-btn {
+      display: none;
+      color: white;
+      background-color: #f1c40f;
+      padding: 5px 15px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #logout-btn:hover {
+      background-color: #d35400;
+    }
+    #admin-panel {
+      display: none; /* Hide by default */
+    }
+  </style>
 </head>
 
 <body>
