@@ -77,7 +77,7 @@
             document.getElementById('loginBtn').addEventListener('click', function() {
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                login(email, password); // Fixed function name
+                login(email, password);
             });
 
             document.getElementById('logoutBtn').addEventListener('click', function() {
@@ -101,8 +101,9 @@
         </nav>
     </header>
 
-    <!-- Input fields for email and password -->
+    <!-- User registration and login section -->
     <div class="content-section">
+        <h2>Регистрация и Вход</h2>
         <div>
             <label for="email">Email:</label>
             <input type="email" id="email" required>
@@ -124,11 +125,44 @@
         <div id="status"></div>
     </div>
 
+    <!-- Content sections (hidden initially) -->
+    <div id="workouts" class="content-section" style="display:none;">
+        <h2>Тренировки</h2>
+        <p>Details about workouts.</p>
+    </div>
+
+    <div id="calendar" class="content-section" style="display:none;">
+        <h2>Календарь</h2>
+        <p>Details about calendar.</p>
+    </div>
+
+    <div id="plans" class="content-section" style="display:none;">
+        <h2>Программы</h2>
+        <p>Details about plans.</p>
+    </div>
+
+    <div id="nutrition" class="content-section" style="display:none;">
+        <h2>Питание</h2>
+        <p>Details about nutrition.</p>
+    </div>
+
+    <div id="progress" class="content-section" style="display:none;">
+        <h2>Прогресс</h2>
+        <p>Details about progress.</p>
+    </div>
+
+    <div id="timer" class="content-section" style="display:none;">
+        <h2>Таймер</h2>
+        <p>Details about timer.</p>
+    </div>
+
     <script>
         function showSection(sectionId) {
+            // Hide all sections
             document.querySelectorAll('.content-section').forEach(section => {
                 section.style.display = 'none';
             });
+            // Show selected section
             document.getElementById(sectionId).style.display = 'block';
         }
     </script>
