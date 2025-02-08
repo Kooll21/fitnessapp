@@ -35,19 +35,22 @@
         userStatus.textContent = `Welcome, ${user.email}`;
         loginLink.style.display = 'none';
         logoutBtn.style.display = 'block';
+        console.log('User is logged in: ', user.email); // Debugging log
       } else {
         // User is logged out
         userStatus.textContent = 'Please log in';
         loginLink.style.display = 'inline-block';
         logoutBtn.style.display = 'none';
+        console.log('User is logged out'); // Debugging log
       }
     });
 
     // Log out function
-    function logoutUser() {
+    window.logoutUser = function() {
+      console.log('Logout function triggered');
       signOut(auth)
         .then(() => {
-          console.log('User logged out');
+          console.log('User logged out successfully');
           // Manually update UI when user logs out
           document.getElementById("user-status").textContent = 'Please log in';
           document.getElementById("login-link").style.display = 'inline-block';
@@ -55,13 +58,14 @@
         })
         .catch((error) => {
           console.error('Error logging out user:', error);
+          // Display error message
+          document.getElementById("status").textContent = `Error logging out: ${error.message}`;
         });
-    }
+    };
   </script>
 
   <!-- Internal CSS for styling -->
   <style>
-    /* General Reset for Margin and Padding */
     * {
       margin: 0;
       padding: 0;
@@ -101,7 +105,6 @@
       color: #d35400;
     }
 
-    /* Add responsive styles */
     @media (max-width: 768px) {
       .navbar-list {
         flex-direction: column;
@@ -154,7 +157,9 @@
     </ul>
   </nav>
 
-  <!-- Your page content here -->
+  <!-- Status display for debugging -->
+  <div id="status"></div>
+
   <h1>Welcome to the Fitness Tracker</h1>
   <p>This is your fitness journey.</p>
 
