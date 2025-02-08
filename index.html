@@ -411,5 +411,39 @@
       })
       .catch(error => console.error('Error loading the menu:', error));
   </script>
+    <script>
+    // Dynamically load the menu from menu.html
+    fetch('menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('navbar-container').innerHTML = html;
+        // Reinitialize Firebase after menu has loaded
+        initializeFirebase();
+      })
+      .catch(error => console.error('Error loading the menu:', error));
+
+    function initializeFirebase() {
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      onAuthStateChanged(auth, (user) => {
+        const userStatus = document.getElementById("user-status");
+        const loginLink = document.getElementById("login-link");
+        const logoutBtn = document.getElementById("logout-btn");
+
+        if (user) {
+          // User is logged in
+          userStatus.textContent = `Welcome, ${user.email}`;
+          loginLink.style.display = 'none';
+          logoutBtn.style.display = 'block';
+        } else {
+          // User is logged out
+          userStatus.textContent = 'Please log in';
+          loginLink.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+        }
+      });
+    }
+  </script>
 </body>
 </html>
