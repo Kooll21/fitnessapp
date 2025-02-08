@@ -57,11 +57,11 @@
     window.logoutUser = function() {
       signOut(auth)
         .then(() => {
-          // Successful logout
+          // Log successful logout
           console.log('User logged out');
           
-          // Redirect to index.html after logout
-          window.location.replace('index.html');  // Use replace to ensure it doesn't stay in history
+          // Redirect to index.html after logout using assign
+          window.location.assign('index.html');  // Use assign to navigate to the page
         })
         .catch((error) => {
           console.error('Error logging out:', error);
