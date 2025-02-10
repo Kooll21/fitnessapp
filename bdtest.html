@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
+  
+  <!-- Стили страницы -->
   <style>
     /* Стили для меню */
     #navbar-container {
       background-color: #333;
-      color: white;
+      color: #fff;
       padding: 10px 20px;
       position: fixed;
       top: 0;
@@ -16,10 +18,12 @@
       right: 0;
       z-index: 1000;
     }
+    /* Отступ для контента, чтобы меню не перекрывало */
     body {
-      margin-top: 60px; /* Отступ, чтобы контент не перекрывался меню */
+      margin-top: 60px;
+      font-family: sans-serif;
     }
-    /* Стили для статуса */
+    /* Стили для статуса подключения */
     #status {
       margin-top: 20px;
       font-size: 18px;
@@ -36,15 +40,15 @@
       margin-top: 10px;
     }
   </style>
-
-  <!-- Модульный скрипт с единой инициализацией Firebase (v11) и определением функций -->
-  <script type="module">
-    // Импорт модульных функций Firebase v11
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-
-    const firebaseConfig = {
+  
+  <!-- Подключаем Firebase SDK версии 8.9.1 -->
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+  
+  <script>
+    // Конфигурация Firebase (v8)
+    var firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
       authDomain: "fitnessapp-f519f.firebaseapp.com",
       projectId: "fitnessapp-f519f",
@@ -53,166 +57,224 @@
       appId: "1:1000735476286:web:4a62a875917834dd215f6f",
       measurementId: "G-MJ8K8ZNQM4"
     };
-
     // Инициализация Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
 
     // Функция проверки состояния аутентификации
     function checkAuthState() {
-      const adminButton = document.getElementById("admin-panel");
-      const userStatus = document.getElementById("user-status");
-      const loginLink = document.getElementById("login-link");
-      const logoutBtn = document.getElementById("logout-btn");
-
-      onAuthStateChanged(auth, (user) => {
+      auth.onAuthStateChanged(function(user) {
         if (user) {
-          userStatus.textContent = Welcome, ${user.email};
-          loginLink.style.display = 'none';
-          logoutBtn.style.display = 'block';
-          adminButton.style.display = 'block';
+          document.getElementById("user-status").textContent = "Welcome, " + user.email;
+          document.getElementById("login-link").style.display = "none";
+          document.getElementById("logout-btn").style.display = "inline-block";
+          // Если есть элемент для админ-панели, показываем его:
+          var adminPanel = document.getElementById("admin-panel");
+          if(adminPanel) { adminPanel.style.display = "block"; }
         } else {
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-          adminButton.style.display = 'none';
+          document.getElementById("user-status").textContent = "Please log in";
+          document.getElementById("login-link").style.display = "inline-block";
+          document.getElementById("logout-btn").style.display = "none";
+          if(document.getElementById("admin-panel")){
+            document.getElementById("admin-panel").style.display = "none";
+          }
         }
       });
     }
 
-    // Функция выхода (вызывается из меню)
-    window.logoutUser = function() {
-      signOut(auth)
-        .then(() => {
-          document.getElementById("user-status").textContent = 'Please log in';
-          document.getElementById("login-link").style.display = 'inline-block';
-          document.getElementById("logout-btn").style.display = 'none';
-          document.getElementById("admin-panel").style.display = 'none';
-        })
-        .catch((error) => {
-          console.error('Error logging out:', error);
-        });
-    };
+    // Функция выхода из системы
+    function logoutUser() {
+      firebase.auth().signOut().then(function() {
+        console.log("User signed out.");
+      }).catch(function(error) {
+        console.error("Error signing out: ", error);
+      });
+    }
 
-    // Функция загрузки меню из файла menu.html и проверки аутентификации после загрузки
+    // Загрузка меню из файла menu.html и проверка авторизации
     document.addEventListener("DOMContentLoaded", function() {
       fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('navbar-container').innerHTML = html;
+        .then(function(response) {
+          return response.text();
+        })
+        .then(function(html) {
+          document.getElementById("navbar-container").innerHTML = html;
           checkAuthState();
         })
-        .catch(error => console.error('Error loading the menu:', error));
+        .catch(function(err) {
+          console.error("Error loading menu:", err);
+          // Если динамическая загрузка не сработала, можно задать меню вручную:
+          document.getElementById("navbar-container").innerHTML = '<span id="user-status">Please log in</span> <a href="login.html" id="login-link">Login</a> <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>';
+          checkAuthState();
+        });
     });
-
-    // Функция тестирования подключения к Firestore
-    async function testFirestoreConnection() {
-      const statusElement = document.getElementById('status');
-      const fileCountElement = document.getElementById('fileCount');
-      const documentListElement = document.getElementById('documentList');
-      documentListElement.innerHTML = ""; // Очистка списка
-
-      try {
-        const querySnapshot = await getDocs(collection(db, "workouts"));
-        if (querySnapshot.empty) {
-          statusElement.textContent = "Ошибка: Коллекция пуста. Добавьте хотя бы один документ.";
-          statusElement.classList.remove('success');
-          statusElement.classList.add('error');
-          fileCountElement.textContent = "";
-        } else {
-          statusElement.textContent = "Подключение успешно!";
-          statusElement.classList.remove('error');
-          statusElement.classList.add('success');
-          fileCountElement.textContent = "Количество тренировок: " + querySnapshot.size;
-
-          querySnapshot.forEach(doc => {
-            console.log("Тренировка:", doc.id, doc.data());
-            const listItem = document.createElement("li");
-            listItem.textContent = "Тренировка: " + doc.id;
-            const subcollectionList = document.createElement("ul");
-            listItem.appendChild(subcollectionList);
-            documentListElement.appendChild(listItem);
-            getSubcollectionsCount(doc.id, subcollectionList);
-          });
-        }
-      } catch (error) {
-        statusElement.textContent = "Ошибка подключения к Firestore: " + error.message;
-        statusElement.classList.remove('success');
-        statusElement.classList.add('error');
-        fileCountElement.textContent = "";
-      }
-    }
-    // Делаем функцию доступной глобально
-    window.testFirestoreConnection = testFirestoreConnection;
-
-    // Функция для поиска подколлекций
-    async function getSubcollectionsCount(docId, subcollectionList) {
-      const possibleSubcollections = ["exercises", "history", "stats"];
-      let foundSubcollections = [];
-
-      for (const subcollection of possibleSubcollections) {
-        try {
-          const subSnapshot = await getDocs(collection(db, "workouts", docId, subcollection));
-          if (!subSnapshot.empty) {
-            foundSubcollections.push(subcollection);
-            const subListItem = document.createElement("li");
-            subListItem.textContent = subcollection;
-            subcollectionList.appendChild(subListItem);
-
-            const docCountItem = document.createElement("span");
-            docCountItem.textContent = ` (${subSnapshot.size} упражнений)`;
-            subListItem.appendChild(docCountItem);
-
-            loadDocumentsInSubcollection(docId, subcollection, subListItem);
-          }
-        } catch (error) {
-          console.error("Ошибка при загрузке подколлекции:", error);
-        }
-      }
-
-      setTimeout(() => {
-        if (foundSubcollections.length === 0) {
-          const noSubcollectionsItem = document.createElement("li");
-          noSubcollectionsItem.textContent = "Нет подколлекций";
-          subcollectionList.appendChild(noSubcollectionsItem);
-        }
-      }, 1000);
-    }
-    window.getSubcollectionsCount = getSubcollectionsCount;
-
-    // Функция для загрузки документов в подколлекции
-    async function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
-      try {
-        const subSnapshot = await getDocs(collection(db, "workouts", docId, subcollection));
-        if (!subSnapshot.empty) {
-          const subDocsList = document.createElement("ul");
-          subListItem.appendChild(subDocsList);
-          subSnapshot.forEach(doc => {
-            const docItem = document.createElement("li");
-            docItem.textContent = "Упражнение: " + doc.id;
-            subDocsList.appendChild(docItem);
-          });
-        } else {
-          const noDocsItem = document.createElement("li");
-          noDocsItem.textContent = "Нет документов в подколлекции";
-          subListItem.appendChild(noDocsItem);
-        }
-      } catch (error) {
-        console.error("Ошибка при загрузке документов подколлекции:", error);
-      }
-    }
-    window.loadDocumentsInSubcollection = loadDocumentsInSubcollection;
   </script>
 </head>
 <body>
-  <!-- Контейнер для меню -->
+  <!-- Контейнер для меню (загружается динамически из menu.html) -->
   <div id="navbar-container"></div>
-
+  
+  <!-- Основной контент страницы -->
+  <h1>Welcome to the Admin Page</h1>
+  <p>This is the admin section of the application. COOOOOOOOOOOOOOOOONNNNTENNNNNT</p>
+  
+  <!-- Раздел для тестирования подключения к базе данных -->
   <h1>Тестирование подключения к базе данных</h1>
   <button onclick="testFirestoreConnection()">Проверить подключение</button>
   <p id="status"></p>
   <p id="fileCount"></p>
   <ul id="documentList"></ul>
+  
+  <script>
+    // Функция для поиска подколлекций (для каждого документа коллекции "workouts")
+    function getSubcollectionsCount(docId, subcollectionList) {
+      var possibleSubcollections = ["exercises", "history", "stats"];
+      var foundSubcollections = [];
+      
+      possibleSubcollections.forEach(function(subcollection) {
+        db.collection("workouts").doc(docId).collection(subcollection).get()
+          .then(function(snapshot) {
+            if (!snapshot.empty) {
+              foundSubcollections.push(subcollection);
+              var subListItem = document.createElement("li");
+              subListItem.textContent = subcollection;
+              subcollectionList.appendChild(subListItem);
+              
+              var docCountItem = document.createElement("span");
+              docCountItem.textContent = " (" + snapshot.size + " упражнений)";
+              subListItem.appendChild(docCountItem);
+              
+              loadDocumentsInSubcollection(docId, subcollection, subListItem);
+            }
+          })
+          .catch(function(error) {
+            console.error("Ошибка при загрузке подколлекции:", error);
+          });
+      });
+      
+      setTimeout(function() {
+        if (foundSubcollections.length === 0) {
+          var noSubcollectionsItem = document.createElement("li");
+          noSubcollectionsItem.textContent = "Нет подколлекций";
+          subcollectionList.appendChild(noSubcollectionsItem);
+        }
+      }, 1000);
+    }
+    
+    // Функция для загрузки документов в подколлекции
+    function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
+      db.collection("workouts").doc(docId).collection(subcollection).get()
+        .then(function(snapshot) {
+          if (!snapshot.empty) {
+            var subDocsList = document.createElement("ul");
+            subListItem.appendChild(subDocsList);
+            snapshot.forEach(function(doc) {
+              var docItem = document.createElement("li");
+              docItem.textContent = "Упражнение: " + doc.id;
+              subDocsList.appendChild(docItem);
+              
+              // Выводим атрибуты упражнения
+              var muscles = doc.data().muscles || "Не указано";
+              var reps = doc.data().reps || "Не указано";
+              var sets = doc.data().sets || "Не указано";
+              var type = doc.data().type || "Не указано";
+              var description = doc.data().description || "Не указано";
+              
+              var attributes = document.createElement("ul");
+              
+              var musclesItem = document.createElement("li");
+              musclesItem.textContent = "Мышцы: " + muscles;
+              attributes.appendChild(musclesItem);
+              
+              var repsItem = document.createElement("li");
+              repsItem.textContent = "Повторения: " + reps;
+              attributes.appendChild(repsItem);
+              
+              var setsItem = document.createElement("li");
+              setsItem.textContent = "Сеты: " + sets;
+              attributes.appendChild(setsItem);
+              
+              var typeItem = document.createElement("li");
+              typeItem.textContent = "Тип: " + type;
+              attributes.appendChild(typeItem);
+              
+              var descriptionItem = document.createElement("li");
+              descriptionItem.textContent = "Описание: ";
+              var descriptionDiv = document.createElement("div");
+              descriptionDiv.classList.add("description");
+              descriptionDiv.textContent = description;
+              descriptionItem.appendChild(descriptionDiv);
+              
+              // Кнопка "Подробности"
+              var toggleButton = document.createElement("button");
+              toggleButton.textContent = "Подробнее";
+              toggleButton.onclick = function() {
+                var desc = descriptionItem.querySelector(".description");
+                var isVisible = desc.style.display === "block";
+                desc.style.display = isVisible ? "none" : "block";
+                toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
+              };
+              descriptionItem.appendChild(toggleButton);
+              attributes.appendChild(descriptionItem);
+              
+              docItem.appendChild(attributes);
+            });
+          } else {
+            var noDocsItem = document.createElement("li");
+            noDocsItem.textContent = "Нет документов в подколлекции";
+            subListItem.appendChild(noDocsItem);
+          }
+        })
+        .catch(function(error) {
+          console.error("Ошибка при загрузке документов подколлекции:", error);
+        });
+    }
+    
+    // Функция для тестирования подключения к базе данных и загрузки тренировок
+    function testFirestoreConnection() {
+      var statusElement = document.getElementById("status");
+      var fileCountElement = document.getElementById("fileCount");
+      var documentListElement = document.getElementById("documentList");
+      documentListElement.innerHTML = ""; // Очистка списка
+      console.log("testFirestoreConnection вызвана");
+      
+      db.collection("workouts").get()
+        .then(function(querySnapshot) {
+          if (querySnapshot.empty) {
+            statusElement.textContent = "Ошибка: Коллекция пуста. Добавьте хотя бы один документ.";
+            statusElement.classList.remove("success");
+            statusElement.classList.add("error");
+            fileCountElement.textContent = "";
+          } else {
+            statusElement.textContent = "Подключение успешно!";
+            statusElement.classList.remove("error");
+            statusElement.classList.add("success");
+            fileCountElement.textContent = "Количество тренировок: " + querySnapshot.size;
+            
+            querySnapshot.forEach(function(doc) {
+              console.log("Тренировка:", doc.id, doc.data());
+              var listItem = document.createElement("li");
+              listItem.textContent = "Тренировка: " + doc.id;
+              
+              var subcollectionList = document.createElement("ul");
+              listItem.appendChild(subcollectionList);
+              
+              documentListElement.appendChild(listItem);
+              getSubcollectionsCount(doc.id, subcollectionList);
+            });
+          }
+        })
+        .catch(function(error) {
+          statusElement.textContent = "Ошибка подключения к Firestore: " + error.message;
+          statusElement.classList.remove("success");
+          statusElement.classList.add("error");
+          fileCountElement.textContent = "";
+        });
+    }
+    
+    // Делаем функцию testFirestoreConnection доступной глобально для onclick
+    window.testFirestoreConnection = testFirestoreConnection;
+  </script>
 </body>
 </html>
