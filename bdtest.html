@@ -17,7 +17,7 @@
         }
 
         body {
-            margin-top: 60px; /* Добавим отступ, чтобы контент не перекрывался меню */
+            margin-top: 60px; /* Чтобы контент не перекрывался меню */
         }
 
         #status {
@@ -68,6 +68,22 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Загрузка меню
+        async function loadMenu() {
+            try {
+                const response = await fetch('menu.html');
+                if (!response.ok) {
+                    throw new Error('Не удалось загрузить menu.html');
+                }
+                const html = await response.text();
+                document.getElementById('navbar-container').innerHTML = html;
+                checkAuthState(); // После загрузки меню проверяем статус аутентификации
+            } catch (error) {
+                console.error('Ошибка при загрузке меню:', error);
+                alert('Ошибка загрузки меню. Проверьте консоль для подробностей.');
+            }
+        }
+
         // Проверка состояния аутентификации
         function checkAuthState() {
             const adminButton = document.getElementById("admin-panel");
@@ -109,30 +125,14 @@
                 });
         };
 
-        // Загрузка меню и проверка состояния аутентификации
+        // Восстановление данных о пользователе при загрузке страницы
         document.addEventListener("DOMContentLoaded", function() {
-            fetch('menu.html')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Не удалось загрузить menu.html');
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    document.getElementById('navbar-container').innerHTML = html;
-                    checkAuthState(); // Проверяем состояние аутентификации после загрузки меню
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке меню:', error);
-                    alert('Ошибка загрузки меню. Проверьте консоль для подробностей.');
-                });
-
-            // Восстановление данных о пользователе при загрузке страницы
+            loadMenu(); // Загружаем меню
             const userData = localStorage.getItem("user");
             if (userData) {
                 const user = JSON.parse(userData);
                 console.log("Восстановлен пользователь:", user);
-                checkAuthState();
+                checkAuthState(); // Проверяем статус аутентификации при восстановлении
             }
         });
     </script>
