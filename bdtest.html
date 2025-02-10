@@ -36,12 +36,20 @@
     <script type="module">
         document.addEventListener("DOMContentLoaded", function() {
             fetch('menu.html')
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Не удалось загрузить menu.html');
+                    }
+                    return response.text();
+                })
                 .then(html => {
                     document.getElementById('navbar-container').innerHTML = html;
                     initializeFirebase(); // Инициализация Firebase после загрузки меню
                 })
-                .catch(error => console.error('Error loading the menu:', error));
+                .catch(error => {
+                    console.error('Ошибка при загрузке меню:', error);
+                    alert('Ошибка загрузки меню. Проверьте консоль для подробностей.');
+                });
         });
 
         // Инициализация Firebase
