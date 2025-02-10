@@ -34,6 +34,59 @@
 
     <!-- Подключаем скрипты Firebase и другие функции после загрузки меню -->
     <script type="module">
+        // Здесь должны быть импорты и код инициализации Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+            authDomain: "fitnessapp-f519f.firebaseapp.com",
+            projectId: "fitnessapp-f519f",
+            storageBucket: "fitnessapp-f519f.appspot.com",
+            messagingSenderId: "1000735476286",
+            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+            measurementId: "G-MJ8K8ZNQM4"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Далее код проверки авторизации и работы с Firestore
+        function checkAuthState() {
+            const adminButton = document.getElementById("admin-panel");
+            const userStatus = document.getElementById("user-status");
+            const loginLink = document.getElementById("login-link");
+            const logoutBtn = document.getElementById("logout-btn");
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userStatus.textContent = Welcome, ${user.email};
+                    loginLink.style.display = 'none';
+                    logoutBtn.style.display = 'block';
+                    adminButton.style.display = 'block'; 
+                } else {
+                    userStatus.textContent = 'Please log in';
+                    loginLink.style.display = 'inline-block';
+                    logoutBtn.style.display = 'none';
+                    adminButton.style.display = 'none';
+                }
+            });
+        }
+
+        window.logoutUser = function() {
+            signOut(auth).then(() => {
+                document.getElementById("user-status").textContent = 'Please log in';
+                document.getElementById("login-link").style.display = 'inline-block';
+                document.getElementById("logout-btn").style.display = 'none';
+                document.getElementById("admin-panel").style.display = 'none';
+            }).catch((error) => console.error('Error logging out:', error));
+        };
+
+        checkAuthState(); // Check authentication state after loading the menu
+    </script>
+
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             fetch('menu.html')
                 .then(response => {
@@ -51,95 +104,7 @@
                     alert('Ошибка загрузки меню. Проверьте консоль для подробностей.');
                 });
         });
-
-        // Инициализация Firebase
-        function initializeFirebase() {
-            import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-            import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-            import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-
-            const firebaseConfig = {
-                apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-                authDomain: "fitnessapp-f519f.firebaseapp.com",
-                projectId: "fitnessapp-f519f",
-                storageBucket: "fitnessapp-f519f.appspot.com",
-                messagingSenderId: "1000735476286",
-                appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-                measurementId: "G-MJ8K8ZNQM4"
-            };
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-
-            function checkAuthState() {
-                const adminButton = document.getElementById("admin-panel");
-                const userStatus = document.getElementById("user-status");
-                const loginLink = document.getElementById("login-link");
-                const logoutBtn = document.getElementById("logout-btn");
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userStatus.textContent = Welcome, ${user.email};
-                        loginLink.style.display = 'none';
-                        logoutBtn.style.display = 'block';
-                        adminButton.style.display = 'block'; 
-                    } else {
-                        userStatus.textContent = 'Please log in';
-                        loginLink.style.display = 'inline-block';
-                        logoutBtn.style.display = 'none';
-                        adminButton.style.display = 'none';
-                    }
-                });
-            }
-
-            window.logoutUser = function() {
-                signOut(auth).then(() => {
-                    document.getElementById("user-status").textContent = 'Please log in';
-                    document.getElementById("login-link").style.display = 'inline-block';
-                    document.getElementById("logout-btn").style.display = 'none';
-                    document.getElementById("admin-panel").style.display = 'none';
-                }).catch((error) => console.error('Error logging out:', error));
-            };
-
-            checkAuthState(); // Check authentication state after loading the menu
-        }
-
-        // Ваша функция для подключения и работы с Firestore
-        document.addEventListener('DOMContentLoaded', function() {
-            window.testFirestoreConnection = function() {
-                var statusElement = document.getElementById('status');
-                var fileCountElement = document.getElementById('fileCount');
-                var documentListElement = document.getElementById('documentList');
-                documentListElement.innerHTML = ""; // Очищаем список перед загрузкой новых данных
-
-                db.collection("workouts").get()
-                    .then(function(querySnapshot) {
-                        if (querySnapshot.empty) {
-                            statusElement.textContent = "Ошибка: Коллекция пуста. Добавьте хотя бы один документ.";
-                            statusElement.classList.remove('success');
-                            statusElement.classList.add('error');
-                            fileCountElement.textContent = "";
-                        } else {
-                            statusElement.textContent = "Подключение успешно!";
-                            statusElement.classList.remove('error');
-                            statusElement.classList.add('success');
-                            fileCountElement.textContent = "Количество тренировок: " + querySnapshot.size;
-
-                            querySnapshot.forEach(function(doc) {
-                                var listItem = document.createElement("li");
-                                listItem.textContent = "Тренировка: " + doc.id;
-                                documentListElement.appendChild(listItem);
-                            });
-                        }
-                    })
-                    .catch(function(error) {
-                        statusElement.textContent = "Ошибка подключения к Firestore: " + error.message;
-                        statusElement.classList.remove('success');
-                        statusElement.classList.add('error');
-                        fileCountElement.textContent = "";
-                    });
-            };
-        });
     </script>
+
 </body>
 </html>
