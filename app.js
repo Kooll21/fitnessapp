@@ -1,12 +1,13 @@
 // Инициализация Firebase
 const firebaseConfig = {
-    apiKey: "ТВОЙ_API_KEY",
-    authDomain: "ТВОЙ_PROJECT_ID.firebaseapp.com",
-    projectId: "ТВОЙ_PROJECT_ID",
-    storageBucket: "ТВОЙ_PROJECT_ID.appspot.com",
-    messagingSenderId: "ТВОЙ_MESSAGING_SENDER_ID",
-    appId: "ТВОЙ_APP_ID"
-};
+      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+      authDomain: "fitnessapp-f519f.firebaseapp.com",
+      projectId: "fitnessapp-f519f",
+      storageBucket: "fitnessapp-f519f.appspot.com",
+      messagingSenderId: "1000735476286",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+      measurementId: "G-MJ8K8ZNQM4"
+    };
 
 // Инициализируем Firebase
 const app = firebase.initializeApp(firebaseConfig);
