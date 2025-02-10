@@ -41,8 +41,7 @@
     </style>
 </head>
 <body>
-    <!-- Размещаем контейнер меню в самом начале -->
-    <div id="navbar-container"></div>
+    <div id="navbar-container"></div> <!-- Контейнер для меню -->
 
     <h1>Тестирование подключения к базе данных</h1>
     <button onclick="testFirestoreConnection()">Проверить подключение</button>
@@ -50,12 +49,67 @@
     <p id="fileCount"></p>
     <ul id="documentList"></ul>
 
-    <!-- Подключаем скрипты Firebase и другие функции после загрузки меню -->
     <script type="module">
-        // Код Firebase (как в предыдущем примере)
-    </script>
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
-    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+            authDomain: "fitnessapp-f519f.firebaseapp.com",
+            projectId: "fitnessapp-f519f",
+            storageBucket: "fitnessapp-f519f.appspot.com",
+            messagingSenderId: "1000735476286",
+            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+            measurementId: "G-MJ8K8ZNQM4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Проверка состояния аутентификации
+        function checkAuthState() {
+            const adminButton = document.getElementById("admin-panel");
+            const userStatus = document.getElementById("user-status");
+            const loginLink = document.getElementById("login-link");
+            const logoutBtn = document.getElementById("logout-btn");
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // Пользователь авторизован
+                    userStatus.textContent = Welcome, ${user.email};
+                    loginLink.style.display = 'none';
+                    logoutBtn.style.display = 'block';
+                    adminButton.style.display = 'block'; // Показываем кнопку Admin Panel
+                    localStorage.setItem("user", JSON.stringify(user)); // Сохраняем данные о пользователе в localStorage
+                } else {
+                    // Пользователь не авторизован
+                    userStatus.textContent = 'Please log in';
+                    loginLink.style.display = 'inline-block';
+                    logoutBtn.style.display = 'none';
+                    adminButton.style.display = 'none'; // Скрываем кнопку Admin Panel
+                    localStorage.removeItem("user"); // Удаляем данные о пользователе из localStorage
+                }
+            });
+        }
+
+        // Выход из системы
+        window.logoutUser = function() {
+            signOut(auth)
+                .then(() => {
+                    document.getElementById("user-status").textContent = 'Please log in';
+                    document.getElementById("login-link").style.display = 'inline-block';
+                    document.getElementById("logout-btn").style.display = 'none';
+                    document.getElementById("admin-panel").style.display = 'none';
+                    localStorage.removeItem("user"); // Убираем данные пользователя при выходе
+                })
+                .catch((error) => {
+                    console.error('Ошибка при выходе:', error);
+                });
+        };
+
+        // Загрузка меню и проверка состояния аутентификации
         document.addEventListener("DOMContentLoaded", function() {
             fetch('menu.html')
                 .then(response => {
@@ -66,12 +120,20 @@
                 })
                 .then(html => {
                     document.getElementById('navbar-container').innerHTML = html;
-                    initializeFirebase(); // Инициализация Firebase после загрузки меню
+                    checkAuthState(); // Проверяем состояние аутентификации после загрузки меню
                 })
                 .catch(error => {
                     console.error('Ошибка при загрузке меню:', error);
                     alert('Ошибка загрузки меню. Проверьте консоль для подробностей.');
                 });
+
+            // Восстановление данных о пользователе при загрузке страницы
+            const userData = localStorage.getItem("user");
+            if (userData) {
+                const user = JSON.parse(userData);
+                console.log("Восстановлен пользователь:", user);
+                checkAuthState();
+            }
         });
     </script>
 
