@@ -106,8 +106,8 @@ nav ul li a {
     cursor: pointer;
     padding: 10px;
     position: absolute; /* Фиксируем в верхнем углу */
-    top: 10px;
-    left: 10px;
+    top: 15px;  /* Поднимаем немного */
+    left: 15px; /* Поднимаем немного */
     z-index: 100;
 }
 
@@ -128,7 +128,7 @@ nav ul li a {
         width: 100%;
         text-align: center;
         position: absolute;
-        top: 50px;
+        top: 50px;  /* Поднимаем на высоту меню */
         left: 0;
         padding: 10px 0;
         z-index: 99; /* Чтобы меню не скрывалось за другими элементами */
@@ -143,6 +143,8 @@ nav ul li a {
 
     .menu-toggle {
         display: flex;
+        top: 10px;  /* Снижаем на 5px для красоты */
+        left: 10px; /* Снижаем на 5px для красоты */
     }
 
     .menu-toggle.active .bar:nth-child(1) {
