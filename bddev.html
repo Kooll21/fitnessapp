@@ -110,7 +110,10 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           // заменяем их на реальные символы перевода строки.
           // Например, если в базе записано: "Строка1\nСтрока2", то в JS строке будут символы '\' и 'n'.
           description = description.replace(/\\n/g, "\n");
-          
+
+          // Логируем после замены
+          console.log("Описание после замены \\n:", description);
+        
           var attributes = document.createElement("ul");
           
           var musclesItem = document.createElement("li");
