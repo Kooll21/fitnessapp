@@ -104,7 +104,7 @@ nav ul li a {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    padding: 10px;
+    padding: 5px;
     position: absolute; /* Фиксируем в верхнем углу */
     top: 15px; /* Подняли кнопку выше */
     left: 15px;
