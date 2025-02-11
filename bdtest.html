@@ -93,22 +93,36 @@
     }
 
     // Загрузка меню из файла menu.html и проверка авторизации
-    document.addEventListener("DOMContentLoaded", function() {
-      fetch('menu.html')
-        .then(function(response) {
-          return response.text();
+    document.addEventListener("DOMContentLoaded", function () {
+    fetch('menu.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("navbar-container").innerHTML = html;
+            checkAuthState();
+            initBurgerMenu(); // Запуск функции инициализации бургера после вставки меню
         })
-        .then(function(html) {
-          document.getElementById("navbar-container").innerHTML = html;
-          checkAuthState();
-        })
-        .catch(function(err) {
-          console.error("Error loading menu:", err);
-          // Если динамическая загрузка не сработала, можно задать меню вручную:
-          document.getElementById("navbar-container").innerHTML = '<span id="user-status">Please log in</span> <a href="login.html" id="login-link">Login</a> <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>';
-          checkAuthState();
+        .catch(err => {
+            console.error("Ошибка загрузки меню:", err);
+            document.getElementById("navbar-container").innerHTML = `
+                <span id="user-status">Please log in</span>
+                <a href="login.html" id="login-link">Login</a>
+                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+            checkAuthState();
         });
-    });
+});
+
+// Функция инициализации меню-бургера
+function initBurgerMenu() {
+    const menuToggle = document.querySelector(".menu-toggle");
+    const navbarList = document.querySelector(".navbar-list");
+
+    if (menuToggle && navbarList) {
+        menuToggle.addEventListener("click", function () {
+            navbarList.classList.toggle("active");
+            menuToggle.classList.toggle("active");
+        });
+    }
+}
   </script>
 </head>
 <body>
