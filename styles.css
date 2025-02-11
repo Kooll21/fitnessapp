@@ -136,6 +136,8 @@ nav ul li a {
 
     .navbar-list.active {
         display: flex;
+        height: auto;
+        max-height: 400px;
     }
 
     .menu-toggle {
