@@ -5,41 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
   
-  <!-- Стили страницы -->
-  <style>
-    /* Стили для меню */
-    #navbar-container {
-      background-color: #333;
-      color: #fff;
-      padding: 10px 20px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-    /* Отступ для контента, чтобы меню не перекрывало */
-    body {
-      margin-top: 260px;
-      font-family: sans-serif;
-    }
-    /* Стили для статуса подключения */
-    #status {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    #status.success {
-      color: green;
-    }
-    #status.error {
-      color: red;
-    }
-    .description {
-      display: none;
-      margin-top: 10px;
-    }
-  </style>
   
   <!-- Подключаем Firebase SDK версии 8.9.1 -->
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
