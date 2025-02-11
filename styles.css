@@ -128,7 +128,7 @@ nav ul li a {
         width: 100%;
         text-align: center;
         position: absolute;
-        top: 50px; /* Поднимаем на высоту меню */
+        top: 0px; /* Поднимаем на высоту меню */
         left: 0;
         padding: 10px 0;
         z-index: 100; /* Меню должно быть ниже кнопки */
