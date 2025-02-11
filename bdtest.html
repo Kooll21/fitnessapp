@@ -161,76 +161,80 @@
     }
     
     // Функция для загрузки документов в подколлекции
-    function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
-      db.collection("workouts").doc(docId).collection(subcollection).get()
-        .then(function(snapshot) {
-          if (!snapshot.empty) {
-            var subDocsList = document.createElement("ul");
-            subListItem.appendChild(subDocsList);
-            snapshot.forEach(function(doc) {
-              var docItem = document.createElement("li");
-              docItem.textContent = "Упражнение: " + doc.id;
-              subDocsList.appendChild(docItem);
-              
-              // Выводим атрибуты упражнения
-              var muscles = doc.data().muscles || "Не указано";
-              var reps = doc.data().reps || "Не указано";
-              var sets = doc.data().sets || "Не указано";
-              var type = doc.data().type || "Не указано";
-              var description = doc.data().description || "Не указано";
-              
-              var attributes = document.createElement("ul");
-              
-              var musclesItem = document.createElement("li");
-              musclesItem.textContent = "Мышцы: " + muscles;
-              attributes.appendChild(musclesItem);
-              
-              var repsItem = document.createElement("li");
-              repsItem.textContent = "Повторения: " + reps;
-              attributes.appendChild(repsItem);
-              
-              var setsItem = document.createElement("li");
-              setsItem.textContent = "Сеты: " + sets;
-              attributes.appendChild(setsItem);
-              
-              var typeItem = document.createElement("li");
-              typeItem.textContent = "Тип: " + type;
-              attributes.appendChild(typeItem);
-              
-              var descriptionItem = document.createElement("li");
-              descriptionItem.textContent = "Описание: ";
-              var descriptionDiv = document.createElement("div");
-              descriptionDiv.classList.add("description");
-              descriptionDiv.textContent = description;
-              descriptionItem.appendChild(descriptionDiv);
-              
-              // Кнопка "Подробности"
-              var toggleButton = document.createElement("button");
-              toggleButton.textContent = "Подробнее";
-              toggleButton.onclick = function() {
-                var desc = descriptionItem.querySelector(".description");
-                var isVisible = desc.style.display === "block";
-              // Если Firestore хранит экранированные символы, можно преобразовать их:
-              // Замена двойного обратного слэша на один (если необходимо):
-              textFromFirestore = textFromFirestore.replace(/\\n/g, "\n");
-                desc.style.display = isVisible ? "none" : "block";
-                toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
-              };
-              descriptionItem.appendChild(toggleButton);
-              attributes.appendChild(descriptionItem);
-              
-              docItem.appendChild(attributes);
-            });
-          } else {
-            var noDocsItem = document.createElement("li");
-            noDocsItem.textContent = "Нет документов в подколлекции";
-            subListItem.appendChild(noDocsItem);
-          }
-        })
-        .catch(function(error) {
-          console.error("Ошибка при загрузке документов подколлекции:", error);
+function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
+  db.collection("workouts").doc(docId).collection(subcollection).get()
+    .then(function(snapshot) {
+      if (!snapshot.empty) {
+        var subDocsList = document.createElement("ul");
+        subListItem.appendChild(subDocsList);
+        snapshot.forEach(function(doc) {
+          var docItem = document.createElement("li");
+          docItem.textContent = "Упражнение: " + doc.id;
+          subDocsList.appendChild(docItem);
+          
+          // Выводим атрибуты упражнения
+          var muscles = doc.data().muscles || "Не указано";
+          var reps = doc.data().reps || "Не указано";
+          var sets = doc.data().sets || "Не указано";
+          var type = doc.data().type || "Не указано";
+          var description = doc.data().description || "Не указано";
+          
+          // Преобразование последовательности "\n" в настоящие переносы строк
+          description = description.replace(/\\n/g, "\n");
+          
+          var attributes = document.createElement("ul");
+          
+          var musclesItem = document.createElement("li");
+          musclesItem.textContent = "Мышцы: " + muscles;
+          attributes.appendChild(musclesItem);
+          
+          var repsItem = document.createElement("li");
+          repsItem.textContent = "Повторения: " + reps;
+          attributes.appendChild(repsItem);
+          
+          var setsItem = document.createElement("li");
+          setsItem.textContent = "Сеты: " + sets;
+          attributes.appendChild(setsItem);
+          
+          var typeItem = document.createElement("li");
+          typeItem.textContent = "Тип: " + type;
+          attributes.appendChild(typeItem);
+          
+          var descriptionItem = document.createElement("li");
+          descriptionItem.textContent = "Описание: ";
+          var descriptionDiv = document.createElement("div");
+          descriptionDiv.classList.add("description");
+          // Можно использовать textContent вместе с CSS-свойством white-space: pre-wrap
+          descriptionDiv.textContent = description;
+          // Если хотите использовать HTML с тегами <br> вместо переносов, то:
+          // descriptionDiv.innerHTML = description.replace(/\n/g, "<br>");
+          descriptionItem.appendChild(descriptionDiv);
+          
+          // Кнопка "Подробности"
+          var toggleButton = document.createElement("button");
+          toggleButton.textContent = "Подробнее";
+          toggleButton.onclick = function() {
+            // Определяем текущее состояние видимости
+            var isVisible = descriptionDiv.style.display === "block";
+            // Переключаем видимость
+            descriptionDiv.style.display = isVisible ? "none" : "block";
+            toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
+          };
+          descriptionItem.appendChild(toggleButton);
+          attributes.appendChild(descriptionItem);
+          
+          docItem.appendChild(attributes);
         });
-    }
+      } else {
+        var noDocsItem = document.createElement("li");
+        noDocsItem.textContent = "Нет документов в подколлекции";
+        subListItem.appendChild(noDocsItem);
+      }
+    })
+    .catch(function(error) {
+      console.error("Ошибка при загрузке документов подколлекции:", error);
+    });
+}
     
     // Функция для тестирования подключения к базе данных и загрузки тренировок
     function testFirestoreConnection() {
