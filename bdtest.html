@@ -210,6 +210,9 @@
               toggleButton.onclick = function() {
                 var desc = descriptionItem.querySelector(".description");
                 var isVisible = desc.style.display === "block";
+              // Если Firestore хранит экранированные символы, можно преобразовать их:
+              // Замена двойного обратного слэша на один (если необходимо):
+              textFromFirestore = textFromFirestore.replace(/\\n/g, "\n");
                 desc.style.display = isVisible ? "none" : "block";
                 toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
               };
