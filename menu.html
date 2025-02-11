@@ -4,53 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu</title>
-  <style>
-    .navbar {
-      background-color: #333;
-      padding: 10px 0;
-    }
-    .navbar-list {
-      display: flex;
-      justify-content: center;
-      list-style-type: none;
-    }
-    .navbar-item {
-      margin: 0 20px;
-    }
-    .navbar-link {
-      color: white;
-      text-decoration: none;
-      font-size: 18px;
-      font-weight: 500;
-      transition: color 0.3s ease, transform 0.3s ease;
-    }
-    .navbar-link:hover {
-      color: #f1c40f;
-      transform: translateY(-3px);
-    }
-    .navbar-link:active {
-      color: #d35400;
-    }
-    #logout-btn {
-      display: none;
-      color: white;
-      background-color: #f1c40f;
-      padding: 5px 15px;
-      font-size: 16px;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    #logout-btn:hover {
-      background-color: #d35400;
-    }
-    #admin-panel {
-      display: none; /* Hide by default */
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
   <script type="module">
     import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-  
+
     const auth = getAuth();
 
     // Log out function
@@ -60,8 +17,7 @@
       signOut(auth)
         .then(() => {
           console.log('User logged out');  // Confirm logout was successful
-          
-          // No need to redirect here, we do it in the onclick handler directly
+          window.location.assign('index.html');
         })
         .catch((error) => {
           console.error('Error logging out:', error);  // Log any errors
@@ -72,6 +28,11 @@
 
 <body>
   <nav class="navbar">
+    <div class="menu-toggle" id="mobile-menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
     <ul class="navbar-list">
       <li class="navbar-item"><a href="index.html" class="navbar-link">Workouts</a></li>
       <li class="navbar-item"><a href="calendar.html" class="navbar-link">Calendar</a></li>
@@ -84,8 +45,16 @@
       </li>
       <li class="navbar-item" id="user-status">Please log in</li>
       <li class="navbar-item" id="login-link"><a href="login.html" class="navbar-link">Login</a></li>
-      <li class="navbar-item" id="logout-btn" onclick="logoutUser(); window.location.assign('index.html');" style="display: none;">Logout</li>
+      <li class="navbar-item" id="logout-btn" onclick="logoutUser();" style="display: none;">Logout</li>
     </ul>
   </nav>
+
+  <script>
+    // Бургер-меню для мобильных устройств
+    document.getElementById("mobile-menu").addEventListener("click", function() {
+      document.querySelector(".navbar-list").classList.toggle("active");
+      this.classList.toggle("active");
+    });
+  </script>
 </body>
 </html>
