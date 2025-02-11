@@ -106,9 +106,9 @@ nav ul li a {
     cursor: pointer;
     padding: 10px;
     position: absolute; /* Фиксируем в верхнем углу */
-    top: 15px; /* Растягиваем сверху */
-    left: 15px; /* Слева */
-    z-index: 101; /* Больше, чем у меню */
+    top: 0px !important; /* Подняли кнопку выше и добавили важность */
+    left: 10px;
+    z-index: 100;
 }
 
 .menu-toggle .bar {
