@@ -36,8 +36,6 @@ nav ul li a {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-    .formatted-text {
-      white-space: pre-wrap; /* сохраняет переносы строк и пробелы */
-      font-family: Arial, sans-serif;
-      line-height: 1.5;
-    }
+   .description {
+  white-space: pre-wrap;
+}
