@@ -106,9 +106,9 @@ nav ul li a {
     cursor: pointer;
     padding: 10px;
     position: absolute; /* Фиксируем в верхнем углу */
-    top: 0px !important; /* Подняли кнопку выше и добавили важность */
-    left: 10px;
-    z-index: 100;
+    top: 15px; /* Подняли кнопку выше */
+    left: 15px;
+    z-index: 101; /* Больше, чем у меню */
 }
 
 .menu-toggle .bar {
@@ -117,6 +117,17 @@ nav ul li a {
     width: 30px;
     margin: 5px 0;
     transition: all 0.3s ease;
+}
+
+.close-menu {
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 102; /* Обеспечиваем, чтобы кнопка закрытия была поверх */
 }
 
 /* Медиа-запросы для мобильных устройств */
@@ -128,7 +139,7 @@ nav ul li a {
         width: 100%;
         text-align: center;
         position: absolute;
-        top: 0px; /* Поднимаем на высоту меню */
+        top: 0px; /* Подняли на высоту меню */
         left: 0;
         padding: 10px 0;
         z-index: 100; /* Меню должно быть ниже кнопки */
@@ -161,5 +172,9 @@ nav ul li a {
 
     .navbar-item {
         margin: 10px 0;
+    }
+
+    .close-menu {
+        display: block; /* Показываем кнопку закрытия */
     }
 }
