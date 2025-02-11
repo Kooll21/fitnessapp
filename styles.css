@@ -51,7 +51,7 @@ nav ul li a {
 .navbar {
     background-color: #333;
     padding: 10px 0;
-    position: relative; /* Добавлено для правильного позиционирования */
+    position: relative; /* Для позиционирования бургер-меню */
 }
 
 .navbar-list {
@@ -106,9 +106,9 @@ nav ul li a {
     cursor: pointer;
     padding: 10px;
     position: absolute; /* Фиксируем в верхнем углу */
-    top: 15px;  /* Поднимаем немного */
-    left: 15px; /* Поднимаем немного */
-    z-index: 100;
+    top: 15px; /* Растягиваем сверху */
+    left: 15px; /* Слева */
+    z-index: 101; /* Больше, чем у меню */
 }
 
 .menu-toggle .bar {
@@ -128,10 +128,10 @@ nav ul li a {
         width: 100%;
         text-align: center;
         position: absolute;
-        top: 50px;  /* Поднимаем на высоту меню */
+        top: 50px; /* Поднимаем на высоту меню */
         left: 0;
         padding: 10px 0;
-        z-index: 99; /* Чтобы меню не скрывалось за другими элементами */
+        z-index: 100; /* Меню должно быть ниже кнопки */
         height: 60px;
     }
 
@@ -143,8 +143,8 @@ nav ul li a {
 
     .menu-toggle {
         display: flex;
-        top: 10px;  /* Снижаем на 5px для красоты */
-        left: 10px; /* Снижаем на 5px для красоты */
+        top: 15px; /* Поднимаем кнопку бургер-меню */
+        left: 15px; /* Слева */
     }
 
     .menu-toggle.active .bar:nth-child(1) {
