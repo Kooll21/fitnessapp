@@ -106,7 +106,9 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           var type = doc.data().type || "Не указано";
           var description = doc.data().description || "Не указано";
           
-          // Преобразуем последовательности "\n" в настоящие переносы строк
+          // Если данные введены вручную через Firestore и содержат последовательности "\n",
+          // заменяем их на реальные символы перевода строки.
+          // Например, если в базе записано: "Строка1\nСтрока2", то в JS строке будут символы '\' и 'n'.
           description = description.replace(/\\n/g, "\n");
           
           var attributes = document.createElement("ul");
@@ -131,7 +133,10 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           descriptionItem.textContent = "Описание: ";
           var descriptionDiv = document.createElement("div");
           descriptionDiv.classList.add("description");
-          descriptionDiv.textContent = description;
+          
+          // Используем innerHTML, заменяя символы новой строки на <br>
+          descriptionDiv.innerHTML = description.replace(/\n/g, "<br>");
+          
           descriptionItem.appendChild(descriptionDiv);
           
           // Кнопка "Подробности"
