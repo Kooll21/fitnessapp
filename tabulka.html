@@ -7,23 +7,30 @@
     <script type="module">
         // Подключаем Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Настройки Firebase (замени на свои)
         const firebaseConfig = {
-            apiKey: "your-api-key",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project-id",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "your-messaging-id",
-            appId: "your-app-id"
+      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+      authDomain: "fitnessapp-f519f.firebaseapp.com",
+      projectId: "fitnessapp-f519f",
+      storageBucket: "fitnessapp-f519f.appspot.com",
+      messagingSenderId: "1000735476286",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+      measurementId: "G-MJ8K8ZNQM4"
         };
 
         // Инициализируем Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Функция загрузки данных
+        // Функция для очистки имени документа (удаление запрещенных символов)
+        function sanitizeDocumentName(name) {
+            // Заменяем запрещенные символы на нижнее подчеркивание или просто удаляем
+            return name.replace(/[\/\[\]]/g, "_");
+        }
+
+        // Функция загрузки данных в выбранную коллекцию
         window.uploadData = async function () {
             const table = document.getElementById("dataTable");
             const headers = Array.from(table.rows[0].cells).map(cell => cell.innerText.trim());
@@ -38,9 +45,21 @@
                 dataToUpload.push(obj);
             }
 
+            // Получаем выбранную коллекцию
+            const selectedCollection = document.getElementById("collectionSelect").value;
+
+            if (!selectedCollection) {
+                alert("Пожалуйста, выберите коллекцию!");
+                return;
+            }
+
+            // Загружаем данные в подколлекцию "exercises" с названием документа как exercisename
             for (let data of dataToUpload) {
+                const documentName = sanitizeDocumentName(data.exercisename);  // Очистка имени документа
+
                 try {
-                    await addDoc(collection(db, "exercises"), data);
+                    const docRef = doc(collection(db, "workouts", selectedCollection, "exercises"), documentName);
+                    await setDoc(docRef, data);
                     console.log("Документ добавлен:", data);
                 } catch (error) {
                     console.error("Ошибка добавления:", error);
@@ -132,6 +151,16 @@
 <body>
 
     <h2>Добавление данных в Firebase</h2>
+
+    <!-- Селектор для выбора коллекции -->
+    <label for="collectionSelect">Выберите коллекцию:</label>
+    <select id="collectionSelect">
+        <option value="Chest">Chest</option>
+        <option value="Legs">Legs</option>
+        <option value="Arms">Arms</option>
+        <option value="Back">Back</option>
+        <!-- Добавьте другие коллекции по мере необходимости -->
+    </select>
 
     <table id="dataTable" onpaste="pasteData(event)">
         <tr>
