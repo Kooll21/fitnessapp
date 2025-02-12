@@ -79,7 +79,7 @@
 // Функция инициализации меню-бургера
 function initBurgerMenu() {
     const menuToggle = document.querySelector(".menu-toggle");
-    const navbarList = document.querySelector(".navbar-list");
+    const navbarList = document.querySelector(".navbar-list")
 
     if (menuToggle && navbarList) {
         menuToggle.addEventListener("click", function () {
@@ -172,7 +172,7 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           var attributes = document.createElement("ul");
           
           var musclesItem = document.createElement("li");
-          musclesItem.textContent = "Мышцы: " + muscletypemain;
+          musclesItem.textContent = "Мышцы: " + muscles;
           attributes.appendChild(musclesItem);
           
           var repsItem = document.createElement("li");
