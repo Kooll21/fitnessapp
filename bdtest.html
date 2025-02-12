@@ -213,27 +213,37 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           descriptionItem.appendChild(descriptionDiv);
           
           // Кнопка "Подробности"
-          var toggleButton = document.createElement("button");
-          toggleButton.textContent = "Подробнее";
-          toggleButton.onclick = function() {
-            var isVisible = descriptionDiv.style.display === "block";
-            descriptionDiv.style.display = isVisible ? "none" : "block";
-            toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
-          };
-          descriptionItem.appendChild(toggleButton);
-          attributes.appendChild(descriptionItem);
+var toggleButton = document.createElement("button");
+toggleButton.textContent = "Подробнее";
+toggleButton.onclick = function() {
+  var isVisible = descriptionDiv.style.display === "block";
+  var videoVisible = videoItem ? videoItem.style.display === "block" : false;
+  
+  // Скрытие или показ как описания, так и видео
+  descriptionDiv.style.display = isVisible ? "none" : "block";
+  if (videoItem) {
+    videoItem.style.display = isVisible ? "none" : "block";
+  }
 
-          // Вставка видео из YouTube, если ссылка есть
-          if (videoUrl) {
-            var videoItem = document.createElement("li");
-            var iframe = document.createElement("iframe");
-            iframe.width = "300";
-            iframe.height = "170";
-            iframe.src = videoUrl.replace("watch?v=", "embed/"); // Преобразуем ссылку в формат embed
-            iframe.allowFullscreen = true;
-            videoItem.appendChild(iframe);
-            attributes.appendChild(videoItem);
-          }
+  // Обновляем текст кнопки в зависимости от текущего состояния
+  toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
+};
+
+// Вставка видео из YouTube, если ссылка есть
+if (videoUrl) {
+  var videoItem = document.createElement("li");
+  var iframe = document.createElement("iframe");
+  iframe.width = "300";
+  iframe.height = "170";
+  iframe.src = videoUrl.replace("watch?v=", "embed/"); // Преобразуем ссылку в формат embed
+  iframe.allowFullscreen = true;
+  videoItem.appendChild(iframe);
+  videoItem.style.display = "none"; // Скрываем видео по умолчанию
+  attributes.appendChild(videoItem);
+}
+
+descriptionItem.appendChild(toggleButton);
+attributes.appendChild(descriptionItem);
 
           docItem.appendChild(attributes);
         });
