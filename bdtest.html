@@ -190,10 +190,10 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           var descriptionItem = document.createElement("li");
           descriptionItem.textContent = "Описание: ";
           var descriptionDiv = document.createElement("div");
-          descriptionDiv.classList.add("description");
           
-          // Используем innerHTML, заменяя символы новой строки на <br>
-          descriptionDiv.innerHTML = description.replace(/\n/g, "<br>");
+descriptionDiv.classList.add("description");
+descriptionDiv.style.display = "none"; // Скрываем описание по умолчанию
+descriptionDiv.innerHTML = description.replace(/\n/g, "<br>");
           
           console.log("HTML-код для описания:", descriptionDiv.innerHTML);
 
