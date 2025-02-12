@@ -156,11 +156,11 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           subDocsList.appendChild(docItem);
           
           // Выводим атрибуты упражнения
-          var muscles = doc.data().Muscle Type Main || "Не указано";
-          var reps = doc.data().Reps || "Не указано";
-          var sets = doc.data().Sets || "Не указано";
-          var type = doc.data().Exercise type || "Не указано";
-          var description = doc.data().Description || "Не указано";
+          var muscles = doc.data().muscletypemain || "Не указано";
+          var reps = doc.data().reps || "Не указано";
+          var sets = doc.data().sets || "Не указано";
+          var type = doc.data().exercisetype || "Не указано";
+          var description = doc.data().description || "Не указано";
           
           console.log("Исходное описание из Firestore:", description);
 
