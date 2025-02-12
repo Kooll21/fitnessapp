@@ -170,6 +170,17 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           console.log("Обработанное описание после замены \\n:", description);
 
           var attributes = document.createElement("ul");
+
+          // Вывод изображения, если ссылка есть
+          if (photoUrl) {
+            var photoItem = document.createElement("li");
+            var img = document.createElement("img");
+            img.src = photoUrl;
+            img.alt = "Изображение упражнения";
+            img.style.maxWidth = "200px"; // Ограничение размера изображения
+            photoItem.appendChild(img);
+            attributes.appendChild(photoItem);
+          }
           
           var musclesItem = document.createElement("li");
           musclesItem.textContent = "Мышцы: " + muscles;
@@ -211,17 +222,6 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           };
           descriptionItem.appendChild(toggleButton);
           attributes.appendChild(descriptionItem);
-
-          // Вывод изображения, если ссылка есть
-          if (photoUrl) {
-            var photoItem = document.createElement("li");
-            var img = document.createElement("img");
-            img.src = photoUrl;
-            img.alt = "Изображение упражнения";
-            img.style.maxWidth = "200px"; // Ограничение размера изображения
-            photoItem.appendChild(img);
-            attributes.appendChild(photoItem);
-          }
 
           // Вставка видео из YouTube, если ссылка есть
           if (videoUrl) {
