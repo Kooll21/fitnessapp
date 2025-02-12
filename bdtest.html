@@ -156,7 +156,7 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           subDocsList.appendChild(docItem);
           
           // Выводим атрибуты упражнения
-          var muscles = doc.data().muscletypemain || "Не указано";
+          var muscles = doc.data().muscle || "Не указано";
           var reps = doc.data().reps || "Не указано";
           var sets = doc.data().sets || "Не указано";
           var type = doc.data().exercisetype || "Не указано";
