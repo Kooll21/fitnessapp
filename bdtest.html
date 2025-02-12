@@ -154,20 +154,19 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           var docItem = document.createElement("li");
           docItem.textContent = "Упражнение: " + doc.id;
           subDocsList.appendChild(docItem);
-
+          
           // Выводим атрибуты упражнения
           var muscles = doc.data().muscle || "Не указано";
+          var muscletypeadditional = doc.data().muscletypeadditional || "Не указано"; // Дополнительная группа мышц
           var reps = doc.data().reps || "Не указано";
           var sets = doc.data().sets || "Не указано";
           var type = doc.data().exercisetype || "Не указано";
           var description = doc.data().description || "Не указано";
-          var videoUrl = doc.data().video || "";  // Ссылка на видео
-          
+          var photoUrl = doc.data().photo || ""; // Ссылка на изображение
+          var videoUrl = doc.data().video || ""; // Ссылка на видео
+
           console.log("Исходное описание из Firestore:", description);
-
-          // Если данные введены вручную через Firestore и содержат экранированные "\n", заменяем их на реальные переводы строки
           description = description.replace(/\\n/g, "\n");
-
           console.log("Обработанное описание после замены \\n:", description);
 
           var attributes = document.createElement("ul");
@@ -175,6 +174,10 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           var musclesItem = document.createElement("li");
           musclesItem.textContent = "Мышцы: " + muscles;
           attributes.appendChild(musclesItem);
+
+          var additionalMusclesItem = document.createElement("li");
+          additionalMusclesItem.textContent = "Доп. мышцы: " + muscletypeadditional;
+          attributes.appendChild(additionalMusclesItem);
           
           var repsItem = document.createElement("li");
           repsItem.textContent = "Повторения: " + reps;
@@ -191,11 +194,9 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           var descriptionItem = document.createElement("li");
           descriptionItem.textContent = "Описание: ";
           var descriptionDiv = document.createElement("div");
-          
           descriptionDiv.classList.add("description");
           descriptionDiv.style.display = "none"; // Скрываем описание по умолчанию
           descriptionDiv.innerHTML = description.replace(/\n/g, "<br>");
-          
           console.log("HTML-код для описания:", descriptionDiv.innerHTML);
 
           descriptionItem.appendChild(descriptionDiv);
@@ -211,41 +212,27 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
           descriptionItem.appendChild(toggleButton);
           attributes.appendChild(descriptionItem);
 
-          // Видео
+          // Вывод изображения, если ссылка есть
+          if (photoUrl) {
+            var photoItem = document.createElement("li");
+            var img = document.createElement("img");
+            img.src = photoUrl;
+            img.alt = "Изображение упражнения";
+            img.style.maxWidth = "200px"; // Ограничение размера изображения
+            photoItem.appendChild(img);
+            attributes.appendChild(photoItem);
+          }
+
+          // Вставка видео из YouTube, если ссылка есть
           if (videoUrl) {
             var videoItem = document.createElement("li");
             var iframe = document.createElement("iframe");
             iframe.width = "300";
             iframe.height = "170";
-
-            // Преобразуем ссылку в формат "embed"
-            var videoIdMatch = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=))([^&]+)/);
-            var videoId = videoIdMatch ? videoIdMatch[1] : null;
-
-            if (videoId) {
-              iframe.src = https://www.youtube.com/embed/${videoId};
-              iframe.allowFullscreen = true;
-              videoItem.appendChild(iframe);
-
-              // Контейнер для видео, который будет скрыт по умолчанию
-              var videoContainer = document.createElement("div");
-              videoContainer.classList.add("video-container");
-              videoContainer.style.display = "none"; // Скрыто по умолчанию
-              videoContainer.appendChild(videoItem);
-              attributes.appendChild(videoContainer);
-
-              // Кнопка "Подробности" для видео
-              var videoToggleButton = document.createElement("button");
-              videoToggleButton.textContent = "Подробнее";
-              videoToggleButton.onclick = function() {
-                var isVisible = videoContainer.style.display === "block";
-                videoContainer.style.display = isVisible ? "none" : "block";
-                videoToggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
-              };
-              attributes.appendChild(videoToggleButton);
-            } else {
-              console.error("Некорректная ссылка на видео:", videoUrl);
-            }
+            iframe.src = videoUrl.replace("watch?v=", "embed/"); // Преобразуем ссылку в формат embed
+            iframe.allowFullscreen = true;
+            videoItem.appendChild(iframe);
+            attributes.appendChild(videoItem);
           }
 
           docItem.appendChild(attributes);
