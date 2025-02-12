@@ -8,6 +8,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script> <!-- Добавил аутентификацию -->
 
   <script>
     // Инициализация Firebase
@@ -22,6 +23,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
+    var auth = firebase.auth();
 
     // Функция проверки состояния аутентификации
     function checkAuthState() {
@@ -30,68 +32,36 @@
           document.getElementById("user-status").textContent = "Welcome, " + user.email;
           document.getElementById("login-link").style.display = "none";
           document.getElementById("logout-btn").style.display = "inline-block";
-          // Если есть элемент для админ-панели, показываем его:
-          var adminPanel = document.getElementById("admin-panel");
-          if(adminPanel) { adminPanel.style.display = "block"; }
         } else {
           document.getElementById("user-status").textContent = "Please log in";
           document.getElementById("login-link").style.display = "inline-block";
           document.getElementById("logout-btn").style.display = "none";
-          if(document.getElementById("admin-panel")){
-            document.getElementById("admin-panel").style.display = "none";
-          }
         }
       });
     }
 
     // Функция выхода из системы
     function logoutUser() {
-      firebase.auth().signOut().then(function() {
+      auth.signOut().then(function() {
         console.log("User signed out.");
       }).catch(function(error) {
         console.error("Error signing out: ", error);
       });
     }
 
-    // Загрузка меню из файла menu.html и проверка авторизации
+    // Загрузка меню и проверка авторизации
     document.addEventListener("DOMContentLoaded", function () {
-    fetch('menu.html')
+      fetch('menu.html')
         .then(response => response.text())
         .then(html => {
-            document.getElementById("navbar-container").innerHTML = html;
-            checkAuthState();
-            initBurgerMenu(); // Запуск функции инициализации бургера после вставки меню
+          document.getElementById("navbar-container").innerHTML = html;
+          checkAuthState();
         })
-        .catch(err => {
-            console.error("Ошибка загрузки меню:", err);
-            document.getElementById("navbar-container").innerHTML = `
-                <span id="user-status">Please log in</span>
-                <a href="login.html" id="login-link">Login</a>
-                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-            checkAuthState();
-        });
-});
+        .catch(err => console.error("Ошибка загрузки меню:", err));
+    });
 
-// Функция инициализации меню-бургера
-function initBurgerMenu() {
-    const menuToggle = document.querySelector(".menu-toggle");
-    const navbarList = document.querySelector(".navbar-list")
-
-    if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", function () {
-            navbarList.classList.toggle("active");
-            menuToggle.classList.toggle("active");
-        });
-    }
-}
-  </script>
-</head>
-<body>
-  <!-- Контейнер для меню (загружается динамически из menu.html) -->
-  <div id="navbar-container"></div>
-
+    // Функция добавления упражнения
     function addExercise() {
-      // Получаем данные из формы
       var category = document.getElementById("category").value.trim();
       var exerciseName = document.getElementById("exerciseName").value.trim();
 
@@ -100,20 +70,19 @@ function initBurgerMenu() {
         return;
       }
 
-var exerciseData = {
-  exerciseid: exerciseName,
-  exercisename: exerciseName,
-  exercisetype: document.getElementById("exerciseType").value.trim(),
-  sets: document.getElementById("sets").value.trim(),  // Сохраняем строкой
-  reps: document.getElementById("reps").value.trim(),  // Сохраняем строкой
-  muscle: document.getElementById("muscle").value.trim(),
-  muscletypeadditional: document.getElementById("muscleTypeAdditional").value.trim(),
-  video: document.getElementById("videoUrl").value.trim(),
-  photo: document.getElementById("photoUrl").value.trim(),
-  description: document.getElementById("description").value.trim()
-};
+      var exerciseData = {
+        exerciseid: exerciseName,
+        exercisename: exerciseName,
+        exercisetype: document.getElementById("exerciseType").value.trim(),
+        sets: document.getElementById("sets").value.trim(),
+        reps: document.getElementById("reps").value.trim(),
+        muscle: document.getElementById("muscle").value.trim(),
+        muscletypeadditional: document.getElementById("muscleTypeAdditional").value.trim(),
+        video: document.getElementById("videoUrl").value.trim(),
+        photo: document.getElementById("photoUrl").value.trim(),
+        description: document.getElementById("description").value.trim()
+      };
 
-      // Теперь название документа полностью соответствует exercisename
       db.collection("workouts").doc(category).collection("exercises").doc(exerciseName).set(exerciseData)
         .then(function () {
           alert("Упражнение добавлено в " + category);
@@ -126,6 +95,10 @@ var exerciseData = {
   </script>
 </head>
 <body>
+
+  <!-- Контейнер для меню -->
+  <div id="navbar-container"></div>
+
   <h1>Добавить упражнение</h1>
 
   <form id="exerciseForm">
@@ -169,5 +142,6 @@ var exerciseData = {
 
     <button type="button" onclick="addExercise()">Добавить упражнение</button>
   </form>
+
 </body>
 </html>
