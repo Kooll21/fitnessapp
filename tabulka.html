@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление данных в Firebase</title>
+    <script type="module">
+        // Подключаем Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Настройки Firebase (замени на свои)
+        const firebaseConfig = {
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "your-messaging-id",
+            appId: "your-app-id"
+        };
+
+        // Инициализируем Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Функция загрузки данных
+        window.uploadData = async function () {
+            const table = document.getElementById("dataTable");
+            const headers = Array.from(table.rows[0].cells).map(cell => cell.innerText.trim());
+            let dataToUpload = [];
+
+            for (let i = 1; i < table.rows.length; i++) {
+                let row = table.rows[i];
+                let obj = {};
+                for (let j = 0; j < row.cells.length; j++) {
+                    obj[headers[j]] = row.cells[j].innerText.trim();
+                }
+                dataToUpload.push(obj);
+            }
+
+            for (let data of dataToUpload) {
+                try {
+                    await addDoc(collection(db, "exercises"), data);
+                    console.log("Документ добавлен:", data);
+                } catch (error) {
+                    console.error("Ошибка добавления:", error);
+                }
+            }
+
+            alert("Данные загружены в Firebase!");
+        };
+
+        // Функция добавления новой строки в таблицу (добавляется в конец таблицы)
+        window.addRow = function () {
+            let table = document.getElementById("dataTable");
+            let row = table.insertRow(table.rows.length);  // Вставляем в конец таблицы
+            for (let i = 0; i < table.rows[0].cells.length; i++) {
+                let cell = row.insertCell();
+                cell.contentEditable = "true";
+                cell.innerText = "";
+            }
+        };
+
+        // Функция удаления последней строки
+        window.removeRow = function () {
+            let table = document.getElementById("dataTable");
+            if (table.rows.length > 1) {
+                table.deleteRow(table.rows.length - 1);
+            }
+        };
+
+        // Функция удаления первой строки
+        window.removeFirstRow = function () {
+            let table = document.getElementById("dataTable");
+            if (table.rows.length > 1) {
+                table.deleteRow(1); // Удаляем вторую строку, так как первая - заголовок
+            }
+        };
+
+        // Функция очистки таблицы (удаление всех строк и столбцов)
+        window.clearTable = function () {
+            let table = document.getElementById("dataTable");
+            // Удаляем все строки, кроме первой (заголовков)
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            // Удаляем все столбцы (заголовки)
+            let headerRow = table.rows[0];
+            while (headerRow.cells.length > 0) {
+                headerRow.deleteCell(0);
+            }
+        };
+
+        // Функция обработки вставки данных
+        window.pasteData = function (e) {
+            e.preventDefault();
+            const clipboardData = e.clipboardData.getData("text/plain");
+            const rows = clipboardData.split("\n");
+            const table = document.getElementById("dataTable");
+
+            rows.forEach((row, rowIndex) => {
+                const cells = row.split("\t");
+                if (rowIndex === 0 && table.rows.length === 1) {
+                    // Если это первая строка (заголовки), вставляем в таблицу
+                    const headerRow = table.rows[0];
+                    const headers = ["exerciseid", "workoutid", "exercisename", "exercisetype", "sets", "reps", "muscle", "muscletypeadditional", "description", "video", "photo"];
+                    headers.forEach((header, index) => {
+                        const th = document.createElement("th");
+                        th.innerText = header;
+                        headerRow.appendChild(th);
+                    });
+                } else {
+                    // Для остальных строк вставляем данные в ячейки
+                    const newRow = table.insertRow(table.rows.length);  // Вставляем в конец таблицы
+                    cells.forEach(cell => {
+                        const newCell = newRow.insertCell();
+                        newCell.contentEditable = "true";
+                        newCell.innerText = cell.trim();
+                    });
+                }
+            });
+        };
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        table { width: 80%; margin: auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        button { margin: 10px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>Добавление данных в Firebase</h2>
+
+    <table id="dataTable" onpaste="pasteData(event)">
+        <tr>
+            <th>exerciseid</th>
+            <th>workoutid</th>
+            <th>exercisename</th>
+            <th>exercisetype</th>
+            <th>sets</th>
+            <th>reps</th>
+            <th>muscle</th>
+            <th>muscletypeadditional</th>
+            <th>description</th>
+            <th>video</th>
+            <th>photo</th>
+        </tr>
+        <tr contenteditable="true">
+            <td>1</td>
+            <td>101</td>
+            <td>Жим лежа</td>
+            <td>Силовое</td>
+            <td>3</td>
+            <td>10</td>
+            <td>Грудь</td>
+            <td>Основной</td>
+            <td>Упражнение для груди</td>
+            <td>https://example.com/video</td>
+            <td>https://example.com/photo</td>
+        </tr>
+    </table>
+
+    <button onclick="addRow()">Добавить строку</button>
+    <button onclick="removeRow()">Удалить строку</button>
+    <button onclick="removeFirstRow()">Удалить первую строку</button>
+    <button onclick="uploadData()">Добавить в базу</button>
+    <button onclick="clearTable()">Очистить таблицу</button>
+
+</body>
+</html>
