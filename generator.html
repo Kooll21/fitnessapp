@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
 </head>
-  <!-- Подключаем Firebase SDK версии 8.9.1 -->
+ <!-- Подключаем Firebase SDK версии 8.9.1 -->
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
@@ -95,7 +95,7 @@ function initBurgerMenu() {
   <!-- Контейнер для меню (загружается динамически из menu.html) -->
   <div id="navbar-container"></div>
 <body>
-    <h1>Выбери тренировку на сегодня</h1>
+     <h1>Выбери тренировку на сегодня</h1>
     <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
     
     <p><label for="workout1">Первая группа мышц:</label>
@@ -158,7 +158,7 @@ function initBurgerMenu() {
                 updateDropdowns();
             });
         });
-
+let allExercises = [];
         document.getElementById("generateWorkout").addEventListener("click", async () => {
             const selectedWorkouts = getSelectedWorkouts();
             if (selectedWorkouts.length === 0) {
@@ -166,68 +166,120 @@ function initBurgerMenu() {
                 return;
             }
 
-            let exercises = [];
+            let workoutPlan = [];
+            let muscleCount = {};
+
             for (const workout of selectedWorkouts) {
                 const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
-                const workoutExercises = snapshot.docs.map(doc => doc.data());
-                exercises.push(...workoutExercises);
-            }
-            
-            exercises = shuffleArray(exercises);
-            
-            let workoutPlan = [];
-            if (selectedWorkouts.length === 1) {
-                workoutPlan = exercises.slice(0, 8);
-            } else if (selectedWorkouts.length === 2) {
-                workoutPlan = exercises.slice(0, 4).concat(exercises.slice(4, 8));
-            } else {
-                workoutPlan = exercises.slice(0, 3).concat(exercises.slice(3, 6)).concat(exercises.slice(6, 9));
+                const exercises = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+
+                allExercises.push(...exercises);
+
+                let mainExercises = exercises.filter(e => e.exercisetype === "Основное");
+                let isolationExercises = exercises.filter(e => e.exercisetype === "Изолирующее");
+
+                shuffleArray(mainExercises);
+                shuffleArray(isolationExercises);
+
+                if (selectedWorkouts.length === 1) {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 4, muscleCount), ...getFilteredExercises(isolationExercises, 4, muscleCount));
+                } else if (selectedWorkouts.length === 2) {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 2, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+                } else {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+                }
             }
 
             displayWorkout(workoutPlan);
         });
-        
+
         function shuffleArray(array) {
             return array.sort(() => Math.random() - 0.5);
+        }
+
+        function getFilteredExercises(exercises, count, muscleCount) {
+            let filtered = [];
+            exercises.forEach(exercise => {
+                if (!muscleCount[exercise.muscle] || muscleCount[exercise.muscle] < 2) {
+                    filtered.push(exercise);
+                    muscleCount[exercise.muscle] = (muscleCount[exercise.muscle] || 0) + 1;
+                }
+            });
+            return filtered.slice(0, count);
         }
 
         function displayWorkout(workoutPlan) {
             const container = document.getElementById("workoutResults");
             container.innerHTML = "";
-            
-            workoutPlan.forEach(exercise => {
+
+            workoutPlan.forEach((exercise, index) => {
                 const embedUrl = exercise.video.replace("watch?v=", "embed/");
                 const exerciseElement = document.createElement("div");
+                exerciseElement.id = `exercise-${exercise.exerciseid}`;
                 exerciseElement.innerHTML = `
                     <h3>${exercise.exercisename}</h3>
-                    <img src="${exercise.photo}" alt="${exercise.exercisename}" width="150">
+                    <img src="${exercise.photo}" width="150">
                     <p>Тип: ${exercise.exercisetype}</p>
                     <p>Мышцы: ${exercise.muscle}</p>
-                    <p>Доп. мышцы: ${exercise.muscletypeadditional}</p>
                     <p>Подходы: ${exercise.sets}</p>
                     <p>Повторы: ${exercise.reps}</p>
                     <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
-                    <div class="exercise-details" style="display:none;">
-                        <iframe width="300" height="200" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
-                        <p>${exercise.description}</p>
-                    </div>
+                    <button onclick="openReplaceModal('${exercise.exerciseid}', '${exercise.muscle}', '${exercise.exercisetype}')">Заменить</button>
+                    <div class="exercise-details" style="display:none;"></div>
                 `;
                 container.appendChild(exerciseElement);
             });
         }
-        
-        function toggleDetails(button, video, description) {
-            const details = button.nextElementSibling;
-            if (details.style.display === "none") {
-                details.style.display = "block";
-                button.textContent = "Скрыть";
-            } else {
-                details.style.display = "none";
-                button.textContent = "Подробнее";
+
+function toggleDetails(button, video, description) {
+    const parent = button.parentElement;
+    const details = parent.querySelector(".exercise-details");
+
+    if (details.style.display === "none" || details.innerHTML === "") {
+        details.style.display = "block";
+        details.innerHTML = `<iframe width="300" height="200" src="${video}" frameborder="0"></iframe><p>${description}</p>`;
+        button.textContent = "Скрыть";
+    } else {
+        details.style.display = "none";
+        button.textContent = "Подробнее";
+    }
+}
+
+        async function openReplaceModal(exerciseid, muscle, type) {
+            const replacements = allExercises.filter(ex => ex.muscle === muscle && ex.exercisetype === type && ex.exerciseid !== exerciseid);
+            let options = replacements.map(ex => `<option value="${ex.exerciseid}">${ex.exercisename}</option>`).join("");
+
+            let modal = document.createElement("div");
+            modal.id = `replace-modal-${exerciseid}`;
+            modal.innerHTML = `
+                <select id="replace-select-${exerciseid}">${options}</select>
+                <button onclick="applyReplacement('${exerciseid}')">Заменить</button>
+            `;
+            document.getElementById(`exercise-${exerciseid}`).appendChild(modal);
+        }
+
+        function applyReplacement(exerciseid) {
+            let selectedId = document.getElementById(`replace-select-${exerciseid}`).value;
+            let newExercise = allExercises.find(ex => ex.exerciseid === selectedId);
+            let oldElement = document.getElementById(`exercise-${exerciseid}`);
+
+            if (newExercise) {
+                oldElement.id = `exercise-${newExercise.exerciseid}`;
+                oldElement.innerHTML = `
+                    <h3>${newExercise.exercisename}</h3>
+                    <img src="${newExercise.photo}" width="150">
+                    <p>Тип: ${newExercise.exercisetype}</p>
+                    <p>Мышцы: ${newExercise.muscle}</p>
+                    <p>Подходы: ${newExercise.sets}</p>
+                    <p>Повторы: ${newExercise.reps}</p>
+                    <button onclick="toggleDetails(this, '${newExercise.video.replace("watch?v=", "embed/")}', '${newExercise.description}')">Подробнее</button>
+                    <button onclick="openReplaceModal('${newExercise.exerciseid}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
+                    <div class="exercise-details" style="display:none;"></div>
+                `;
             }
         }
-        
-        loadWorkouts();
+
+        window.onload = loadWorkouts;
     </script>
 </body>
 </html>
