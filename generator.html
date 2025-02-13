@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -26,6 +25,9 @@
     <select id="workout3" class="workout-select">
         <option value="">Выберите группу мышц</option>
     </select>
+    
+    <button id="generateWorkout">Сгенерировать тренировку</button>
+    <div id="workoutResults"></div>
     
     <script>
         var firebaseConfig = {
@@ -79,6 +81,73 @@
                 updateDropdowns();
             });
         });
+
+        document.getElementById("generateWorkout").addEventListener("click", async () => {
+            const selectedWorkouts = getSelectedWorkouts();
+            if (selectedWorkouts.length === 0) {
+                alert("Выберите хотя бы одну группу мышц!");
+                return;
+            }
+
+            let exercises = [];
+            for (const workout of selectedWorkouts) {
+                const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
+                const workoutExercises = snapshot.docs.map(doc => doc.data());
+                exercises.push(...workoutExercises);
+            }
+            
+            exercises = shuffleArray(exercises);
+            
+            let workoutPlan = [];
+            if (selectedWorkouts.length === 1) {
+                workoutPlan = exercises.slice(0, 8);
+            } else if (selectedWorkouts.length === 2) {
+                workoutPlan = exercises.slice(0, 4).concat(exercises.slice(4, 8));
+            } else {
+                workoutPlan = exercises.slice(0, 3).concat(exercises.slice(3, 6)).concat(exercises.slice(6, 9));
+            }
+
+            displayWorkout(workoutPlan);
+        });
+        
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function displayWorkout(workoutPlan) {
+            const container = document.getElementById("workoutResults");
+            container.innerHTML = "";
+            
+            workoutPlan.forEach(exercise => {
+                const exerciseElement = document.createElement("div");
+                exerciseElement.innerHTML = `
+                    <h3>${exercise.exercisename}</h3>
+                    <img src="${exercise.photo}" alt="${exercise.exercisename}" width="150">
+                    <p>Тип: ${exercise.exercisetype}</p>
+                    <p>Мышцы: ${exercise.muscle}</p>
+                    <p>Доп. мышцы: ${exercise.muscletypeadditional}</p>
+                    <p>Подходы: ${exercise.sets}</p>
+                    <p>Повторы: ${exercise.reps}</p>
+                    <button onclick="toggleDetails(this, '${exercise.video}', '${exercise.description}')">Подробнее</button>
+                    <div class="exercise-details" style="display:none;">
+                        <iframe width="300" height="200" src="${exercise.video}" frameborder="0" allowfullscreen></iframe>
+                        <p>${exercise.description}</p>
+                    </div>
+                `;
+                container.appendChild(exerciseElement);
+            });
+        }
+        
+        function toggleDetails(button, video, description) {
+            const details = button.nextElementSibling;
+            if (details.style.display === "none") {
+                details.style.display = "block";
+                button.textContent = "Скрыть";
+            } else {
+                details.style.display = "none";
+                button.textContent = "Подробнее";
+            }
+        }
         
         loadWorkouts();
     </script>
