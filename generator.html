@@ -1,1 +1,86 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор тренировки</title>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <h1>Выбери тренировку на сегодня</h1>
+    <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
+    
+    <label for="workout1">Первая группа мышц:</label>
+    <select id="workout1" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <label for="workout2">Вторая группа мышц:</label>
+    <select id="workout2" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <label for="workout3">Третья группа мышц:</label>
+    <select id="workout3" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+            authDomain: "fitnessapp-f519f.firebaseapp.com",
+            projectId: "fitnessapp-f519f",
+            storageBucket: "fitnessapp-f519f.appspot.com",
+            messagingSenderId: "1000735476286",
+            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+        let allWorkouts = [];
+
+        async function loadWorkouts() {
+            try {
+                const snapshot = await db.collection("workouts").get();
+                allWorkouts = snapshot.docs.map(doc => doc.id);
+                updateDropdowns();
+            } catch (error) {
+                console.error("Ошибка загрузки тренировок:", error);
+            }
+        }
+        
+        function updateDropdowns() {
+            document.querySelectorAll(".workout-select").forEach(select => {
+                let selectedValue = select.getAttribute("data-selected") || "";
+                select.innerHTML = '<option value="">Выберите группу мышц</option>';
+                let selectedWorkouts = getSelectedWorkouts();
+                allWorkouts.forEach(workout => {
+                    if (!selectedWorkouts.includes(workout) || workout === selectedValue) {
+                        let option = document.createElement("option");
+                        option.value = workout;
+                        option.textContent = workout;
+                        if (workout === selectedValue) option.selected = true;
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        function getSelectedWorkouts() {
+            return Array.from(document.querySelectorAll(".workout-select"))
+                .map(select => select.value)
+                .filter(value => value);
+        }
+        
+        document.querySelectorAll(".workout-select").forEach(select => {
+            select.addEventListener("change", (event) => {
+                event.target.setAttribute("data-selected", event.target.value);
+                updateDropdowns();
+            });
+        });
+        
+        loadWorkouts();
+    </script>
+</body>
+</html>
