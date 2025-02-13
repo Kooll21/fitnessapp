@@ -1,147 +1,158 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Добавить упражнение</title>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script> <!-- Добавил аутентификацию -->
-
-  <script>
-    // Инициализация Firebase
-    var firebaseConfig = {
-      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-      authDomain: "fitnessapp-f519f.firebaseapp.com",
-      projectId: "fitnessapp-f519f",
-      storageBucket: "fitnessapp-f519f.appspot.com",
-      messagingSenderId: "1000735476286",
-      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-      measurementId: "G-MJ8K8ZNQM4"
-    };
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.firestore();
-    var auth = firebase.auth();
-
-    // Функция проверки состояния аутентификации
-    function checkAuthState() {
-      auth.onAuthStateChanged(function(user) {
-        if (user) {
-          document.getElementById("user-status").textContent = "Welcome, " + user.email;
-          document.getElementById("login-link").style.display = "none";
-          document.getElementById("logout-btn").style.display = "inline-block";
-        } else {
-          document.getElementById("user-status").textContent = "Please log in";
-          document.getElementById("login-link").style.display = "inline-block";
-          document.getElementById("logout-btn").style.display = "none";
-        }
-      });
-    }
-
-    // Функция выхода из системы
-    function logoutUser() {
-      auth.signOut().then(function() {
-        console.log("User signed out.");
-      }).catch(function(error) {
-        console.error("Error signing out: ", error);
-      });
-    }
-
-    // Загрузка меню и проверка авторизации
-    document.addEventListener("DOMContentLoaded", function () {
-      fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById("navbar-container").innerHTML = html;
-          checkAuthState();
-        })
-        .catch(err => console.error("Ошибка загрузки меню:", err));
-    });
-
-    // Функция добавления упражнения
-    function addExercise() {
-      var category = document.getElementById("category").value.trim();
-      var exerciseName = document.getElementById("exerciseName").value.trim();
-
-      if (!category || !exerciseName) {
-        alert("Выберите категорию и введите название упражнения!");
-        return;
-      }
-
-      var exerciseData = {
-        exerciseid: exerciseName,
-        exercisename: exerciseName,
-        exercisetype: document.getElementById("exerciseType").value.trim(),
-        sets: document.getElementById("sets").value.trim(),
-        reps: document.getElementById("reps").value.trim(),
-        muscle: document.getElementById("muscle").value.trim(),
-        muscletypeadditional: document.getElementById("muscleTypeAdditional").value.trim(),
-        video: document.getElementById("videoUrl").value.trim(),
-        photo: document.getElementById("photoUrl").value.trim(),
-        description: document.getElementById("description").value.trim()
-      };
-
-      db.collection("workouts").doc(category).collection("exercises").doc(exerciseName).set(exerciseData)
-        .then(function () {
-          alert("Упражнение добавлено в " + category);
-          document.getElementById("exerciseForm").reset();
-        })
-        .catch(function (error) {
-          console.error("Ошибка при добавлении упражнения: ", error);
-        });
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор тренировки</title>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
 </head>
 <body>
-
-  <!-- Контейнер для меню -->
-  <div id="navbar-container"></div>
-
-  <h1>Добавить упражнение</h1>
-
-  <form id="exerciseForm">
-    <label for="category">Категория (группа мышц):</label>
-    <select id="category">
-      <option value="Chest">Грудь</option>
-      <option value="Biceps">Бицепс</option>
-      <option value="Back">Спина</option>
-      <option value="Legs">Ноги</option>
-      <option value="Shoulders">Плечи</option>
-      <option value="Triceps">Трицепс</option>
+    <h1>Выбери тренировку на сегодня</h1>
+    <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
+    
+    <label for="workout1">Первая группа мышц:</label>
+    <select id="workout1" class="workout-select">
+        <option value="">Выберите группу мышц</option>
     </select>
-    <br><br>
+    
+    <label for="workout2">Вторая группа мышц:</label>
+    <select id="workout2" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <label for="workout3">Третья группа мышц:</label>
+    <select id="workout3" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <button id="generateWorkout">Сгенерировать тренировку</button>
+    <div id="workoutResults"></div>
+    
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+            authDomain: "fitnessapp-f519f.firebaseapp.com",
+            projectId: "fitnessapp-f519f",
+            storageBucket: "fitnessapp-f519f.appspot.com",
+            messagingSenderId: "1000735476286",
+            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+        let allWorkouts = [];
 
-    <label for="exerciseName">Название упражнения:</label>
-    <input type="text" id="exerciseName" required><br><br>
+        async function loadWorkouts() {
+            try {
+                const snapshot = await db.collection("workouts").get();
+                allWorkouts = snapshot.docs.map(doc => doc.id);
+                updateDropdowns();
+            } catch (error) {
+                console.error("Ошибка загрузки тренировок:", error);
+            }
+        }
+        
+        function updateDropdowns() {
+            document.querySelectorAll(".workout-select").forEach(select => {
+                let selectedValue = select.getAttribute("data-selected") || "";
+                select.innerHTML = '<option value="">Выберите группу мышц</option>';
+                let selectedWorkouts = getSelectedWorkouts();
+                allWorkouts.forEach(workout => {
+                    if (!selectedWorkouts.includes(workout) || workout === selectedValue) {
+                        let option = document.createElement("option");
+                        option.value = workout;
+                        option.textContent = workout;
+                        if (workout === selectedValue) option.selected = true;
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
 
-    <label for="exerciseType">Тип упражнения:</label>
-    <input type="text" id="exerciseType"><br><br>
+        function getSelectedWorkouts() {
+            return Array.from(document.querySelectorAll(".workout-select"))
+                .map(select => select.value)
+                .filter(value => value);
+        }
+        
+        document.querySelectorAll(".workout-select").forEach(select => {
+            select.addEventListener("change", (event) => {
+                event.target.setAttribute("data-selected", event.target.value);
+                updateDropdowns();
+            });
+        });
 
-    <label for="sets">Количество подходов:</label>
-    <input type="text" id="sets"><br><br>
+        document.getElementById("generateWorkout").addEventListener("click", async () => {
+            const selectedWorkouts = getSelectedWorkouts();
+            if (selectedWorkouts.length === 0) {
+                alert("Выберите хотя бы одну группу мышц!");
+                return;
+            }
 
-    <label for="reps">Количество повторений:</label>
-    <input type="text" id="reps"><br><br>
+            let workoutPlan = [];
+            for (const workout of selectedWorkouts) {
+                const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
+                const exercises = snapshot.docs.map(doc => doc.data());
+                
+                let mainExercises = exercises.filter(e => e.exercisetype === "Основное");
+                let isolationExercises = exercises.filter(e => e.exercisetype === "Изолирующее");
+                
+                shuffleArray(mainExercises);
+                shuffleArray(isolationExercises);
+                
+                if (selectedWorkouts.length === 1) {
+                    workoutPlan.push(...mainExercises.slice(0, 4), ...isolationExercises.slice(0, 4));
+                } else if (selectedWorkouts.length === 2) {
+                    workoutPlan.push(...mainExercises.slice(0, 2), ...isolationExercises.slice(0, 2));
+                } else {
+                    workoutPlan.push(...mainExercises.slice(0, 1), ...isolationExercises.slice(0, 2));
+                }
+            }
+            
+            displayWorkout(workoutPlan);
+        });
+        
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
 
-    <label for="muscle">Основная мышца:</label>
-    <input type="text" id="muscle"><br><br>
-
-    <label for="muscleTypeAdditional">Доп. мышцы:</label>
-    <input type="text" id="muscleTypeAdditional"><br><br>
-
-    <label for="videoUrl">Ссылка на видео (YouTube):</label>
-    <input type="url" id="videoUrl"><br><br>
-
-    <label for="photoUrl">Ссылка на фото:</label>
-    <input type="url" id="photoUrl"><br><br>
-
-    <label for="description">Описание упражнения:</label><br>
-    <textarea id="description" rows="4" cols="40"></textarea><br><br>
-
-    <button type="button" onclick="addExercise()">Добавить упражнение</button>
-  </form>
-
+        function displayWorkout(workoutPlan) {
+            const container = document.getElementById("workoutResults");
+            container.innerHTML = "";
+            
+            workoutPlan.forEach(exercise => {
+                const embedUrl = exercise.video.replace("watch?v=", "embed/");
+                const exerciseElement = document.createElement("div");
+                exerciseElement.innerHTML = `
+                    <h3>${exercise.exercisename}</h3>
+                    <img src="${exercise.photo}" alt="${exercise.exercisename}" width="150">
+                    <p>Тип: ${exercise.exercisetype}</p>
+                    <p>Мышцы: ${exercise.muscle}</p>
+                    <p>Доп. мышцы: ${exercise.muscletypeadditional}</p>
+                    <p>Подходы: ${exercise.sets}</p>
+                    <p>Повторы: ${exercise.reps}</p>
+                    <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
+                    <div class="exercise-details" style="display:none;">
+                        <iframe width="300" height="200" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
+                        <p>${exercise.description}</p>
+                    </div>
+                `;
+                container.appendChild(exerciseElement);
+            });
+        }
+        
+        function toggleDetails(button, video, description) {
+            const details = button.nextElementSibling;
+            if (details.style.display === "none") {
+                details.style.display = "block";
+                button.textContent = "Скрыть";
+            } else {
+                details.style.display = "none";
+                button.textContent = "Подробнее";
+            }
+        }
+        
+        loadWorkouts();
+    </script>
 </body>
 </html>
