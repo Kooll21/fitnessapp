@@ -90,46 +90,54 @@ function initBurgerMenu() {
     }
 }
   </script>
-
-      <!-- Контейнер для меню (загружается динамически из menu.html) -->
-  <div id="navbar-container"></div>
 <body>
-    <h1>Выбери тренировку на сегодня</h1>
+     <h1>Выбери тренировку на сегодня</h1>
+    <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
     
-    <label for="workout1">Первая группа мышц:</label>
-    <select id="workout1" class="workout-select"></select>
+    <p><label for="workout1">Первая группа мышц:</label>
+    <select id="workout1" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select></p>
     
-    <label for="workout2">Вторая группа мышц:</label>
-    <select id="workout2" class="workout-select"></select>
+    <p><label for="workout2">Вторая группа мышц:</label>
+    <select id="workout2" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select></p>
     
-    <label for="workout3">Третья группа мышц:</label>
-    <select id="workout3" class="workout-select"></select>
+    <p><label for="workout3">Третья группа мышц:</label>
+    <select id="workout3" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select></p>
     
     <button id="generateWorkout">Сгенерировать тренировку</button>
     <div id="workoutResults"></div>
     
     <script>
-   
-
-        let allWorkouts = [];
-        let allExercises = [];
+        
 
         async function loadWorkouts() {
-            const snapshot = await db.collection("workouts").get();
-            allWorkouts = snapshot.docs.map(doc => doc.id);
-            updateDropdowns();
+            try {
+                const snapshot = await db.collection("workouts").get();
+                allWorkouts = snapshot.docs.map(doc => doc.id);
+                updateDropdowns();
+            } catch (error) {
+                console.error("Ошибка загрузки тренировок:", error);
+            }
         }
-
+        
         function updateDropdowns() {
             document.querySelectorAll(".workout-select").forEach(select => {
-                let selectedValue = select.value;
+                let selectedValue = select.getAttribute("data-selected") || "";
                 select.innerHTML = '<option value="">Выберите группу мышц</option>';
+                let selectedWorkouts = getSelectedWorkouts();
                 allWorkouts.forEach(workout => {
-                    let option = document.createElement("option");
-                    option.value = workout;
-                    option.textContent = workout;
-                    if (workout === selectedValue) option.selected = true;
-                    select.appendChild(option);
+                    if (!selectedWorkouts.includes(workout) || workout === selectedValue) {
+                        let option = document.createElement("option");
+                        option.value = workout;
+                        option.textContent = workout;
+                        if (workout === selectedValue) option.selected = true;
+                        select.appendChild(option);
+                    }
                 });
             });
         }
@@ -139,7 +147,14 @@ function initBurgerMenu() {
                 .map(select => select.value)
                 .filter(value => value);
         }
-
+        
+        document.querySelectorAll(".workout-select").forEach(select => {
+            select.addEventListener("change", (event) => {
+                event.target.setAttribute("data-selected", event.target.value);
+                updateDropdowns();
+            });
+        });
+let allExercises = [];
         document.getElementById("generateWorkout").addEventListener("click", async () => {
             const selectedWorkouts = getSelectedWorkouts();
             if (selectedWorkouts.length === 0) {
@@ -212,17 +227,19 @@ function initBurgerMenu() {
             });
         }
 
-        function toggleDetails(button, video, description) {
-            const details = button.nextElementSibling;
-            if (details.style.display === "none") {
-                details.style.display = "block";
-                details.innerHTML = `<iframe width="300" height="200" src="${video}" frameborder="0"></iframe><p>${description}</p>`;
-                button.textContent = "Скрыть";
-            } else {
-                details.style.display = "none";
-                button.textContent = "Подробнее";
-            }
-        }
+function toggleDetails(button, video, description) {
+    const parent = button.parentElement;
+    const details = parent.querySelector(".exercise-details");
+
+    if (details.style.display === "none" || details.innerHTML === "") {
+        details.style.display = "block";
+        details.innerHTML = `<iframe width="300" height="200" src="${video}" frameborder="0"></iframe><p>${description}</p>`;
+        button.textContent = "Скрыть";
+    } else {
+        details.style.display = "none";
+        button.textContent = "Подробнее";
+    }
+}
 
         async function openReplaceModal(exerciseid, muscle, type) {
             const replacements = allExercises.filter(ex => ex.muscle === muscle && ex.exercisetype === type && ex.exerciseid !== exerciseid);
