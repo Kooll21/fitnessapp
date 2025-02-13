@@ -119,6 +119,7 @@
             container.innerHTML = "";
             
             workoutPlan.forEach(exercise => {
+                const embedUrl = exercise.video.replace("watch?v=", "embed/");
                 const exerciseElement = document.createElement("div");
                 exerciseElement.innerHTML = `
                     <h3>${exercise.exercisename}</h3>
@@ -128,9 +129,9 @@
                     <p>Доп. мышцы: ${exercise.muscletypeadditional}</p>
                     <p>Подходы: ${exercise.sets}</p>
                     <p>Повторы: ${exercise.reps}</p>
-                    <button onclick="toggleDetails(this, '${exercise.video}', '${exercise.description}')">Подробнее</button>
+                    <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
                     <div class="exercise-details" style="display:none;">
-                        <iframe width="300" height="200" src="${exercise.video}" frameborder="0" allowfullscreen></iframe>
+                        <iframe width="300" height="200" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
                         <p>${exercise.description}</p>
                     </div>
                 `;
