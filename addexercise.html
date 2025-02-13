@@ -90,11 +90,8 @@ function initBurgerMenu() {
     }
 }
   </script>
-</head>
-<body>
-  <!-- Контейнер для меню (загружается динамически из menu.html) -->
+    <!-- Контейнер для меню (загружается динамически из menu.html) -->
   <div id="navbar-container"></div>
-    
 <body>
     <h1>Выбери тренировку на сегодня</h1>
     <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
@@ -117,8 +114,9 @@ function initBurgerMenu() {
     <button id="generateWorkout">Сгенерировать тренировку</button>
     <div id="workoutResults"></div>
     
-    <script>
-       
+
+        
+        <script>
         let allWorkouts = [];
 
         async function loadWorkouts() {
@@ -169,6 +167,7 @@ function initBurgerMenu() {
             }
 
             let workoutPlan = [];
+            let muscleCount = {}; // Для отслеживания количества повторений упражнений для каждой мышечной группы
             for (const workout of selectedWorkouts) {
                 const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
                 const exercises = snapshot.docs.map(doc => doc.data());
@@ -180,11 +179,11 @@ function initBurgerMenu() {
                 shuffleArray(isolationExercises);
                 
                 if (selectedWorkouts.length === 1) {
-                    workoutPlan.push(...mainExercises.slice(0, 4), ...isolationExercises.slice(0, 4));
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 4, muscleCount), ...getFilteredExercises(isolationExercises, 4, muscleCount));
                 } else if (selectedWorkouts.length === 2) {
-                    workoutPlan.push(...mainExercises.slice(0, 2), ...isolationExercises.slice(0, 2));
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 2, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
                 } else {
-                    workoutPlan.push(...mainExercises.slice(0, 1), ...isolationExercises.slice(0, 2));
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
                 }
             }
             
@@ -230,7 +229,29 @@ function initBurgerMenu() {
                 button.textContent = "Подробнее";
             }
         }
-        
+
+        // Функция для фильтрации упражнений с учетом количества повторений мышечных групп
+        function getFilteredExercises(exercises, maxCount, muscleCount) {
+            let filteredExercises = [];
+            for (const exercise of exercises) {
+                if (muscleCount[exercise.muscle]) {
+                    // Проверяем, сколько раз упражнение с этим мышечным атрибутом было добавлено
+                    if (muscleCount[exercise.muscle] >= 2) {
+                        continue; // Пропускаем упражнения, если их добавлено больше двух раз
+                    }
+                }
+                
+                // Добавляем упражнение в план тренировки
+                filteredExercises.push(exercise);
+                muscleCount[exercise.muscle] = (muscleCount[exercise.muscle] || 0) + 1;
+                
+                if (filteredExercises.length >= maxCount) {
+                    break;
+                }
+            }
+            return filteredExercises;
+        }
+
         loadWorkouts();
     </script>
 </body>
