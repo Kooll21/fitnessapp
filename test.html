@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор тренировки</title>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <h1>Выбери тренировку на сегодня</h1>
+    <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
+    
+    <label for="workout1">Первая группа мышц:</label>
+    <select id="workout1" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <label for="workout2">Вторая группа мышц:</label>
+    <select id="workout2" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <label for="workout3">Третья группа мышц:</label>
+    <select id="workout3" class="workout-select">
+        <option value="">Выберите группу мышц</option>
+    </select>
+    
+    <button id="generateWorkout">Сгенерировать тренировку</button>
+    <div id="workoutResults"></div>
+    
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+            authDomain: "fitnessapp-f519f.firebaseapp.com",
+            projectId: "fitnessapp-f519f",
+            storageBucket: "fitnessapp-f519f.appspot.com",
+            messagingSenderId: "1000735476286",
+            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+
+        let allWorkouts = [];
+        let allExercises = [];
+
+        // Загружаем все доступные тренировки
+        async function loadWorkouts() {
+            console.log("Загрузка тренировок...");
+            try {
+                const snapshot = await db.collection("workouts").get();
+                allWorkouts = snapshot.docs.map(doc => doc.id);
+                console.log("Тренировки загружены:", allWorkouts);
+                updateDropdowns();
+            } catch (error) {
+                console.error("Ошибка загрузки тренировок:", error);
+            }
+        }
+        
+        // Обновляем выпадающие списки для выбора групп мышц
+        function updateDropdowns() {
+            console.log("Обновление выпадающих списков...");
+            document.querySelectorAll(".workout-select").forEach(select => {
+                let selectedValue = select.getAttribute("data-selected") || "";
+                select.innerHTML = '<option value="">Выберите группу мышц</option>';
+                let selectedWorkouts = getSelectedWorkouts();
+                allWorkouts.forEach(workout => {
+                    if (!selectedWorkouts.includes(workout) || workout === selectedValue) {
+                        let option = document.createElement("option");
+                        option.value = workout;
+                        option.textContent = workout;
+                        if (workout === selectedValue) option.selected = true;
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        // Получаем выбранные группы мышц
+        function getSelectedWorkouts() {
+            return Array.from(document.querySelectorAll(".workout-select"))
+                .map(select => select.value)
+                .filter(value => value);
+        }
+        
+        document.querySelectorAll(".workout-select").forEach(select => {
+            select.addEventListener("change", (event) => {
+                event.target.setAttribute("data-selected", event.target.value);
+                updateDropdowns();
+            });
+        });
+
+        // Генерация тренировки по выбранным группам мышц
+        document.getElementById("generateWorkout").addEventListener("click", async () => {
+            const selectedWorkouts = getSelectedWorkouts();
+            console.log("Выбранные группы мышц:", selectedWorkouts);
+            if (selectedWorkouts.length === 0) {
+                alert("Выберите хотя бы одну группу мышц!");
+                return;
+            }
+
+            let workoutPlan = [];
+            let muscleCount = {}; // Для отслеживания количества повторений мышечных групп
+
+            // Для каждой выбранной группы мышц генерируем тренировку
+            for (const workout of selectedWorkouts) {
+                console.log(`Генерация тренировки для: ${workout}`);
+                const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
+                const exercises = snapshot.docs.map(doc => doc.data());
+                console.log(`Упражнения для ${workout}:`, exercises);
+                allExercises.push(...exercises); // Добавляем все упражнения в общий список
+
+                let mainExercises = exercises.filter(e => e.exercisetype === "Основное");
+                let isolationExercises = exercises.filter(e => e.exercisetype === "Изолирующее");
+
+                shuffleArray(mainExercises);
+                shuffleArray(isolationExercises);
+
+                if (selectedWorkouts.length === 1) {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 4, muscleCount), ...getFilteredExercises(isolationExercises, 4, muscleCount));
+                } else if (selectedWorkouts.length === 2) {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 2, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+                } else {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+                }
+            }
+
+            displayWorkout(workoutPlan);
+        });
+        
+        // Перемешиваем массив для случайного выбора упражнений
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        // Фильтруем упражнения, чтобы избежать дублирования мышц
+        function getFilteredExercises(exercises, count, muscleCount) {
+            let filtered = [];
+            exercises.forEach(exercise => {
+                if (!muscleCount[exercise.muscle] || muscleCount[exercise.muscle] < 2) {
+                    filtered.push(exercise);
+                    muscleCount[exercise.muscle] = (muscleCount[exercise.muscle] || 0) + 1;
+                }
+            });
+            return filtered.slice(0, count);
+        }
+
+        // Отображаем выбранные упражнения
+        function displayWorkout(workoutPlan) {
+            const container = document.getElementById("workoutResults");
+            container.innerHTML = "";
+            console.log("Отображаем упражнения:", workoutPlan);
+
+            workoutPlan.forEach((exercise, index) => {
+                const embedUrl = exercise.video.replace("watch?v=", "embed/");
+                const exerciseElement = document.createElement("div");
+                exerciseElement.id = "exercise-" + index; // Присваиваем уникальный ID для каждого упражнения
+                exerciseElement.innerHTML = `
+                    <h3>${exercise.exercisename}</h3>
+                    <img src="${exercise.photo}" alt="${exercise.exercisename}" width="150">
+                    <p>Тип: ${exercise.exercisetype}</p>
+                    <p>Мышцы: ${exercise.muscle}</p>
+                    <p>Доп. мышцы: ${exercise.muscletypeadditional}</p>
+                    <p>Подходы: ${exercise.sets}</p>
+                    <p>Повторы: ${exercise.reps}</p>
+                    <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
+                    <button onclick="openReplaceModal(${index}, '${exercise.muscle}', '${exercise.exercisetype}')">Заменить упражнение</button>
+                    <div class="exercise-details" style="display:none;">
+                        <iframe width="300" height="200" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
+                        <p>${exercise.description}</p>
+                    </div>
+                `;
+                container.appendChild(exerciseElement);
+            });
+        }
+        
+        // Переключаем отображение подробностей
+        function toggleDetails(button, video, description) {
+            const details = button.nextElementSibling;
+            if (details.style.display === "none") {
+                details.style.display = "block";
+                button.textContent = "Скрыть";
+            } else {
+                details.style.display = "none";
+                button.textContent = "Подробнее";
+            }
+        }
+
+        // Открываем модальное окно для замены упражнения
+        async function openReplaceModal(exerciseIndex, muscle, exercisetype) {
+            console.log(`Открытие модального окна для замены упражнения №${exerciseIndex} (мышца: ${muscle}, тип: ${exercisetype})`);
+            const replacementExercises = await getReplacementExercises(muscle, exercisetype);
+
+            console.log("Возможные замены:", replacementExercises);
+
+            let replacementOptions = "";
+            replacementExercises.forEach(exercise => {
+                replacementOptions += `<option value="${exercise.id}">${exercise.exercisename}</option>`;
+            });
+            
+            const replaceModal = `
+                <div id="replace-modal-${exerciseIndex}">
+                    <label for="replacementExercises">Выберите замену:</label>
+                    <select id="replacementExercises">
+                        ${replacementOptions}
+                    </select>
+                    <button onclick="applyReplacement(${exerciseIndex})">Применить замену</button>
+                </div>
+            `;
+            
+            document.getElementById("exercise-" + exerciseIndex).insertAdjacentHTML('beforeend', replaceModal);
+        }
+
+        // Получаем упражнения для замены
+        async function getReplacementExercises(muscle, exercisetype) {
+            console.log(`Получение упражнений для замены (мышца: ${muscle}, тип: ${exercisetype})`);
+            const replacementExercises = [];
+
+            for (const workout of allWorkouts) {
+                const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
+                snapshot.docs.forEach(doc => {
+                    const exercise = doc.data();
+                    if (exercise.muscle === muscle && exercise.exercisetype === exercisetype) {
+                        replacementExercises.push({ ...exercise, id: doc.id });
+                    }
+                });
+            }
+            console.log("Найденные упражнения для замены:", replacementExercises);
+            return replacementExercises;
+        }
+
+        // Применяем замену для упражнения
+        function applyReplacement(exerciseIndex) {
+            const selectedExerciseId = document.getElementById("replacementExercises").value;
+            const newExercise = allExercises.find(ex => ex.id === selectedExerciseId);
+
+            console.log(`Применяем замену для упражнения №${exerciseIndex} на ${selectedExerciseId}`);
+
+            if (newExercise) {
+                const exerciseElement = document.getElementById("exercise-" + exerciseIndex);
+                exerciseElement.innerHTML = `
+                    <h3>${newExercise.exercisename}</h3>
+                    <img src="${newExercise.photo}" alt="${newExercise.exercisename}" width="150">
+                    <p>Тип: ${newExercise.exercisetype}</p>
+                    <p>Мышцы: ${newExercise.muscle}</p>
+                    <p>Доп. мышцы: ${newExercise.muscletypeadditional}</p>
+                    <p>Подходы: ${newExercise.sets}</p>
+                    <p>Повторы: ${newExercise.reps}</p>
+                    <button onclick="toggleDetails(this, '${newExercise.video.replace("watch?v=", "embed/")}', '${newExercise.description}')">Подробнее</button>
+                    <div class="exercise-details" style="display:none;">
+                        <iframe width="300" height="200" src="${newExercise.video.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>
+                        <p>${newExercise.description}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Загружаем данные о тренировках при старте страницы
+        window.onload = loadWorkouts;
+    </script>
+</body>
+</html>
