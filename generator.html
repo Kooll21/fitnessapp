@@ -7,6 +7,93 @@
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
 </head>
+  <!-- Подключаем Firebase SDK версии 8.9.1 -->
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+  
+  <script>
+    // Конфигурация Firebase (v8)
+    var firebaseConfig = {
+      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+      authDomain: "fitnessapp-f519f.firebaseapp.com",
+      projectId: "fitnessapp-f519f",
+      storageBucket: "fitnessapp-f519f.appspot.com",
+      messagingSenderId: "1000735476286",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+      measurementId: "G-MJ8K8ZNQM4"
+    };
+    // Инициализация Firebase
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+
+    // Функция проверки состояния аутентификации
+    function checkAuthState() {
+      auth.onAuthStateChanged(function(user) {
+        if (user) {
+          document.getElementById("user-status").textContent = "Welcome, " + user.email;
+          document.getElementById("login-link").style.display = "none";
+          document.getElementById("logout-btn").style.display = "inline-block";
+          // Если есть элемент для админ-панели, показываем его:
+          var adminPanel = document.getElementById("admin-panel");
+          if(adminPanel) { adminPanel.style.display = "block"; }
+        } else {
+          document.getElementById("user-status").textContent = "Please log in";
+          document.getElementById("login-link").style.display = "inline-block";
+          document.getElementById("logout-btn").style.display = "none";
+          if(document.getElementById("admin-panel")){
+            document.getElementById("admin-panel").style.display = "none";
+          }
+        }
+      });
+    }
+
+    // Функция выхода из системы
+    function logoutUser() {
+      firebase.auth().signOut().then(function() {
+        console.log("User signed out.");
+      }).catch(function(error) {
+        console.error("Error signing out: ", error);
+      });
+    }
+
+    // Загрузка меню из файла menu.html и проверка авторизации
+    document.addEventListener("DOMContentLoaded", function () {
+    fetch('menu.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("navbar-container").innerHTML = html;
+            checkAuthState();
+            initBurgerMenu(); // Запуск функции инициализации бургера после вставки меню
+        })
+        .catch(err => {
+            console.error("Ошибка загрузки меню:", err);
+            document.getElementById("navbar-container").innerHTML = `
+                <span id="user-status">Please log in</span>
+                <a href="login.html" id="login-link">Login</a>
+                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+            checkAuthState();
+        });
+});
+
+// Функция инициализации меню-бургера
+function initBurgerMenu() {
+    const menuToggle = document.querySelector(".menu-toggle");
+    const navbarList = document.querySelector(".navbar-list")
+
+    if (menuToggle && navbarList) {
+        menuToggle.addEventListener("click", function () {
+            navbarList.classList.toggle("active");
+            menuToggle.classList.toggle("active");
+        });
+    }
+}
+  </script>
+</head>
+<body>
+  <!-- Контейнер для меню (загружается динамически из menu.html) -->
+  <div id="navbar-container"></div>
 <body>
     <h1>Выбери тренировку на сегодня</h1>
     <p>Можешь создать тренировку на свой вкус. Например, выбрать только одну группу мышц или комбинацию из двух-трех.</p>
@@ -30,17 +117,7 @@
     <div id="workoutResults"></div>
     
     <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-            authDomain: "fitnessapp-f519f.firebaseapp.com",
-            projectId: "fitnessapp-f519f",
-            storageBucket: "fitnessapp-f519f.appspot.com",
-            messagingSenderId: "1000735476286",
-            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-        };
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
-        let allWorkouts = [];
+        
 
         async function loadWorkouts() {
             try {
