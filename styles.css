@@ -191,11 +191,13 @@ body.modal-open {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 80%; /* Ширина попапа в процентах */
+    max-width: 600px; /* Ограничение максимальной ширины */
     max-height: 80vh;
     overflow-y: auto;
     background-color: white;
     padding: 20px;
-    z-index: 1001; /* Обеспечивает, чтобы попап был поверх контента */
+    z-index: 1001;
 }
 
 #overlay {
@@ -211,4 +213,18 @@ body.modal-open {
 
 body.modal-open #overlay {
     display: block;
+}
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #000000;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #f00;
 }
