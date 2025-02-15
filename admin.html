@@ -71,6 +71,8 @@
         .then(html => {
           document.getElementById("navbar-container").innerHTML = html;
           checkAuthState();
+           document.getElementById("popup").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
         })
         .catch(err => console.error("Ошибка загрузки меню:", err));
     });
