@@ -84,23 +84,33 @@
     }
 
     function displayWorkouts(workouts) {
-      const container = document.getElementById("workouts-list");
-      container.innerHTML = "<h2>Saved Workouts</h2>";
-      workouts.forEach((workout, index) => {
-        const workoutElement = document.createElement("div");
-        workoutElement.innerHTML = `
-          <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")} 
-          <button onclick="showWorkoutDetails(${index})">Подробнее</button></p>
-        `;
-        container.appendChild(workoutElement);
-      });
-    }
+  const container = document.getElementById("workouts-list");
+  container.innerHTML = "<h2>Saved Workouts</h2>";
+  workouts.forEach((workout, index) => {
+    const workoutElement = document.createElement("div");
+    workoutElement.innerHTML = `
+      <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <button onclick="showWorkoutDetails(${index})">Подробнее</button>
+    `;
+    workoutElement.dataset.details = JSON.stringify(workout); // Store details in a dataset attribute
+    container.appendChild(workoutElement);
+  });
+}
 
-    window.showWorkoutDetails = function(index) {
-      const workout = document.querySelectorAll("#workouts-list div")[index];
-      document.getElementById("popup-content").innerHTML = workout.innerHTML;
-      document.body.classList.add("modal-open");
-    };
+
+window.showWorkoutDetails = function(index) {
+  const workoutElement = document.querySelectorAll("#workouts-list div")[index];
+  const workoutData = JSON.parse(workoutElement.dataset.details);
+
+  document.getElementById("popup-content").innerHTML = `
+    <h3>Workout Details</h3>
+    <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+    <p><strong>Exercises:</strong> ${workoutData.exercises ? workoutData.exercises.join(", ") : "No details available"}</p>
+  `;
+
+  document.body.classList.add("modal-open");
+};
+
 
     window.closePopup = function() {
       document.body.classList.remove("modal-open");
