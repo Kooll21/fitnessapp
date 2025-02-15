@@ -305,39 +305,45 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 
 });
-// Функция для отображения попап окна с подробной информацией
 function showDetailsPopup(exerciseId) {
-    const exercise = allExercises.find(ex => ex.id === exerciseId);
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
 
-    if (exercise) {
-        const modal = document.createElement("div");
-        modal.id = `popup-${exerciseId}`;
-        modal.classList.add("popup-modal");
-        modal.innerHTML = `
-            <div class="popup-content">
-                <span class="popup-close" onclick="closePopup('${exerciseId}')">&times;</span>
-                <h2>${exercise.exercisename}</h2>
-                <img src="${exercise.photo}" width="200" alt="${exercise.exercisename}">
-                <p><strong>Описание:</strong> ${exercise.description}</p>
-                <iframe width="560" height="315" src="${exercise.video.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        // Показываем модальное окно
-        modal.style.display = "block";
-    }
+    // Показать попап
+    popup.style.display = "block";
+    overlay.style.display = "block";
+
+    // Блокируем прокрутку фона
+    document.body.classList.add("modal-open");
+
+    // Наполнение попапа данными
+    const exercise = workoutPlan.find(ex => ex.id === exerciseId);
+    const description = exercise.description || "Нет описания";
+    const photo = exercise.photo || "";
+    const video = exercise.video || "";
+
+    popup.innerHTML = `
+        <h2>${exercise.exercisename}</h2>
+        <img src="${photo}" alt="${exercise.exercisename}" style="width: 100%; max-height: 300px; object-fit: cover;">
+        <p>${description}</p>
+        <video controls>
+            <source src="${video}" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+        <button onclick="closePopup()">Закрыть</button>
+    `;
 }
 
-// Функция для закрытия попап окна
-function closePopup(exerciseId) {
-    const modal = document.getElementById(`popup-${exerciseId}`);
-    if (modal) {
-        modal.classList.add('fade-out'); // Добавляем анимацию исчезновения
-        setTimeout(() => {
-            modal.remove(); // Удаляем модальное окно после анимации
-        }, 300);
-    }
+function closePopup() {
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
+
+    // Скрыть попап
+    popup.style.display = "none";
+    overlay.style.display = "none";
+
+    // Разблокировать прокрутку фона
+    document.body.classList.remove("modal-open");
 }
 // Функция для удаления тренировки
 document.getElementById("deleteWorkoutBtn").addEventListener("click", function() {
@@ -370,6 +376,8 @@ document.getElementById("deleteWorkoutBtn").addEventListener("click", function()
         }
     }
   </script>
+  <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
+<div id="popup" class="popup" style="display:none;"></div>
 
 </body>
 </html>
