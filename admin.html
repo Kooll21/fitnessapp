@@ -75,15 +75,40 @@
         .catch(err => console.error("Ошибка загрузки меню:", err));
     });
 
-    function loadUserWorkouts(userId) {
-      const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-      getDocs(userWorkoutsRef).then(snapshot => {
-        let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        displayWorkouts(workouts);
-      }).catch(error => console.error("Error fetching workouts:", error));
+  async function loadUserWorkouts(userId) {
+  const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
+  const snapshot = await getDocs(userWorkoutsRef);
+  let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+  
+  // Now, fetch exercises for each workout
+  for (let workout of workouts) {
+    if (workout.exerciseIds && workout.exerciseIds.length > 0) {
+      // Assuming each workout document contains an array of exercise IDs
+      workout.exercises = await loadExercises(workout.exerciseIds);
     }
+  }
 
-    function displayWorkouts(workouts) {
+  displayWorkouts(workouts);
+}
+
+async function loadExercises(exerciseIds) {
+  const exercises = [];
+  
+  for (let id of exerciseIds) {
+    const exerciseRef = doc(db, "exercises", id);  // Assuming exercises are stored in "exercises" collection
+    const exerciseDoc = await getDoc(exerciseRef);
+
+    if (exerciseDoc.exists()) {
+      exercises.push(exerciseDoc.data());  // Store the exercise data
+    } else {
+      console.error(`Exercise with ID ${id} not found.`);
+    }
+  }
+
+  return exercises;
+}
+
+function displayWorkouts(workouts) {
   const container = document.getElementById("workouts-list");
   container.innerHTML = "<h2>Saved Workouts</h2>";
   workouts.forEach((workout, index) => {
@@ -92,19 +117,19 @@
       <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
       <button onclick="showWorkoutDetails(${index})">Подробнее</button>
     `;
-    workoutElement.dataset.details = JSON.stringify(workout); // Store details in a dataset attribute
+    workoutElement.dataset.details = JSON.stringify(workout); // Store full workout details in a dataset attribute
     container.appendChild(workoutElement);
   });
 }
-
 
 window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
+  // If exercises are available, show them
   const exercisesList = workoutData.exercises
     ? workoutData.exercises.map(exercise => 
-        `<li><strong>${exercise.name}</strong>: ${exercise.reps} reps, ${exercise.sets} sets</li>`
+        `<li><strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: ${exercise.reps} reps, ${exercise.sets} sets</li>`
       ).join("")
     : "No details available";
 
