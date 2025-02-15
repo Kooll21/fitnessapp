@@ -180,7 +180,8 @@ nav ul li a {
 }
 /* General popup styling */
 #popup {
-    max-width: 90%;  /* Maximum width for larger screens */
+    display: none;  /* Hidden by default */
+    max-width: 90%;  /* Max width for larger screens */
     width: 500px;  /* Default width */
     max-height: 80vh;  /* Limit height */
     overflow-y: auto;  /* Make it scrollable */
@@ -189,6 +190,11 @@ nav ul li a {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin: 0 auto; /* Center the popup */
+    position: fixed;  /* Position fixed */
+    top: 50%;  /* Center vertically */
+    left: 50%;  /* Center horizontally */
+    transform: translate(-50%, -50%);  /* Adjust for center alignment */
+    z-index: 1000; /* Ensure it's on top */
 }
 
 /* Lock body scroll when popup is open */
@@ -199,7 +205,7 @@ body.modal-open {
 /* On mobile screens, make the popup width 100% with reduced padding */
 @media (max-width: 768px) {
     #popup {
-        width: 90%;  /* Make it a bit wider on mobile */
+        width: 90%;  /* Make it wider on mobile */
         max-width: 90%;  /* Ensure it doesn't take the entire screen */
         padding: 10px;  /* Reduced padding for better fit */
         margin: 10px;  /* Reduced margin for a better fit */
