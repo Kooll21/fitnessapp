@@ -228,3 +228,7 @@ body.modal-open #overlay {
 .close-btn:hover {
     color: #f00;
 }
+#overlay, #popup {
+  display: none; /* По умолчанию скрыты */
+}
+
