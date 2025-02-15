@@ -413,7 +413,16 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-// Adding an event listener for the 'Complete Workout' button
+      const fetchExercises = async () => {
+    const exercisesSnapshot = await db.collection("exercises").get();
+    const exercises = exercisesSnapshot.docs.map(doc => ({
+        id: doc.id,  // This is the Firestore document ID (the exercise id)
+        ...doc.data() // Include all other data like exercise name, reps, sets, etc.
+    }));
+
+    // Now save these exercises in your workoutPlan variable
+    workoutPlan = exercises;
+};
 document.getElementById("complete-workout-btn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
@@ -425,11 +434,11 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
         
         // Return only the necessary data, including exerciseid and weight
         return {
-            exerciseid: exercise.id,  // Add the exercise ID (from the database)
-            exercisename: exercise.exercisename,  // Keep exercise name
-            reps: exercise.reps,  // Keep number of reps
-            sets: exercise.sets,  // Keep number of sets
-            weight: weight  // Include the weight value
+            exerciseid: exercise.id,  // Exercise ID (should be retrieved from the database)
+            exercisename: exercise.exercisename,  // Exercise name
+            reps: exercise.reps,  // Number of reps
+            sets: exercise.sets,  // Number of sets
+            weight: weight  // Weight value input by the user
         };
     });
 
@@ -475,6 +484,13 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     // Optionally, show the 'delete' button or other UI elements
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 });
+
+      db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
+    exercises: workoutData,  // workoutData includes exerciseid from the database
+    date: new Date(),
+    status: "completed"  // Mark the workout as completed
+})
+
 
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
