@@ -311,6 +311,9 @@ function showDetailsPopup(exerciseId) {
             </div>
         `;
         document.body.appendChild(modal);
+        
+        // Показываем модальное окно
+        modal.style.display = "block";
     }
 }
 
@@ -318,7 +321,10 @@ function showDetailsPopup(exerciseId) {
 function closePopup(exerciseId) {
     const modal = document.getElementById(`popup-${exerciseId}`);
     if (modal) {
-        modal.remove();
+        modal.classList.add('fade-out'); // Добавляем анимацию исчезновения
+        setTimeout(() => {
+            modal.remove(); // Удаляем модальное окно после анимации
+        }, 300);
     }
 }
 // Функция для удаления тренировки
@@ -352,5 +358,6 @@ document.getElementById("deleteWorkoutBtn").addEventListener("click", function()
         }
     }
   </script>
+
 </body>
 </html>
