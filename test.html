@@ -352,49 +352,70 @@ document.getElementById("deleteWorkoutBtn").addEventListener("click", function()
     // Очистить сохраненные упражнения
     document.getElementById("savedWorkout").innerHTML = "";
 
-   // Показать кнопку генерации тренировки
-document.getElementById("generateWorkout").style.display = "inline-block";
+    // Скрыть кнопки сохранения, удаления и выполнения тренировки
+    toggleButtons(false);
 
-// Скрыть кнопки сохранения, удаления и выполнения тренировки
-document.getElementById("saveWorkoutBtn").style.display = "none";
-document.getElementById("deleteWorkoutBtn").style.display = "none";
-document.getElementById("complete-workout-btn").style.display = "none";
+    // Показать кнопку генерации тренировки
+    document.getElementById("generateWorkout").style.display = "inline-block";
+
+    // Очистить блок с сгенерированными результатами
+    document.getElementById("workoutResults").innerHTML = "";
+    document.getElementById("workoutResults").style.display = "none"; // Скрыть блок с результатами
+
+    // Скрыть кнопку "Сохранить тренировку"
+    document.getElementById("saveWorkoutBtn").style.display = "none";
+});
 
 // Показать кнопку "Сохранить тренировку" после генерации тренировки
 document.getElementById("generateWorkout").addEventListener("click", function () {
+    // Очистить блок с результатами, чтобы не было старых данных
+    document.getElementById("workoutResults").innerHTML = "";
+
+    // Показать блок с результатами
+    document.getElementById("workoutResults").style.display = "block";
+
+    // Генерация новой тренировки (например, новый контент)
+    const newWorkoutContent = "<p>Новая тренировка сгенерирована!</p>";
+
+    // Добавить новый контент в блок
+    document.getElementById("workoutResults").innerHTML = newWorkoutContent;
+
+    // Показать кнопку "Сохранить тренировку"
     document.getElementById("saveWorkoutBtn").style.display = "inline-block";
 });
 
 // Показать кнопки "Удалить тренировку" и "Тренировка выполнена" после сохранения
 document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
-    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
-    document.getElementById("complete-workout-btn").style.display = "inline-block";
+    toggleButtons(true);
 });
 
-// Скрыть кнопки "Удалить тренировку" и "Тренировка выполнена" после удаления тренировки
-document.getElementById("deleteWorkoutBtn").addEventListener("click", function () {
-    document.getElementById("deleteWorkoutBtn").style.display = "none";
-    document.getElementById("complete-workout-btn").style.display = "none";
-});
+// Функция для переключения видимости кнопок
+function toggleButtons(isSaved) {
+    console.log('Toggle buttons:', isSaved);
+    document.getElementById("deleteWorkoutBtn").style.display = isSaved ? "inline-block" : "none";
+    document.getElementById("complete-workout-btn").style.display = isSaved ? "inline-block" : "none";
+    document.getElementById("saveWorkoutBtn").style.display = isSaved ? "none" : "inline-block";
+}
 
-    // Очистить и показать блок с сгенерированными упражнениями
-    document.getElementById("workoutResults").style.display = "block";
-    document.getElementById("workoutResults").innerHTML = ""; // Очистить предыдущие результаты
-        });
-    function toggleDetails(button, videoUrl, description) {
-        const detailsDiv = button.nextElementSibling;
-        if (detailsDiv.style.display === "none") {
-            detailsDiv.innerHTML = `
-                <iframe width="560" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                <p>${description}</p>
-            `;
-            detailsDiv.style.display = "block";
-            button.textContent = "Скрыть";
-        } else {
-            detailsDiv.style.display = "none";
-            button.textContent = "Подробнее";
-        }
+// Функция для показа/скрытия деталей видео
+function toggleDetails(button, videoUrl, description) {
+    const detailsDiv = button.nextElementSibling;
+    if (detailsDiv.style.display === "none") {
+        detailsDiv.innerHTML = `
+            <iframe width="560" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p>${description}</p>
+        `;
+        detailsDiv.style.display = "block";
+        button.textContent = "Скрыть";
+    } else {
+        detailsDiv.style.display = "none";
+        button.textContent = "Подробнее";
     }
+}
+
+
+
+
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
 <div id="popup" class="popup" style="display:none;"></div>
