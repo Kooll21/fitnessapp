@@ -350,12 +350,30 @@ document.getElementById("deleteWorkoutBtn").addEventListener("click", function()
     // Очистить сохраненные упражнения
     document.getElementById("savedWorkout").innerHTML = "";
 
-    // Показать кнопку генерации тренировки
-    document.getElementById("generateWorkout").style.display = "inline-block";
+   // Показать кнопку генерации тренировки
+document.getElementById("generateWorkout").style.display = "inline-block";
 
-    // Скрыть кнопки сохранения и удаления
-    document.getElementById("saveWorkoutBtn").style.display = "none";
+// Скрыть кнопки сохранения, удаления и выполнения тренировки
+document.getElementById("saveWorkoutBtn").style.display = "none";
+document.getElementById("deleteWorkoutBtn").style.display = "none";
+document.getElementById("complete-workout-btn").style.display = "none";
+
+// Показать кнопку "Сохранить тренировку" после генерации тренировки
+document.getElementById("generateWorkout").addEventListener("click", function () {
+    document.getElementById("saveWorkoutBtn").style.display = "inline-block";
+});
+
+// Показать кнопки "Удалить тренировку" и "Тренировка выполнена" после сохранения
+document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
+    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
+    document.getElementById("complete-workout-btn").style.display = "inline-block";
+});
+
+// Скрыть кнопки "Удалить тренировку" и "Тренировка выполнена" после удаления тренировки
+document.getElementById("deleteWorkoutBtn").addEventListener("click", function () {
     document.getElementById("deleteWorkoutBtn").style.display = "none";
+    document.getElementById("complete-workout-btn").style.display = "none";
+});
 
     // Очистить и показать блок с сгенерированными упражнениями
     document.getElementById("workoutResults").style.display = "block";
