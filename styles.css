@@ -178,45 +178,37 @@ nav ul li a {
         display: block; /* Показываем кнопку закрытия */
     }
 }
-/* General popup styling */
-#popup {
-    display: none;  /* Hidden by default */
-    width: 500px;  /* Set a default width */
-    max-width: 90%;  /* Limit width for larger screens */
-    height: auto;  /* Auto height based on content */
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    position: fixed;  /* Fixed position to keep it on top */
-    top: 50%;  /* Center vertically */
-    left: 50%;  /* Center horizontally */
-    transform: translate(-50%, -50%);  /* Correct centering */
-    z-index: 1000; /* Ensure it appears above other content */
-    box-sizing: border-box;  /* Include padding in width/height calculation */
-    opacity: 1;  /* Make sure the popup is visible */
-    transition: opacity 0.3s ease;  /* Smooth transition */
-}
-
-/* Make sure body doesn't scroll when popup is open */
+  /* Стили для модального окна */
+/* Add some basic styles for the popup and overlay */
+/* Запрещаем прокрутку фона */
 body.modal-open {
     overflow: hidden;
 }
 
-/* Mobile-specific adjustments */
-@media (max-width: 768px) {
-    #popup {
-        width: 90%;  /* 90% width on mobile */
-        padding: 15px;  /* Reduced padding */
-        margin: 5px;  /* Adjust margin to avoid edge issues */
-    }
+/* Стили для попапа (можно настроить по своему усмотрению) */
+#popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: white;
+    padding: 20px;
+    z-index: 1001; /* Обеспечивает, чтобы попап был поверх контента */
 }
 
-/* Extra small screens (very small phones) */
-@media (max-width: 480px) {
-    #popup {
-        padding: 10px;  /* Even smaller padding */
-        margin: 5px;  /* Adjust for tighter fit */
-    }
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Нижний слой для затемнения */
+    display: none;
 }
 
+body.modal-open #overlay {
+    display: block;
+}
