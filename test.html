@@ -413,33 +413,65 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-// Obrabotchik dlya knopki "Tренировка выполнена"
-document.getElementById("complete-workout-btn").addEventListener("click", async function() {
-    try {
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            alert("Dlya sohraneniya trenirovki neobkhodimo vstupit' v sistemu.");
-            return;
-        }
+// Adding an event listener for the 'Complete Workout' button
+document.getElementById("complete-workout-btn").addEventListener("click", function() {
+    const savedContainer = document.getElementById("savedWorkout");
+    savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-        // Sohranenie trenirovki v Firestore
-        await db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
-            exercises: workoutPlan, // Soderzhit vse uprazhneniya iz trenirovki
+    // Gather exercises with weight values and include them when saving
+    const workoutData = workoutPlan.map(exercise => {
+        // Get the weight value for each exercise
+        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Default if no weight is provided
+        
+        // Include the weight in the exercise data
+        return {
+            ...exercise,
+            weight: weight  // Add the weight to the exercise data
+        };
+    });
+
+    // Check if the user is logged in
+    const user = firebase.auth().currentUser;
+    if (user) {
+        // User is logged in, save the workout data
+        db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
+            exercises: workoutData,
             date: new Date(),
-            status: "completed"
+            status: "completed"  // Mark the workout as completed
+        })
+        .then(() => {
+            alert("Тренировка успешно завершена и сохранена!");
+            console.log("Workout saved to Firestore:", workoutData);
+        })
+        .catch((error) => {
+            console.error("Error saving workout:", error);
         });
-
-        alert("Trenirovka uspeshno sohranena!");
-
-        // Skryt' knoпku "Tренировка выполнена"
-        document.getElementById("complete-workout-btn").style.display = "none";
-
-        // Mozhno doedinit' logiku dlya pokazov pop-ap okna ili drugikh deystviy
-    } catch (error) {
-        console.error("Proizoshla oshibka pri sohranenii trenirovki:", error);
+    } else {
+        // If the user is not logged in, show a message or redirect to login page
+        alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
+        // Optionally, you can redirect to the login page
+        // window.location.href = '/login'; 
     }
-});
 
+    // Render the completed workout UI with weight
+    workoutData.forEach((exercise, index) => {
+        const savedExercise = document.createElement("div");
+
+        // Insert the exercise data, including weight, in the UI
+        savedExercise.innerHTML = `
+            <label for="checkbox-${exercise.id}">
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
+            </label>
+            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+        `;
+        savedContainer.appendChild(savedExercise);
+    });
+
+    // Optionally, hide the workout results section
+    document.getElementById("workoutResults").style.display = "none";
+    // Optionally, show the 'delete' button or other UI elements
+    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
+});
 
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
