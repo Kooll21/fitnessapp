@@ -274,22 +274,53 @@ function applyReplacement(exerciseid) {
     }
 }
 
-    // Функция для сохранения тренировки
-    document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
-        const savedContainer = document.getElementById("savedWorkout");
-        savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
+// Функция для сохранения тренировки
+document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
+    const savedContainer = document.getElementById("savedWorkout");
+    savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-        workoutPlan.forEach((exercise, index) => {
-            const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
-            const savedExercise = document.createElement("div");
-            savedExercise.innerHTML = `${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг`;
-            savedContainer.appendChild(savedExercise);
-        });
-
-        document.getElementById("workoutResults").style.display = "none";
-        document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
+    workoutPlan.forEach((exercise, index) => {
+        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
+        const savedExercise = document.createElement("div");
+        savedExercise.innerHTML = `
+            ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+        `;
+        savedContainer.appendChild(savedExercise);
     });
 
+    document.getElementById("workoutResults").style.display = "none";
+    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
+});
+
+// Функция для отображения попап окна с подробной информацией
+function showDetailsPopup(exerciseId) {
+    const exercise = allExercises.find(ex => ex.id === exerciseId);
+
+    if (exercise) {
+        const modal = document.createElement("div");
+        modal.id = `popup-${exerciseId}`;
+        modal.classList.add("popup-modal");
+        modal.innerHTML = `
+            <div class="popup-content">
+                <span class="popup-close" onclick="closePopup('${exerciseId}')">&times;</span>
+                <h2>${exercise.exercisename}</h2>
+                <img src="${exercise.photo}" width="200" alt="${exercise.exercisename}">
+                <p><strong>Описание:</strong> ${exercise.description}</p>
+                <iframe width="560" height="315" src="${exercise.video.replace("watch?v=", "embed/")}" frameborder="0" allowfullscreen></iframe>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+}
+
+// Функция для закрытия попап окна
+function closePopup(exerciseId) {
+    const modal = document.getElementById(`popup-${exerciseId}`);
+    if (modal) {
+        modal.remove();
+    }
+}
 // Функция для удаления тренировки
 document.getElementById("deleteWorkoutBtn").addEventListener("click", function() {
     // Очистить сохраненные упражнения
