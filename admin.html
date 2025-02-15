@@ -140,14 +140,18 @@ window.showWorkoutDetails = function(index) {
     <ul>${exercisesList}</ul>
   `;
 
+  // Show modal and overlay
   document.body.classList.add("modal-open");
+  document.getElementById("overlay").style.display = "block"; // Ensure overlay is visible
+  document.getElementById("popup").style.display = "block";  // Ensure popup is visible
 };
 
-
-    window.closePopup = function() {
-      document.body.classList.remove("modal-open");
-    };
-
+window.closePopup = function() {
+  // Hide modal and overlay
+  document.body.classList.remove("modal-open");
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("popup").style.display = "none";
+};
 
     // Load menu and check authentication on page load
     document.addEventListener("DOMContentLoaded", function () {
