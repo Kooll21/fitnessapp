@@ -178,7 +178,7 @@ nav ul li a {
         display: block; /* Показываем кнопку закрытия */
     }
 }
-    /* Стили для модального окна */
+/* Стили для модального окна */
 .popup-modal {
     display: none; /* Скрыто по умолчанию, будет отображаться при вызове */
     position: fixed;
@@ -189,6 +189,7 @@ nav ul li a {
     background: rgba(0, 0, 0, 0.4); /* Прозрачный черный фон */
     z-index: 1000;
     animation: fadeIn 0.3s ease;
+    overflow: auto; /* Разрешаем прокрутку для модального окна */
 }
 
 /* Анимация появления окна */
@@ -203,10 +204,11 @@ nav ul li a {
     border-radius: 8px; /* Скругленные углы */
     padding: 20px;
     max-width: 600px;
-    margin: 100px auto;
+    max-height: 80vh; /* Ограничиваем высоту окна */
+    margin: 10vh auto; /* Центрируем окно по вертикали с небольшим отступом */
     position: relative;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    overflow: hidden;
+    overflow-y: auto; /* Разрешаем прокрутку внутри окна */
     transition: all 0.3s ease-in-out; /* Плавные изменения */
 }
 
@@ -262,3 +264,25 @@ nav ul li a {
     pointer-events: none; /* Отключаем кликабельность */
     transition: opacity 0.3s ease;
 }
+
+/* Мобильные устройства */
+@media (max-width: 600px) {
+    .popup-content {
+        max-width: 90%; /* Ширина окна на мобильных устройствах */
+        margin: 5vh auto; /* Меньше отступа сверху и снизу */
+        padding: 15px;
+    }
+
+    .popup-content h2 {
+        font-size: 20px; /* Меньше шрифт заголовка */
+    }
+
+    .popup-content p {
+        font-size: 14px; /* Меньше шрифт описания */
+    }
+
+    .popup-content iframe {
+        max-height: 200px; /* Ограничиваем размер видео */
+    }
+}
+
