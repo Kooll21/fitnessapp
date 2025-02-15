@@ -145,41 +145,45 @@
     let allExercises = [];
     let workoutPlan = [];
 
-    document.getElementById("generateWorkout").addEventListener("click", async () => {
-        const selectedWorkouts = getSelectedWorkouts();
-        if (selectedWorkouts.length === 0) {
-            alert("Выберите хотя бы одну группу мышц!");
-            return;
+// Обработчик для генерации тренировки
+document.getElementById("generateWorkout").addEventListener("click", async () => {
+    const selectedWorkouts = getSelectedWorkouts();
+    if (selectedWorkouts.length === 0) {
+        alert("Выберите хотя бы одну группу мышц!");
+        return;
+    }
+
+    workoutPlan = [];
+    allExercises = []; // Очищаем все старые упражнения перед новой генерацией
+    let muscleCount = {};
+
+
+    // Получаем упражнения для каждой выбранной группы мышц
+    for (const workout of selectedWorkouts) {
+        const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
+        const exercises = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+
+        allExercises.push(...exercises);
+
+        let mainExercises = exercises.filter(e => e.exercisetype === "Основное");
+        let isolationExercises = exercises.filter(e => e.exercisetype === "Изолирующее");
+
+        shuffleArray(mainExercises);
+        shuffleArray(isolationExercises);
+
+        if (selectedWorkouts.length === 1) {
+            workoutPlan.push(...getFilteredExercises(mainExercises, 4, muscleCount), ...getFilteredExercises(isolationExercises, 4, muscleCount));
+        } else if (selectedWorkouts.length === 2) {
+            workoutPlan.push(...getFilteredExercises(mainExercises, 2, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+        } else {
+            workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
         }
+    }
 
-        workoutPlan = [];
-        let muscleCount = {};
-
-        for (const workout of selectedWorkouts) {
-            const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
-            const exercises = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-
-            allExercises.push(...exercises);
-
-            let mainExercises = exercises.filter(e => e.exercisetype === "Основное");
-            let isolationExercises = exercises.filter(e => e.exercisetype === "Изолирующее");
-
-            shuffleArray(mainExercises);
-            shuffleArray(isolationExercises);
-
-            if (selectedWorkouts.length === 1) {
-                workoutPlan.push(...getFilteredExercises(mainExercises, 4, muscleCount), ...getFilteredExercises(isolationExercises, 4, muscleCount));
-            } else if (selectedWorkouts.length === 2) {
-                workoutPlan.push(...getFilteredExercises(mainExercises, 2, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
-            } else {
-                workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
-            }
-        }
-
-        displayWorkout(workoutPlan);
-        document.getElementById("saveWorkoutBtn").style.display = "inline-block";
-        document.getElementById("deleteWorkoutBtn").style.display = "none";
-    });
+    displayWorkout(workoutPlan);
+    document.getElementById("saveWorkoutBtn").style.display = "inline-block";
+    document.getElementById("deleteWorkoutBtn").style.display = "none";
+});
 
     function shuffleArray(array) {
         return array.sort(() => Math.random() - 0.5);
@@ -286,14 +290,22 @@ function applyReplacement(exerciseid) {
         document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
     });
 
-    // Функция для удаления тренировки
-    document.getElementById("deleteWorkoutBtn").addEventListener("click", function() {
-        document.getElementById("savedWorkout").innerHTML = "";
-        document.getElementById("generateWorkout").style.display = "inline-block";
-        document.getElementById("saveWorkoutBtn").style.display = "none";
-        document.getElementById("deleteWorkoutBtn").style.display = "none";
-    });
+// Функция для удаления тренировки
+document.getElementById("deleteWorkoutBtn").addEventListener("click", function() {
+    // Очистить сохраненные упражнения
+    document.getElementById("savedWorkout").innerHTML = "";
 
+    // Показать кнопку генерации тренировки
+    document.getElementById("generateWorkout").style.display = "inline-block";
+
+    // Скрыть кнопки сохранения и удаления
+    document.getElementById("saveWorkoutBtn").style.display = "none";
+    document.getElementById("deleteWorkoutBtn").style.display = "none";
+
+    // Очистить и показать блок с сгенерированными упражнениями
+    document.getElementById("workoutResults").style.display = "block";
+    document.getElementById("workoutResults").innerHTML = ""; // Очистить предыдущие результаты
+        });
     function toggleDetails(button, videoUrl, description) {
         const detailsDiv = button.nextElementSibling;
         if (detailsDiv.style.display === "none") {
