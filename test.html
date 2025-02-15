@@ -413,7 +413,32 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
+// Obrabotchik dlya knopki "Tренировка выполнена"
+document.getElementById("complete-workout-btn").addEventListener("click", async function() {
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            alert("Dlya sohraneniya trenirovki neobkhodimo vstupit' v sistemu.");
+            return;
+        }
 
+        // Sohranenie trenirovki v Firestore
+        await db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
+            exercises: workoutPlan, // Soderzhit vse uprazhneniya iz trenirovki
+            date: new Date(),
+            status: "completed"
+        });
+
+        alert("Trenirovka uspeshno sohranena!");
+
+        // Skryt' knoпku "Tренировка выполнена"
+        document.getElementById("complete-workout-btn").style.display = "none";
+
+        // Mozhno doedinit' logiku dlya pokazov pop-ap okna ili drugikh deystviy
+    } catch (error) {
+        console.error("Proizoshla oshibka pri sohranenii trenirovki:", error);
+    }
+});
 
 
   </script>
