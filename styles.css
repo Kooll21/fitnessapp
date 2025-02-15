@@ -178,6 +178,14 @@ nav ul li a {
         display: block; /* Показываем кнопку закрытия */
     }
 }
+  /* Стили для модального окна */
+/* Add some basic styles for the popup and overlay */
+/* Запрещаем прокрутку фона */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Стили для попапа (можно настроить по своему усмотрению) */
 #popup {
     position: fixed;
     top: 50%;
@@ -204,4 +212,3 @@ nav ul li a {
 body.modal-open #overlay {
     display: block;
 }
-
