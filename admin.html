@@ -4,36 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
-  <style>
-    /* Styles for the modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    .modal-content {
-      background-color: white;
-      margin: 15% auto;
-      padding: 20px;
-      width: 50%;
-      border-radius: 10px;
-    }
-    .close {
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-    }
-  </style>
+
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -45,23 +21,27 @@
       measurementId: "G-MJ8K8ZNQM4"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Function to check authentication state
     function checkAuthState() {
       const adminButton = document.getElementById("admin-panel");
       const userStatus = document.getElementById("user-status");
       const loginLink = document.getElementById("login-link");
       const logoutBtn = document.getElementById("logout-btn");
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           userStatus.textContent = `Welcome, ${user.email}`;
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
-          loadUserWorkouts(user.uid);
+
+          // Load user workouts
+          await loadUserWorkouts(user.uid);
         } else {
           userStatus.textContent = 'Please log in';
           loginLink.style.display = 'inline-block';
@@ -71,6 +51,7 @@
       });
     }
 
+    // Log out function
     window.logoutUser = function() {
       signOut(auth)
         .then(() => {
@@ -84,60 +65,101 @@
         });
     };
 
+    // Load user workouts
     async function loadUserWorkouts(userId) {
-      const workoutsRef = collection(db, "userWorkouts", userId, "workouts");
-      const snapshot = await getDocs(workoutsRef);
-      let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      displayWorkouts(workouts);
+      try {
+        const workoutsRef = collection(db, "userWorkouts", userId, "workouts");
+        const q = query(workoutsRef, orderBy("date", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        let workouts = [];
+        querySnapshot.forEach((doc) => {
+          workouts.push({ ...doc.data(), id: doc.id });
+        });
+
+        displayWorkouts(workouts);
+      } catch (error) {
+        console.error("Error fetching workouts:", error);
+      }
     }
 
+    // Display workouts in the list format
     function displayWorkouts(workouts) {
       const container = document.getElementById("workouts-list");
       container.innerHTML = "<h2>Saved Workouts</h2>";
+
+      if (workouts.length === 0) {
+        container.innerHTML += "<p>No workouts found.</p>";
+        return;
+      }
+
       workouts.forEach((workout, index) => {
-        const workoutDate = new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU");
         const workoutElement = document.createElement("div");
+        let formattedDate = "Unknown Date";
+
+        if (workout.date && workout.date.seconds) {
+          const workoutDate = new Date(workout.date.seconds * 1000);
+          formattedDate = workoutDate.toLocaleDateString("ru-RU");
+        }
+
+        const exercisesList = workout.exercises
+          ? workout.exercises.map(exercise => 
+              `<li>${exercise.exercisename} (${exercise.reps}x${exercise.sets}) - Вес: ${exercise.weight} кг</li>`
+            ).join('')
+          : "<li>No exercises recorded</li>";
+
         workoutElement.innerHTML = `
-          <p><strong>№ ${index + 1}:</strong> ${workoutDate} - Тренировка выполнена
-            <button onclick="openModal('${workout.id}')">View Details</button>
+          <p>
+            <strong>№ ${index + 1}:</strong> ${formattedDate} - Тренировка выполнена
+            <ul>${exercisesList}</ul>
           </p>
         `;
         container.appendChild(workoutElement);
       });
     }
 
-    window.openModal = function(workoutId) {
-      const modal = document.getElementById("workout-modal");
-      const modalContent = document.getElementById("modal-content");
-      const workout = document.querySelector(`[data-id='${workoutId}']`);
-      if (workout) {
-        modalContent.innerHTML = workout.innerHTML;
-        modal.style.display = "block";
-      }
-    };
+    // Load menu and check authentication on page load
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch('menu.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById("navbar-container").innerHTML = html;
+          checkAuthState();
+          initBurgerMenu();
+        })
+        .catch(err => {
+          console.error("Ошибка загрузки меню:", err);
+          document.getElementById("navbar-container").innerHTML = `
+            <span id="user-status">Please log in</span>
+            <a href="login.html" id="login-link">Login</a>
+            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+          checkAuthState();
+        });
+    });
 
-    window.closeModal = function() {
-      document.getElementById("workout-modal").style.display = "none";
-    };
+    // Function to initialize burger menu
+    function initBurgerMenu() {
+      const menuToggle = document.querySelector(".menu-toggle");
+      const navbarList = document.querySelector(".navbar-list");
+
+      if (menuToggle && navbarList) {
+        menuToggle.addEventListener("click", function () {
+          navbarList.classList.toggle("active");
+          menuToggle.classList.toggle("active");
+        });
+      }
+    }
   </script>
 </head>
 <body>
+
+  <!-- Placeholder for dynamic menu -->
   <div id="navbar-container"></div>
+
   <h1>Welcome to the Admin Page</h1>
-  <div id="workouts-list"></div>
+  <p>This is the admin section of the application.</p>
 
-  <!-- Modal for workout details -->
-  <div id="workout-modal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <div id="modal-content"></div>
-    </div>
-  </div>
+  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      checkAuthState();
-    });
-  </script>
 </body>
 </html>
