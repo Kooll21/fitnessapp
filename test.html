@@ -423,16 +423,14 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
         // Get the weight value for each exercise
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Default if no weight is provided
         
-        // Create a new object with only the necessary fields
-        const filteredExercise = {
-            exerciseid: exercise.id,  // Add the exercise ID
+        // Return only the necessary data, including exerciseid and weight
+        return {
+            exerciseid: exercise.id,  // Add the exercise ID (from the database)
             exercisename: exercise.exercisename,  // Keep exercise name
             reps: exercise.reps,  // Keep number of reps
             sets: exercise.sets,  // Keep number of sets
             weight: weight  // Include the weight value
         };
-
-        return filteredExercise;
     });
 
     // Check if the user is logged in
