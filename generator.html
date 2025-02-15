@@ -110,6 +110,8 @@
   <button id="generateWorkout">Сгенерировать тренировку</button>
   <button id="saveWorkoutBtn" style="display:none;">Сохранить тренировку</button>
   <button id="deleteWorkoutBtn" style="display:none;">Удалить тренировку</button>
+<button id="complete-workout-btn" class="complete-btn" style="display:none;">Тренировка выполнена</button>
+
   <div id="workoutResults"></div>
   <div id="savedWorkout"></div>
 
@@ -274,52 +276,149 @@ function applyReplacement(exerciseid) {
     }
 }
 
-    // Функция для сохранения тренировки
-    document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
-        const savedContainer = document.getElementById("savedWorkout");
-        savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
+// Функция для сохранения тренировки
+document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
+    const savedContainer = document.getElementById("savedWorkout");
+    savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-        workoutPlan.forEach((exercise, index) => {
-            const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
-            const savedExercise = document.createElement("div");
-            savedExercise.innerHTML = `${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг`;
-            savedContainer.appendChild(savedExercise);
-        });
+    workoutPlan.forEach((exercise, index) => {
+        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
+        const savedExercise = document.createElement("div");
 
-        document.getElementById("workoutResults").style.display = "none";
-        document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
+        // Создание чекбокса
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `checkbox-${exercise.id}`;
+
+        // Вставка чекбокса и текста в элемент
+        savedExercise.innerHTML = `
+            <label for="checkbox-${exercise.id}">
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+            </label>
+            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+        `;
+
+        // Вставка чекбокса в начало
+        savedExercise.insertBefore(checkbox, savedExercise.firstChild);
+        savedContainer.appendChild(savedExercise);
     });
 
+    document.getElementById("workoutResults").style.display = "none";
+    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
+
+});
+function showDetailsPopup(exerciseId) {
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
+
+    // Показать попап
+    popup.style.display = "block";
+    overlay.style.display = "block";
+
+    // Блокируем прокрутку фона
+    document.body.classList.add("modal-open");
+
+    // Наполнение попапа данными
+    const exercise = workoutPlan.find(ex => ex.id === exerciseId);
+    const description = exercise.description || "Нет описания";
+    const photo = exercise.photo || "";
+    const video = exercise.video || "";
+
+    // Ensure the video URL is in the correct format (embed URL)
+    const videoUrl = video.replace("watch?v=", "embed/");
+
+    popup.innerHTML = `
+        <h2>${exercise.exercisename}</h2>
+        <img src="${photo}" alt="${exercise.exercisename}" style="width: 100%; max-height: 300px; object-fit: cover;">
+        <p>${description}</p>
+        <iframe width="100%" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <button class="close-btn" onclick="closePopup()">X</button>
+    `;
+}
+
+function closePopup() {
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
+
+    // Скрыть попап
+    popup.style.display = "none";
+    overlay.style.display = "none";
+
+    // Разблокировать прокрутку фона
+    document.body.classList.remove("modal-open");
+}
 // Функция для удаления тренировки
 document.getElementById("deleteWorkoutBtn").addEventListener("click", function() {
     // Очистить сохраненные упражнения
     document.getElementById("savedWorkout").innerHTML = "";
 
+    // Скрыть кнопки сохранения, удаления и выполнения тренировки
+    toggleButtons(false);
+
     // Показать кнопку генерации тренировки
     document.getElementById("generateWorkout").style.display = "inline-block";
 
-    // Скрыть кнопки сохранения и удаления
-    document.getElementById("saveWorkoutBtn").style.display = "none";
-    document.getElementById("deleteWorkoutBtn").style.display = "none";
+    // Очистить блок с сгенерированными результатами
+    document.getElementById("workoutResults").innerHTML = "";
+    document.getElementById("workoutResults").style.display = "none"; // Скрыть блок с результатами
 
-    // Очистить и показать блок с сгенерированными упражнениями
+    // Скрыть кнопку "Сохранить тренировку"
+    document.getElementById("saveWorkoutBtn").style.display = "none";
+});
+
+// Показать кнопку "Сохранить тренировку" после генерации тренировки
+document.getElementById("generateWorkout").addEventListener("click", function () {
+    // Очистить блок с результатами, чтобы не было старых данных
+    document.getElementById("workoutResults").innerHTML = "";
+
+    // Показать блок с результатами
     document.getElementById("workoutResults").style.display = "block";
-    document.getElementById("workoutResults").innerHTML = ""; // Очистить предыдущие результаты
-        });
-    function toggleDetails(button, videoUrl, description) {
-        const detailsDiv = button.nextElementSibling;
-        if (detailsDiv.style.display === "none") {
-            detailsDiv.innerHTML = `
-                <iframe width="560" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                <p>${description}</p>
-            `;
-            detailsDiv.style.display = "block";
-            button.textContent = "Скрыть";
-        } else {
-            detailsDiv.style.display = "none";
-            button.textContent = "Подробнее";
-        }
+
+    // Генерация новой тренировки (например, новый контент)
+    const newWorkoutContent = "<p>Новая тренировка сгенерирована!</p>";
+
+    // Добавить новый контент в блок
+    document.getElementById("workoutResults").innerHTML = newWorkoutContent;
+
+    // Показать кнопку "Сохранить тренировку"
+    document.getElementById("saveWorkoutBtn").style.display = "inline-block";
+});
+
+// Показать кнопки "Удалить тренировку" и "Тренировка выполнена" после сохранения
+document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
+    toggleButtons(true);
+});
+
+// Функция для переключения видимости кнопок
+function toggleButtons(isSaved) {
+    console.log('Toggle buttons:', isSaved);
+    document.getElementById("deleteWorkoutBtn").style.display = isSaved ? "inline-block" : "none";
+    document.getElementById("complete-workout-btn").style.display = isSaved ? "inline-block" : "none";
+    document.getElementById("saveWorkoutBtn").style.display = isSaved ? "none" : "inline-block";
+}
+
+// Функция для показа/скрытия деталей видео
+function toggleDetails(button, videoUrl, description) {
+    const detailsDiv = button.nextElementSibling;
+    if (detailsDiv.style.display === "none") {
+        detailsDiv.innerHTML = `
+            <iframe width="560" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p>${description}</p>
+        `;
+        detailsDiv.style.display = "block";
+        button.textContent = "Скрыть";
+    } else {
+        detailsDiv.style.display = "none";
+        button.textContent = "Подробнее";
     }
+}
+
+
+
+
   </script>
+  <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
+<div id="popup" class="popup" style="display:none;"></div>
+
 </body>
 </html>
