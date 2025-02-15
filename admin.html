@@ -50,15 +50,7 @@ onAuthStateChanged(auth, (user) => {
     adminButton.style.display = 'none';
   }
 });
-        } else {
-          // User is logged out
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-          adminButton.style.display = 'none'; // Hide Admin Panel button
-        }
-      });
-    }
+
 
     // Log out function
     window.logoutUser = function() {
