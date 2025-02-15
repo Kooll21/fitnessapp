@@ -185,30 +185,35 @@ body.modal-open {
     overflow: hidden;
 }
 
-/* Стили для попапа (можно настроить по своему усмотрению) */
+/* General popup styling */
 #popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-height: 80vh;
-    overflow-y: auto;
-    background-color: white;
+    max-width: 90%;  /* Maximum width for larger screens */
+    width: 500px;  /* Default width */
+    max-height: 80vh;  /* Limit height */
+    overflow-y: auto;  /* Make it scrollable */
     padding: 20px;
-    z-index: 1001; /* Обеспечивает, чтобы попап был поверх контента */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000; /* Нижний слой для затемнения */
-    display: none;
+/* Lock body scroll when popup is open */
+body.modal-open {
+    overflow: hidden;
 }
 
-body.modal-open #overlay {
-    display: block;
+/* On mobile screens, make the popup width 100% */
+@media (max-width: 768px) {
+    #popup {
+        width: 100%;  /* Full width on mobile devices */
+        max-width: 90%;  /* Ensure it doesn't take the entire screen */
+        padding: 15px;
+    }
+}
+
+/* For very small screens (like some phones), reduce padding */
+@media (max-width: 480px) {
+    #popup {
+        padding: 10px;
+    }
 }
