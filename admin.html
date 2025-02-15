@@ -34,13 +34,22 @@
       const loginLink = document.getElementById("login-link");
       const logoutBtn = document.getElementById("logout-btn");
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User is logged in
-          userStatus.textContent = `Welcome, ${user.email}`;
-          loginLink.style.display = 'none';
-          logoutBtn.style.display = 'block';
-          adminButton.style.display = 'block'; // Show Admin Panel button
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userStatus.textContent = `Welcome, ${user.email}`;
+    loginLink.style.display = 'none';
+    logoutBtn.style.display = 'block';
+    adminButton.style.display = 'block';
+
+    // Загружаем тренировки пользователя
+    loadUserWorkouts(user.uid);
+  } else {
+    userStatus.textContent = 'Please log in';
+    loginLink.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    adminButton.style.display = 'none';
+  }
+});
         } else {
           // User is logged out
           userStatus.textContent = 'Please log in';
