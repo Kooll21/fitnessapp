@@ -9,7 +9,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -26,19 +26,22 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Function to check authentication state
     function checkAuthState() {
       const adminButton = document.getElementById("admin-panel");
       const userStatus = document.getElementById("user-status");
       const loginLink = document.getElementById("login-link");
       const logoutBtn = document.getElementById("logout-btn");
 
-      onAuthStateChanged(auth, (user) => {
+      onAuthStateChanged(auth, async (user) => {
         if (user) {
           userStatus.textContent = `Welcome, ${user.email}`;
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
-          loadUserWorkouts(user.uid);
+
+          // Load user workouts
+          await loadUserWorkouts(user.uid);
         } else {
           userStatus.textContent = 'Please log in';
           loginLink.style.display = 'inline-block';
@@ -48,6 +51,7 @@
       });
     }
 
+    // Log out function
     window.logoutUser = function() {
       signOut(auth)
         .then(() => {
@@ -56,9 +60,65 @@
           document.getElementById("logout-btn").style.display = 'none';
           document.getElementById("admin-panel").style.display = 'none';
         })
-        .catch((error) => console.error('Error logging out:', error));
+        .catch((error) => {
+          console.error('Error logging out:', error);
+        });
     };
 
+    // Load user workouts
+    async function loadUserWorkouts(userId) {
+      try {
+        const workoutsRef = collection(db, "userWorkouts", userId, "workouts");
+        const q = query(workoutsRef, orderBy("date", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        let workouts = [];
+        querySnapshot.forEach((doc) => {
+          workouts.push({ ...doc.data(), id: doc.id });
+        });
+
+        displayWorkouts(workouts);
+      } catch (error) {
+        console.error("Error fetching workouts:", error);
+      }
+    }
+
+    // Display workouts in the list format
+    function displayWorkouts(workouts) {
+      const container = document.getElementById("workouts-list");
+      container.innerHTML = "<h2>Saved Workouts</h2>";
+
+      if (workouts.length === 0) {
+        container.innerHTML += "<p>No workouts found.</p>";
+        return;
+      }
+
+      workouts.forEach((workout, index) => {
+        const workoutElement = document.createElement("div");
+        let formattedDate = "Unknown Date";
+
+        if (workout.date && workout.date.seconds) {
+          const workoutDate = new Date(workout.date.seconds * 1000);
+          formattedDate = workoutDate.toLocaleDateString("ru-RU");
+        }
+
+        const exercisesList = workout.exercises
+          ? workout.exercises.map(exercise => 
+              `<li>${exercise.exercisename} (${exercise.reps}x${exercise.sets}) - Вес: ${exercise.weight} кг</li>`
+            ).join('')
+          : "<li>No exercises recorded</li>";
+
+        workoutElement.innerHTML = `
+          <p>
+            <strong>№ ${index + 1}:</strong> ${formattedDate} - Тренировка выполнена
+            <ul>${exercisesList}</ul>
+          </p>
+        `;
+        container.appendChild(workoutElement);
+      });
+    }
+
+    // Load menu and check authentication on page load
     document.addEventListener("DOMContentLoaded", function () {
       fetch('menu.html')
         .then(response => response.text())
@@ -68,7 +128,7 @@
           initBurgerMenu();
         })
         .catch(err => {
-          console.error("Error loading menu:", err);
+          console.error("Ошибка загрузки меню:", err);
           document.getElementById("navbar-container").innerHTML = `
             <span id="user-status">Please log in</span>
             <a href="login.html" id="login-link">Login</a>
@@ -77,9 +137,11 @@
         });
     });
 
+    // Function to initialize burger menu
     function initBurgerMenu() {
       const menuToggle = document.querySelector(".menu-toggle");
       const navbarList = document.querySelector(".navbar-list");
+
       if (menuToggle && navbarList) {
         menuToggle.addEventListener("click", function () {
           navbarList.classList.toggle("active");
@@ -91,39 +153,13 @@
 </head>
 <body>
 
+  <!-- Placeholder for dynamic menu -->
   <div id="navbar-container"></div>
 
   <h1>Welcome to the Admin Page</h1>
   <p>This is the admin section of the application.</p>
-  <div id="workouts-list"></div>
 
-  <script>
-    function loadUserWorkouts(userId) {
-      const workoutsRef = collection(db, "userWorkouts", userId, "workouts");
-      getDocs(workoutsRef)
-        .then((snapshot) => {
-          let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-          displayWorkouts(workouts);
-        })
-        .catch((error) => console.error("Error fetching workouts:", error));
-    }
+  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
 
-    function displayWorkouts(workouts) {
-      const container = document.getElementById("workouts-list");
-      container.innerHTML = "<h2>Saved Workouts</h2>";
-      workouts.forEach((workout, index) => {
-        const workoutElement = document.createElement("div");
-        const workoutDate = workout.date ? new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU") : "Unknown date";
-        workoutElement.innerHTML = `
-          <p>
-            <strong>№ ${index + 1}:</strong> ${workoutDate} - Workout Completed
-            <ul>
-              ${workout.exercises ? workout.exercises.map(ex => `<li>${ex.exercisename} (${ex.reps}x${ex.sets}) - Weight: ${ex.weight} kg</li>`).join('') : '<li>No exercises found</li>'}
-            </ul>
-          </p>`;
-        container.appendChild(workoutElement);
-      });
-    }
-  </script>
 </body>
 </html>
