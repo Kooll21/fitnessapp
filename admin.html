@@ -9,7 +9,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -20,39 +20,34 @@
       appId: "1:1000735476286:web:4a62a875917834dd215f6f",
       measurementId: "G-MJ8K8ZNQM4"
     };
-    // Инициализация Firebase
+
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    // Инициализация аутентификации
     const auth = getAuth(app);
-    // Инициализация Firestore
     const db = getFirestore(app);
 
-    // Function to check authentication state
     function checkAuthState() {
       const adminButton = document.getElementById("admin-panel");
       const userStatus = document.getElementById("user-status");
       const loginLink = document.getElementById("login-link");
       const logoutBtn = document.getElementById("logout-btn");
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    userStatus.textContent = `Welcome, ${user.email}`;
-    loginLink.style.display = 'none';
-    logoutBtn.style.display = 'block';
-    adminButton.style.display = 'block';
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          userStatus.textContent = `Welcome, ${user.email}`;
+          loginLink.style.display = 'none';
+          logoutBtn.style.display = 'block';
+          adminButton.style.display = 'block';
+          loadUserWorkouts(user.uid);
+        } else {
+          userStatus.textContent = 'Please log in';
+          loginLink.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+          adminButton.style.display = 'none';
+        }
+      });
+    }
 
-    // Загружаем тренировки пользователя
-    loadUserWorkouts(user.uid);
-  } else {
-    userStatus.textContent = 'Please log in';
-    loginLink.style.display = 'inline-block';
-    logoutBtn.style.display = 'none';
-    adminButton.style.display = 'none';
-  }
-});
-
-
-    // Log out function
     window.logoutUser = function() {
       signOut(auth)
         .then(() => {
@@ -61,90 +56,74 @@ onAuthStateChanged(auth, (user) => {
           document.getElementById("logout-btn").style.display = 'none';
           document.getElementById("admin-panel").style.display = 'none';
         })
-        .catch((error) => {
-          console.error('Error logging out:', error);
-        });
+        .catch((error) => console.error('Error logging out:', error));
     };
 
-     // Загрузка меню из файла menu.html и проверка авторизации
     document.addEventListener("DOMContentLoaded", function () {
-    fetch('menu.html')
+      fetch('menu.html')
         .then(response => response.text())
         .then(html => {
-            document.getElementById("navbar-container").innerHTML = html;
-            checkAuthState();
-            initBurgerMenu(); // Запуск функции инициализации бургера после вставки меню
+          document.getElementById("navbar-container").innerHTML = html;
+          checkAuthState();
+          initBurgerMenu();
         })
         .catch(err => {
-            console.error("Ошибка загрузки меню:", err);
-            document.getElementById("navbar-container").innerHTML = `
-                <span id="user-status">Please log in</span>
-                <a href="login.html" id="login-link">Login</a>
-                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-            checkAuthState();
+          console.error("Error loading menu:", err);
+          document.getElementById("navbar-container").innerHTML = `
+            <span id="user-status">Please log in</span>
+            <a href="login.html" id="login-link">Login</a>
+            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+          checkAuthState();
         });
-});
+    });
 
-// Функция инициализации меню-бургера
-function initBurgerMenu() {
-    const menuToggle = document.querySelector(".menu-toggle");
-    const navbarList = document.querySelector(".navbar-list");
-
-    if (menuToggle && navbarList) {
+    function initBurgerMenu() {
+      const menuToggle = document.querySelector(".menu-toggle");
+      const navbarList = document.querySelector(".navbar-list");
+      if (menuToggle && navbarList) {
         menuToggle.addEventListener("click", function () {
-            navbarList.classList.toggle("active");
-            menuToggle.classList.toggle("active");
+          navbarList.classList.toggle("active");
+          menuToggle.classList.toggle("active");
         });
+      }
     }
-}
   </script>
 </head>
 <body>
 
-  <!-- Placeholder for dynamic menu -->
   <div id="navbar-container"></div>
 
   <h1>Welcome to the Admin Page</h1>
-  <p>This is the admin section of the application. COOOOOOOOOOOOOOOOONNNNTENNNNNT </p>
+  <p>This is the admin section of the application.</p>
+  <div id="workouts-list"></div>
+
   <script>
-    // Load all user workouts
-      function loadUserWorkouts(userId) {
-        db.collection("userWorkouts").doc(userId).collection("workouts").orderBy("date", "desc")
-          .get()
-          .then((snapshot) => {
-            let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-            displayWorkouts(workouts);
-          })
-          .catch((error) => {
-            console.error("Error fetching workouts:", error);
-          });
-      }
+    function loadUserWorkouts(userId) {
+      const workoutsRef = collection(db, "userWorkouts", userId, "workouts");
+      getDocs(workoutsRef)
+        .then((snapshot) => {
+          let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+          displayWorkouts(workouts);
+        })
+        .catch((error) => console.error("Error fetching workouts:", error));
+    }
 
-      // Display workouts in the list format
-      function displayWorkouts(workouts) {
-        const container = document.getElementById("workouts-list");
-        container.innerHTML = "<h2>Saved Workouts</h2>";
-        workouts.forEach((workout, index) => {
-          const workoutElement = document.createElement("div");
-          const workoutDate = new Date(workout.date.seconds * 1000);
-          const formattedDate = workoutDate.toLocaleDateString("ru-RU");
-
-          workoutElement.innerHTML = `
-            <p>
-              <strong>№ ${index + 1}:</strong> ${formattedDate} - Тренировка выполнена
-              <ul>
-                ${workout.exercises.map(exercise => `<li>${exercise.exercisename} (${exercise.reps}x${exercise.sets}) - Вес: ${exercise.weight} кг</li>`).join('')}
-              </ul>
-            </p>
-          `;
-          container.appendChild(workoutElement);
-        });
-      }
-
-      // Run on page load
-      document.addEventListener("DOMContentLoaded", function () {
-        checkAuthState();
+    function displayWorkouts(workouts) {
+      const container = document.getElementById("workouts-list");
+      container.innerHTML = "<h2>Saved Workouts</h2>";
+      workouts.forEach((workout, index) => {
+        const workoutElement = document.createElement("div");
+        const workoutDate = workout.date ? new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU") : "Unknown date";
+        workoutElement.innerHTML = `
+          <p>
+            <strong>№ ${index + 1}:</strong> ${workoutDate} - Workout Completed
+            <ul>
+              ${workout.exercises ? workout.exercises.map(ex => `<li>${ex.exercisename} (${ex.reps}x${ex.sets}) - Weight: ${ex.weight} kg</li>`).join('') : '<li>No exercises found</li>'}
+            </ul>
+          </p>`;
+        container.appendChild(workoutElement);
       });
+    }
   </script>
 </body>
 </html>
