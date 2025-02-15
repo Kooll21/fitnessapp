@@ -102,14 +102,22 @@ window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
+  const exercisesList = workoutData.exercises
+    ? workoutData.exercises.map(exercise => 
+        `<li><strong>${exercise.name}</strong>: ${exercise.reps} reps, ${exercise.sets} sets</li>`
+      ).join("")
+    : "No details available";
+
   document.getElementById("popup-content").innerHTML = `
     <h3>Workout Details</h3>
     <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-    <p><strong>Exercises:</strong> ${workoutData.exercises ? workoutData.exercises.join(", ") : "No details available"}</p>
+    <p><strong>Exercises:</strong></p>
+    <ul>${exercisesList}</ul>
   `;
 
   document.body.classList.add("modal-open");
 };
+
 
 
     window.closePopup = function() {
