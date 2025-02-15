@@ -418,16 +418,6 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-      const fetchExercises = async () => {
-    const exercisesSnapshot = await db.collection("exercises").get();
-    const exercises = exercisesSnapshot.docs.map(doc => ({
-        id: doc.id,  // This is the Firestore document ID (the exercise id)
-        ...doc.data() // Include all other data like exercise name, reps, sets, etc.
-    }));
-
-    // Now save these exercises in your workoutPlan variable
-    workoutPlan = exercises;
-};
 document.getElementById("complete-workout-btn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
@@ -439,7 +429,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
         
         // Return only the necessary data, including exerciseid and weight
         return {
-            exerciseid: exercise.id,  // Exercise ID (should be retrieved from the database)
+            exerciseid: exercise.id,  // Exercise ID (this should be the Firestore document ID)
             exercisename: exercise.exercisename,  // Exercise name
             reps: exercise.reps,  // Number of reps
             sets: exercise.sets,  // Number of sets
@@ -466,8 +456,6 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     } else {
         // If the user is not logged in, show a message or redirect to login page
         alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
-        // Optionally, you can redirect to the login page
-        // window.location.href = '/login'; 
     }
 
     // Render the completed workout UI with weight
@@ -475,7 +463,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
         const savedExercise = document.createElement("div");
 
         // Insert the exercise data, including weight, in the UI
-        savedExercise.innerHTML = `
+        savedExercise.innerHTML = ` 
             <label for="checkbox-${exercise.exerciseid}">
                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
             </label>
@@ -486,15 +474,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
 
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
-    // Optionally, show the 'delete' button or other UI elements
-    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 });
-
-      db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
-    exercises: workoutData,  // workoutData includes exerciseid from the database
-    date: new Date(),
-    status: "completed"  // Mark the workout as completed
-})
 
 
   </script>
