@@ -418,15 +418,18 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Gather exercises with weight values and include them when saving
+    // Gather exercises with weight values and only necessary data
     const workoutData = workoutPlan.map(exercise => {
         // Get the weight value for each exercise
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Default if no weight is provided
         
-        // Include the weight in the exercise data
+        // Return only the necessary data, including exerciseid and weight
         return {
-            ...exercise,
-            weight: weight  // Add the weight to the exercise data
+            exerciseid: exercise.id,  // Add the exercise ID
+            exercisename: exercise.exercisename,  // Keep exercise name
+            reps: exercise.reps,  // Keep number of reps
+            sets: exercise.sets,  // Keep number of sets
+            weight: weight  // Include the weight value
         };
     });
 
@@ -459,10 +462,10 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
 
         // Insert the exercise data, including weight, in the UI
         savedExercise.innerHTML = `
-            <label for="checkbox-${exercise.id}">
+            <label for="checkbox-${exercise.exerciseid}">
                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
             </label>
-            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+            <button onclick="showDetailsPopup('${exercise.exerciseid}')">Подробнее</button>
         `;
         savedContainer.appendChild(savedExercise);
     });
