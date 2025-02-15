@@ -126,10 +126,10 @@ window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
-  // If exercises are available, show them
+  // If exercises are available, show them with weight
   const exercisesList = workoutData.exercises
     ? workoutData.exercises.map(exercise => 
-        `<li><strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: ${exercise.reps} reps, ${exercise.sets} sets</li>`
+        `<li><strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: ${exercise.reps} reps, ${exercise.sets} sets, Weight: ${exercise.weight || "Not specified"} kg</li>`
       ).join("")
     : "No details available";
 
@@ -142,7 +142,6 @@ window.showWorkoutDetails = function(index) {
 
   document.body.classList.add("modal-open");
 };
-
 
 
     window.closePopup = function() {
