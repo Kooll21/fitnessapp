@@ -178,111 +178,30 @@ nav ul li a {
         display: block; /* Показываем кнопку закрытия */
     }
 }
-/* Стили для модального окна */
-.popup-modal {
-    display: none; /* Скрыто по умолчанию, будет отображаться при вызове */
+#popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: white;
+    padding: 20px;
+    z-index: 1001; /* Обеспечивает, чтобы попап был поверх контента */
+}
+
+#overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* Прозрачный черный фон */
-    z-index: 1000;
-    animation: fadeIn 0.3s ease;
-    overflow: auto; /* Разрешаем прокрутку для модального окна */
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Нижний слой для затемнения */
+    display: none;
 }
 
-/* Анимация появления окна */
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-/* Контент модального окна */
-.popup-content {
-    background: white;
-    border-radius: 8px; /* Скругленные углы */
-    padding: 20px;
-    max-width: 600px;
-    max-height: 80vh; /* Ограничиваем высоту окна */
-    margin: 10vh auto; /* Центрируем окно по вертикали с небольшим отступом */
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    overflow-y: auto; /* Разрешаем прокрутку внутри окна */
-    transition: all 0.3s ease-in-out; /* Плавные изменения */
-}
-
-/* Заголовок */
-.popup-content h2 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-/* Картинка */
-.popup-content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-/* Описание */
-.popup-content p {
-    font-size: 16px;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-/* Встроенное видео */
-.popup-content iframe {
-    max-width: 100%;
-    border-radius: 8px;
-}
-
-/* Кнопка закрытия */
-.popup-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 30px;
-    color: #333;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.popup-close:hover {
-    color: #f44336; /* Цвет при наведении */
-}
-
-/* Плавное исчезновение при закрытии */
-.popup-modal.fade-out {
-    opacity: 0;
-    pointer-events: none; /* Отключаем кликабельность */
-    transition: opacity 0.3s ease;
-}
-
-/* Мобильные устройства */
-@media (max-width: 600px) {
-    .popup-content {
-        max-width: 90%; /* Ширина окна на мобильных устройствах */
-        margin: 5vh auto; /* Меньше отступа сверху и снизу */
-        padding: 15px;
-    }
-
-    .popup-content h2 {
-        font-size: 20px; /* Меньше шрифт заголовка */
-    }
-
-    .popup-content p {
-        font-size: 14px; /* Меньше шрифт описания */
-    }
-
-    .popup-content iframe {
-        max-height: 200px; /* Ограничиваем размер видео */
-    }
+body.modal-open #overlay {
+    display: block;
 }
 
