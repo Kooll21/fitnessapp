@@ -282,17 +282,29 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     workoutPlan.forEach((exercise, index) => {
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
         const savedExercise = document.createElement("div");
+
+        // Создание чекбокса
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `checkbox-${exercise.id}`;
+
+        // Вставка чекбокса и текста в элемент
         savedExercise.innerHTML = `
-            ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+            <label for="checkbox-${exercise.id}">
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+            </label>
             <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
         `;
+
+        // Вставка чекбокса в начало
+        savedExercise.insertBefore(checkbox, savedExercise.firstChild);
         savedContainer.appendChild(savedExercise);
     });
 
     document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
-});
 
+});
 // Функция для отображения попап окна с подробной информацией
 function showDetailsPopup(exerciseId) {
     const exercise = allExercises.find(ex => ex.id === exerciseId);
