@@ -283,38 +283,28 @@ function applyReplacement(exerciseid) {
 document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
-    
-    // Assuming exercises is an array of exercise objects
-    const exercises = getCurrentWorkoutPlan(); // Replace with your actual array of exercises
 
-    exercises.forEach((exercise, index) => {
-        // Create a div to hold each exercise
-        const savedExercise = document.createElement("div");
-
-        // Create a checkbox for the exercise
+    workoutPlan.forEach((exercise, index) => {  // Loop through workoutPlan to get each exercise
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.id = `checkbox-${exercise.id}`;
+        checkbox.id = `checkbox-${exercise.id}`;  // Use exercise.id
 
-        // Insert checkbox and exercise details into the savedExercise container
+        const savedExercise = document.createElement("div");
         savedExercise.innerHTML = `
             <label for="checkbox-${exercise.id}">
-                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
             </label>
             <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
         `;
-        
-        // Insert the checkbox before the exercise details
-        savedExercise.insertBefore(checkbox, savedExercise.firstChild);
 
-        // Append the saved exercise to the container
+        savedExercise.insertBefore(checkbox, savedExercise.firstChild);
         savedContainer.appendChild(savedExercise);
     });
-
-    // Hide workout results after saving
+    
     document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 });
+
 
 function showDetailsPopup(exerciseId) {
     const popup = document.getElementById("popup");
