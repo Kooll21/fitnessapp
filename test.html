@@ -279,31 +279,40 @@ function applyReplacement(exerciseid) {
     }
 }
 
-// Функция для сохранения тренировки
 document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    workoutPlan.forEach((exercise, index) => {  // Loop through workoutPlan to get each exercise
+    workoutPlan.forEach((exercise, index) => {  // Перебираем workoutPlan, чтобы получить каждое упражнение
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.id = `checkbox-${exercise.id}`;  // Use exercise.id
+        checkbox.id = `checkbox-${exercise.id}`;  // Используем exercise.id
 
+        // Создаем элемент для ввода веса
+        const weightInput = document.createElement("input");
+        weightInput.type = "number";
+        weightInput.id = `weight-${exercise.id}`;
+        weightInput.placeholder = "Введите вес";
+
+        // Создаем блок для отображения упражнения
         const savedExercise = document.createElement("div");
         savedExercise.innerHTML = `
             <label for="checkbox-${exercise.id}">
-                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов
             </label>
             <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
         `;
 
+        // Вставляем чекбокс и поле ввода веса
         savedExercise.insertBefore(checkbox, savedExercise.firstChild);
+        savedExercise.appendChild(weightInput);  // Добавляем input для веса
         savedContainer.appendChild(savedExercise);
     });
-    
+
     document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 });
+
 
 
 function showDetailsPopup(exerciseId) {
