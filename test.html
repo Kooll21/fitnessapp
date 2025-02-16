@@ -428,7 +428,8 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     // Теперь, собираем данные с введенными весами
     const workoutData = workoutPlan.map(exercise => {
         // Получаем вес для каждого упражнения
-        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Если вес не указан, ставим дефолтное значение
+         const weight = document.getElementById(`weight-${exercise.id}`)?.value || "не указан";
+
 
         // Возвращаем нужные данные, включая ID упражнения и введенный вес
         return {
