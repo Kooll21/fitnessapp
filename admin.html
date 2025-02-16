@@ -66,21 +66,22 @@
     };
 
  document.addEventListener("DOMContentLoaded", function () {
-fetch('menu.html')
-  .then(response => response.text())
-  .then(html => {
-    document.getElementById("navbar-container").innerHTML = html;
-    checkAuthState();
-    initBurgerMenu(); // Важно!
-  })
-  .catch(err => console.error("Ошибка загрузки меню:", err));
-
+      fetch('menu.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById("navbar-container").innerHTML = html;
+          checkAuthState();
+           document.getElementById("popup").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+        })
+        .catch(err => console.error("Ошибка загрузки меню:", err));
+    });
 
   async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
   const snapshot = await getDocs(userWorkoutsRef);
   let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-  
+
   // Now, fetch exercises for each workout
   for (let workout of workouts) {
     if (workout.exerciseIds && workout.exerciseIds.length > 0) {
@@ -94,7 +95,7 @@ fetch('menu.html')
 
 async function loadExercises(exerciseIds) {
   const exercises = [];
-  
+
   for (let id of exerciseIds) {
     const exerciseRef = doc(db, "exercises", id);  // Assuming exercises are stored in "exercises" collection
     const exerciseDoc = await getDoc(exerciseRef);
@@ -192,7 +193,7 @@ window.closePopup = function() {
   <!-- Placeholder for dynamic menu -->
   <div id="navbar-container"></div>
 
-  
+
 <body>
   <div id="navbar-container"></div>
   <h1>Welcome to the Admin Page</h1>
