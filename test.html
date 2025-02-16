@@ -437,41 +437,44 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
         };
     });
 
-    // Check if the user is logged in
     const user = firebase.auth().currentUser;
-    if (user) {
-        // User is logged in, save the workout data
-        db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
-            exercises: workoutData,
-            date: new Date(),
-            status: "completed"  // Mark the workout as completed
-        })
-        .then(() => {
-            alert("Тренировка успешно завершена и сохранена!");
-            console.log("Workout saved to Firestore:", workoutData);
-        })
-        .catch((error) => {
-            console.error("Error saving workout:", error);
-        });
-    } else {
-        // If the user is not logged in, show a message or redirect to login page
+    if (!user) {
         alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
+        return;
     }
 
-    // Render the completed workout UI with weight
+    try {
+        await saveWorkoutToFirestore(user.uid, workoutData);
+        alert("Тренировка успешно завершена и сохранена!");
+        console.log("Workout saved to Firestore:", workoutData);
+        renderSavedWorkout(savedContainer, workoutData);
+    } catch (error) {
+        console.error("Ошибка при сохранении тренировки:", error);
+    }
+});
+
+// Функция сохранения в Firestore
+async function saveWorkoutToFirestore(userId, workoutData) {
+    return db.collection("userWorkouts").doc(userId).collection("workouts").add({
+        exercises: workoutData,
+        date: new Date(),
+        status: "completed"
+    });
+}
+
+// Функция отображения сохраненной тренировки
+function renderSavedWorkout(container, workoutData) {
     workoutData.forEach((exercise, index) => {
         const savedExercise = document.createElement("div");
-
-        // Insert the exercise data, including weight, in the UI
         savedExercise.innerHTML = ` 
             <label for="checkbox-${exercise.exerciseid}">
                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
             </label>
             <button onclick="showDetailsPopup('${exercise.exerciseid}')">Подробнее</button>
         `;
-        savedContainer.appendChild(savedExercise);
+        container.appendChild(savedExercise);
     });
-
+}
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
 });
