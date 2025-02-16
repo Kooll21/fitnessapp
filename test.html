@@ -298,16 +298,17 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
         weightInput.style.display = "inline-block";  // Показываем поле ввода веса
     });
 
+    // Отображаем сохраненные упражнения
     workoutPlan.forEach((exercise, index) => {
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
         const savedExercise = document.createElement("div");
 
-        // Create a checkbox
+        // Создаем чекбокс
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `checkbox-${exercise.id}`;
 
-        // Insert checkbox and exercise details
+        // Добавляем чекбокс и информацию о упражнении
         savedExercise.innerHTML = `
             <label for="checkbox-${exercise.id}">
                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
@@ -320,9 +321,9 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     
     document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
-
     document.getElementById("complete-workout-btn").style.display = "inline-block";  // Показать кнопку "Тренировка выполнена"
 });
+
 function showDetailsPopup(exerciseId) {
     const popup = document.getElementById("popup");
     const overlay = document.getElementById("overlay");
