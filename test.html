@@ -421,23 +421,19 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-document.getElementById("complete-workout-btn").addEventListener("click", function() {
+document.getElementById("complete-workout-btn").addEventListener("click", async function () {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Теперь, собираем данные с введенными весами
+    // Получаем данные тренировки с введенными весами
     const workoutData = workoutPlan.map(exercise => {
-        // Получаем вес для каждого упражнения
-         const weight = document.getElementById(`weight-${exercise.id}`)?.value || "не указан";
-
-
-        // Возвращаем нужные данные, включая ID упражнения и введенный вес
+        const weightInput = document.getElementById(`weight-${exercise.id}`);
         return {
-            exerciseid: exercise.id,  // ID упражнения (например, ID документа в Firestore)
-            exercisename: exercise.exercisename,  // Название упражнения
-            reps: exercise.reps,  // Количество повторов
-            sets: exercise.sets,  // Количество подходов
-            weight: weight  // Введенный вес
+            exerciseid: exercise.id,
+            exercisename: exercise.exercisename,
+            reps: exercise.reps,
+            sets: exercise.sets,
+            weight: weightInput ? weightInput.value || "не указан" : "не указан"
         };
     });
 
