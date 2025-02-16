@@ -295,7 +295,7 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
         // Создаем элемент для ввода веса
         const weightInput = document.createElement("input");
         weightInput.type = "number";
-        weightInput.id = `weight-${exercise.id}`;
+        weightInput.id = weightId;
         weightInput.placeholder = "Введите вес";
 
         // Создаем блок для отображения упражнения
@@ -316,7 +316,6 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 });
-
 
 
 
@@ -460,7 +459,6 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
         alert("Произошла ошибка при сохранении тренировки.");
     }
 });
-
 
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
