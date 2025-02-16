@@ -434,29 +434,29 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-       // Собираем данные о тренировке, включая веса
+    // Gather exercises with weight values and only necessary data
     const workoutData = workoutPlan.map(exercise => {
-        // Получаем вес для каждого упражнения
-        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Если вес не введен, указываем "не указан"
+        // Get the weight value for each exercise
+        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Default if no weight is provided
         
-        // Возвращаем только необходимые данные, включая ID упражнения и вес
+        // Return only the necessary data, including exerciseid and weight
         return {
-            exerciseid: exercise.id,  // ID упражнения (должен быть уникальным)
-            exercisename: exercise.exercisename,  // Название упражнения
-            reps: exercise.reps,  // Количество повторов
-            sets: exercise.sets,  // Количество подходов
-            weight: weight  // Вводимый пользователем вес
+            exerciseid: exercise.id,  // Exercise ID (this should be the Firestore document ID)
+            exercisename: exercise.exercisename,  // Exercise name
+            reps: exercise.reps,  // Number of reps
+            sets: exercise.sets,  // Number of sets
+            weight: weight  // Weight value input by the user
         };
     });
 
-    // Проверка, авторизован ли пользователь
+    // Check if the user is logged in
     const user = firebase.auth().currentUser;
     if (user) {
-        // Если пользователь авторизован, сохраняем данные тренировки
+        // User is logged in, save the workout data
         db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
             exercises: workoutData,
             date: new Date(),
-            status: "completed"  // Отметим тренировку как завершенную
+            status: "completed"  // Mark the workout as completed
         })
         .then(() => {
             alert("Тренировка успешно завершена и сохранена!");
@@ -466,23 +466,23 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
             console.error("Error saving workout:", error);
         });
     } else {
-        // Если пользователь не авторизован, показываем сообщение
+        // If the user is not logged in, show a message or redirect to login page
         alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
     }
 
-    // Обновляем интерфейс с данными о завершенной тренировке
+    // Render the completed workout UI with weight
     workoutData.forEach((exercise, index) => {
-        const weight = exercise.weight;
         const savedExercise = document.createElement("div");
-        savedExercise.innerHTML = `
-            ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+
+        // Insert the exercise data, including weight, in the UI
+        savedExercise.innerHTML = ` 
+            <label for="checkbox-${exercise.exerciseid}">
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
+            </label>
+            <button onclick="showDetailsPopup('${exercise.exerciseid}')">Подробнее</button>
         `;
         savedContainer.appendChild(savedExercise);
     });
-
-    // Скрываем кнопку "Тренировка выполнена" после завершения
-    document.getElementById("complete-workout-btn").style.display = "none";
-});
 
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
