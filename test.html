@@ -425,18 +425,18 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Gather exercises with weight values and only necessary data
+    // Теперь, собираем данные с введенными весами
     const workoutData = workoutPlan.map(exercise => {
-        // Get the weight value for each exercise
-        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Default if no weight is provided
-        
-        // Return only the necessary data, including exerciseid and weight
+        // Получаем вес для каждого упражнения
+        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Если вес не указан, ставим дефолтное значение
+
+        // Возвращаем нужные данные, включая ID упражнения и введенный вес
         return {
-            exerciseid: exercise.id,  // Exercise ID (this should be the Firestore document ID)
-            exercisename: exercise.exercisename,  // Exercise name
-            reps: exercise.reps,  // Number of reps
-            sets: exercise.sets,  // Number of sets
-            weight: weight  // Weight value input by the user
+            exerciseid: exercise.id,  // ID упражнения (например, ID документа в Firestore)
+            exercisename: exercise.exercisename,  // Название упражнения
+            reps: exercise.reps,  // Количество повторов
+            sets: exercise.sets,  // Количество подходов
+            weight: weight  // Введенный вес
         };
     });
 
