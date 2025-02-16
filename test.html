@@ -283,10 +283,9 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    workoutPlan.forEach((exercise, index) => {  // Перебираем workoutPlan, чтобы получить каждое упражнение
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.id = `checkbox-${exercise.id}`;  // Используем exercise.id
+        workoutPlan.forEach((exercise, index) => {  
+        const weightId = `weight-${exercise.id}`;
+        console.log(`Создается инпут: ${weightId}`);
 
         // Создаем элемент для ввода веса
         const weightInput = document.createElement("input");
