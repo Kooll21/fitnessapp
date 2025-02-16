@@ -430,48 +430,39 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Проверяем, есть ли инпуты с весом
-    console.log("Поиск инпутов веса...");
-
+    // Массив для данных тренировки, включая веса
     const workoutData = workoutPlan.map(exercise => {
         const weightInput = document.querySelector(`#weight-${CSS.escape(exercise.id)}`);
         console.log(`exercise.id: ${exercise.id}, найден инпут:`, weightInput);
 
+        // Извлекаем значение из инпута веса, если оно есть
+        const weight = weightInput ? weightInput.value : null;
+
         return {
             exerciseid: exercise.id,
             exercisename: exercise.exercisename,
-            reps: exercise.reps,
+            weight: weight, // Добавляем значение веса
             sets: exercise.sets,
-            weight: weightInput ? weightInput.value.trim() || "не указан" : "не указан"
+            reps: exercise.reps,
         };
     });
 
-    console.log("Workout data перед сохранением:", workoutData);
-
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
-        return;
-    }
-
+    // Сохранение данных тренировки в Firestore
     try {
-        await saveWorkoutToFirestore(user.uid, workoutData);
-        alert("Тренировка успешно завершена и сохранена!");
+        await db.collection("userWorkouts").add({
+            userId: auth.currentUser.uid,
+            date: new Date(),
+            workoutData: workoutData,
+        });
         console.log("Workout saved to Firestore:", workoutData);
-        renderSavedWorkout(savedContainer, workoutData);
     } catch (error) {
-        console.error("Ошибка при сохранении тренировки:", error);
+        console.error("Error saving workout to Firestore:", error);
     }
+
+    // После сохранения, показываем сообщение об успехе
+    alert("Тренировка сохранена!");
 });
 
-// Функция сохранения в Firestore
-async function saveWorkoutToFirestore(userId, workoutData) {
-    return db.collection("userWorkouts").doc(userId).collection("workouts").add({
-        exercises: workoutData,
-        date: new Date(),
-        status: "completed"
-    });
-}
 
 // Функция отображения сохраненной тренировки
 function renderSavedWorkout(container, workoutData) {
