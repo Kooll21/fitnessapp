@@ -425,17 +425,23 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Получаем данные тренировки с введенными весами
+    // Проверяем, есть ли инпуты с весом
+    console.log("Поиск инпутов веса...");
+
     const workoutData = workoutPlan.map(exercise => {
-        const weightInput = document.getElementById(`weight-${exercise.id}`);
+        const weightInput = document.querySelector(`#weight-${CSS.escape(exercise.id)}`);
+        console.log(`exercise.id: ${exercise.id}, найден инпут:`, weightInput);
+
         return {
             exerciseid: exercise.id,
             exercisename: exercise.exercisename,
             reps: exercise.reps,
             sets: exercise.sets,
-            weight: weightInput ? weightInput.value || "не указан" : "не указан"
+            weight: weightInput ? weightInput.value.trim() || "не указан" : "не указан"
         };
     });
+
+    console.log("Workout data перед сохранением:", workoutData);
 
     const user = firebase.auth().currentUser;
     if (!user) {
@@ -475,6 +481,7 @@ function renderSavedWorkout(container, workoutData) {
         container.appendChild(savedExercise);
     });
 }
+
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
 });
