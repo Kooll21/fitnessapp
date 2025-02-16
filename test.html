@@ -183,10 +183,6 @@ document.getElementById("generateWorkout").addEventListener("click", async () =>
     }
 
     displayWorkout(workoutPlan);
-      // Скроем кнопки и поле ввода веса до нажатия "Сохранить тренировку"
-    workoutPlan.forEach((exercise) => {
-        document.getElementById(`weight-${exercise.id}`).style.display = "none";  // Скрыть поле ввода веса
-    });
     document.getElementById("saveWorkoutBtn").style.display = "inline-block";
     document.getElementById("deleteWorkoutBtn").style.display = "none";
 });
@@ -233,8 +229,6 @@ function displayWorkout(workoutPlan) {
             <p>Мышцы: ${exercise.muscle}</p>
             <p>Подходы: ${exercise.sets}</p>
             <p>Повторы: ${exercise.reps}</p>
-            <label for="weight-${exercise.id}">Вес (кг):</label>
-            <input type="number" id="weight-${exercise.id}" placeholder="Введите вес" min="0">
             <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
             <div class="exercise-details" style="display:none;"></div>
             <button onclick="openReplaceModal('${exercise.id}', '${exercise.muscle}', '${exercise.exercisetype}')">Заменить</button>
@@ -292,28 +286,16 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // После сохранения тренировки показываем поля ввода веса
-    workoutPlan.forEach((exercise) => {
-        const weightInput = document.getElementById(`weight-${exercise.id}`);
-
-        if (weightInput) {
-            weightInput.style.display = "inline-block";  // Показываем поле ввода веса
-        } else {
-            console.error(`Не найдено поле ввода для веса с id: weight-${exercise.id}`);
-        }
-    });
-
-    // Отображаем сохраненные упражнения
     workoutPlan.forEach((exercise, index) => {
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
         const savedExercise = document.createElement("div");
 
-        // Создаем чекбокс
+        // Create a checkbox
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `checkbox-${exercise.id}`;
 
-        // Добавляем чекбокс и информацию о упражнении
+        // Insert checkbox and exercise details
         savedExercise.innerHTML = `
             <label for="checkbox-${exercise.id}">
                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
@@ -326,10 +308,8 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     
     document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
-    document.getElementById("complete-workout-btn").style.display = "inline-block";  // Показать кнопку "Тренировка выполнена"
+
 });
-
-
 function showDetailsPopup(exerciseId) {
     const popup = document.getElementById("popup");
     const overlay = document.getElementById("overlay");
