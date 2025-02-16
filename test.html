@@ -289,7 +289,10 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
     workoutPlan.forEach((exercise, index) => {
-        const weightInput = document.getElementById(`weight-${exercise.id}`);
+         const weightInput = document.getElementById(`saved-weight-${exercise.id}`);
+    if (weightInput) {
+        exercise.weight = weightInput.value || "не указан";
+    }
         weightInput.disabled = false; // Разблокируем поле веса
 
         const weight = weightInput.value || "не указан";
