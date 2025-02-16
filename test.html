@@ -430,53 +430,37 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Массив для данных тренировки, включая веса
+    // Проверяем, есть ли инпуты с весом
+    console.log("Поиск инпутов веса...");
+
     const workoutData = workoutPlan.map(exercise => {
         const weightInput = document.querySelector(`#weight-${CSS.escape(exercise.id)}`);
         console.log(`exercise.id: ${exercise.id}, найден инпут:`, weightInput);
 
-        // Извлекаем значение из инпута веса, если оно есть
-        const weight = weightInput ? weightInput.value : null;
-
         return {
             exerciseid: exercise.id,
             exercisename: exercise.exercisename,
-            weight: weight, // Добавляем значение веса
-            sets: exercise.sets,
-            reps: exercise.reps,
+            weight: weightInput ? weightInput.value : null  // Считываем значение веса
         };
     });
 
-    // Сохранение данных тренировки в Firestore
-    try {
-        await db.collection("userWorkouts").add({
-            userId: auth.currentUser.uid,
-            date: new Date(),
-            workoutData: workoutData,
-        });
-        console.log("Workout saved to Firestore:", workoutData);
-    } catch (error) {
-        console.error("Error saving workout to Firestore:", error);
-    }
+    console.log("Workout data перед сохранением:", workoutData);
 
-    // После сохранения, показываем сообщение об успехе
-    alert("Тренировка сохранена!");
+    try {
+        // Сохраняем в Firestore
+        await db.collection("completed_workouts").add({
+            workoutData: workoutData,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()  // Сохраняем время тренировки
+        });
+
+        console.log("Workout saved to Firestore:", workoutData);
+        alert("Тренировка сохранена!");
+    } catch (error) {
+        console.error("Ошибка при сохранении тренировки:", error);
+        alert("Произошла ошибка при сохранении тренировки.");
+    }
 });
 
-
-// Функция отображения сохраненной тренировки
-function renderSavedWorkout(container, workoutData) {
-    workoutData.forEach((exercise, index) => {
-        const savedExercise = document.createElement("div");
-        savedExercise.innerHTML = ` 
-            <label for="checkbox-${exercise.exerciseid}">
-                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
-            </label>
-            <button onclick="showDetailsPopup('${exercise.exerciseid}')">Подробнее</button>
-        `;
-        container.appendChild(savedExercise);
-    });
-}
 
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
