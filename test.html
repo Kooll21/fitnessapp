@@ -292,10 +292,11 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-        // После сохранения тренировки показываем поля ввода веса
+    // После сохранения тренировки показываем поля ввода веса
     workoutPlan.forEach((exercise) => {
         const weightInput = document.getElementById(`weight-${exercise.id}`);
         weightInput.style.display = "inline-block";  // Показываем поле ввода веса
+    });
 
     workoutPlan.forEach((exercise, index) => {
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
@@ -321,8 +322,6 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 
     document.getElementById("complete-workout-btn").style.display = "inline-block";  // Показать кнопку "Тренировка выполнена"
-});
-
 });
 function showDetailsPopup(exerciseId) {
     const popup = document.getElementById("popup");
