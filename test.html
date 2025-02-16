@@ -295,7 +295,12 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     // После сохранения тренировки показываем поля ввода веса
     workoutPlan.forEach((exercise) => {
         const weightInput = document.getElementById(`weight-${exercise.id}`);
-        weightInput.style.display = "inline-block";  // Показываем поле ввода веса
+
+        if (weightInput) {
+            weightInput.style.display = "inline-block";  // Показываем поле ввода веса
+        } else {
+            console.error(`Не найдено поле ввода для веса с id: weight-${exercise.id}`);
+        }
     });
 
     // Отображаем сохраненные упражнения
@@ -323,6 +328,7 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
     document.getElementById("complete-workout-btn").style.display = "inline-block";  // Показать кнопку "Тренировка выполнена"
 });
+
 
 function showDetailsPopup(exerciseId) {
     const popup = document.getElementById("popup");
