@@ -66,16 +66,15 @@
     };
 
  document.addEventListener("DOMContentLoaded", function () {
-      fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById("navbar-container").innerHTML = html;
-          checkAuthState();
-           document.getElementById("popup").style.display = "none";
-  document.getElementById("overlay").style.display = "none";
-        })
-        .catch(err => console.error("Ошибка загрузки меню:", err));
-    });
+fetch('menu.html')
+  .then(response => response.text())
+  .then(html => {
+    document.getElementById("navbar-container").innerHTML = html;
+    checkAuthState();
+    initBurgerMenu(); // Важно!
+  })
+  .catch(err => console.error("Ошибка загрузки меню:", err));
+
 
   async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
