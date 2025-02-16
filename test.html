@@ -181,7 +181,7 @@ document.getElementById("generateWorkout").addEventListener("click", async () =>
             workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
         }
     }
-
+console.log(workoutPlan);
     displayWorkout(workoutPlan);
     document.getElementById("saveWorkoutBtn").style.display = "inline-block";
     document.getElementById("deleteWorkoutBtn").style.display = "none";
@@ -285,6 +285,7 @@ function applyReplacement(exerciseid) {
 
 // Функция для сохранения тренировки
 document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
+    console.log("Кнопка 'Сохранить тренировку' нажата!");
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
