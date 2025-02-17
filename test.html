@@ -101,34 +101,41 @@
       });
     }
 
-    window.updateWeights = async function(workoutId, exerciseCount) {
-      const user = auth.currentUser;
-      if (!user) {
-        console.error("User not authenticated");
-        return;
-      }
-      const currentUserId = user.uid;
+   window.updateWeights = async function(workoutId, exerciseCount) {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("User not authenticated");
+    return;
+  }
+  const currentUserId = user.uid;
 
-      const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
+  const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
 
-      // Object for updating Firestore fields
-      const updates = {};
+  // Získání aktuálních dat o cvičení
+  const workoutDoc = await getDoc(workoutRef);
+  if (!workoutDoc.exists()) {
+    console.error("Workout not found");
+    return;
+  }
 
-      for (let i = 0; i < exerciseCount; i++) {
-        const weightInput = document.getElementById(`weight-${i}`);
-        const weight = parseFloat(weightInput.value) || 0;
+  const workoutData = workoutDoc.data();
+  const updates = {};
 
-        updates[`exercises.${i}.weight`] = weight; // Use backticks for the key
-      }
+  for (let i = 0; i < exerciseCount; i++) {
+    const weightInput = document.getElementById(`weight-${i}`);
+    const weight = parseFloat(weightInput.value) || 0;
 
-      // Update only the changed weights
-      await updateDoc(workoutRef, updates);
+    // Aktualizace pouze pole weight pro konkrétní cvičení
+    updates[`exercises.${i}.weight`] = weight; // Použijeme backticks pro klíč
+  }
 
-      console.log("Weights updated successfully:", updates);
-      closePopup();
-      loadUserWorkouts(currentUserId);
-    };
+  // Aktualizace pouze specifických váh
+  await updateDoc(workoutRef, updates);
 
+  console.log("Weights updated successfully:", updates);
+  closePopup();
+  loadUserWorkouts(currentUserId);
+};
     window.showWorkoutDetails = function(index) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[index];
       const workoutData = JSON.parse(workoutElement.dataset.details);
