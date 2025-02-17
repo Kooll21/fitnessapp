@@ -107,52 +107,39 @@
     console.error("User not authenticated");
     return;
   }
-  const currentUserId = user.uid;
 
+  const currentUserId = user.uid;
   const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
 
-  // Get the current workout data
-  const workoutDoc = await getDoc(workoutRef);
-  if (!workoutDoc.exists()) {
-    console.error("Workout not found");
-    return;
-  }
-
-  const workoutData = workoutDoc.data();
-  const updates = {};
+  // Prepare an array of promises for updating each exercise
+  const updatePromises = [];
 
   for (let i = 0; i < exerciseCount; i++) {
     const weightInput = document.getElementById(`weight-${i}`);
     const weight = parseFloat(weightInput.value) || 0;
 
-    // Update only the weight field for the specific exercise
-    updates[`exercises.${i}.weight`] = weight; // Using backticks for key
+    // Assuming you have a way to identify the exercise ID for each input
+    const exerciseId = document.getElementById(`exercise-id-${i}`).value; // Get the exercise ID
+
+    // Create a reference to the specific exercise document
+    const exerciseRef = doc(workoutRef, "exercises", exerciseId);
+
+    // Prepare the update operation for this specific exercise
+    const updatePromise = updateDoc(exerciseRef, { weight: weight });
+    updatePromises.push(updatePromise);
   }
 
-  // Update only the specified fields
-  await updateDoc(workoutRef, updates)
-    .then(() => {
-      console.log("Weights updated successfully:", updates);
-      closePopup();
-      loadUserWorkouts(currentUserId);
-    })
-    .catch((error) => {
-      console.error("Error updating weights:", error);
-    });
-};
-    window.showWorkoutDetails = function(index) {
-      const workoutElement = document.querySelectorAll("#workouts-list div")[index];
-      const workoutData = JSON.parse(workoutElement.dataset.details);
+  // Execute all update promises
+  try {
+    await Promise.all(updatePromises);
+    console.log("Weights updated successfully");
+  } catch (error) {
+    console.error("Error updating weights:", error);
+  }
 
-      const exercisesList = workoutData.exercises
-        ? workoutData.exercises.map((exercise, idx) => 
-            `<li>
-              <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-              <input type="number" id="weight-${idx}" value="${exercise.weight || 0}" placeholder="Введите вес" />
-              <span>${exercise.reps} reps, ${exercise.sets} sets</span>
-            </li>`
-          ).join("")
-        : "No details available";
+  closePopup();
+  loadUserWorkouts(currentUserId);
+};
 
       document.getElementById("popup-content").innerHTML = 
         `<h3>Workout Details</h3>
