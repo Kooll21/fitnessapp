@@ -429,7 +429,11 @@ function toggleButtons(isSaved) {
 const weightsBuffer = {};
 
 document.addEventListener('DOMContentLoaded', () => {
-    const weightsBuffer = {};
+    // Убедитесь, что exerciseId и exercisename определены
+    let exerciseId; // Замените на правильное значение
+    let exercisename; // Замените на правильное значение
+    let reps; // Замените на правильное значение
+    let sets; // Замените на правильное значение
 
     const savedExerciseElement = document.createElement("div");
     savedExerciseElement.id = `saved-exercise-${exerciseId}`;
@@ -437,10 +441,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <h3>${exercisename}</h3>
         <p>Повторы: ${reps}</p>
         <p>Подходы: ${sets}</p>
-       <h1>Введите данные о весах</h1>
-    <div id="weightsContainer"></div>
-    <button id="addWeightBtn">Добавить вес</button>
-    <button id="saveWeightsBtn">Сохранить веса</button>
+        <p>Введите данные о весах</p>
+        <div id="weightsContainer"></div>
+        <button id="addWeightBtn">Добавить вес</button>
+        <button id="saveWeightsBtn">Сохранить веса</button>
     `;
 
     document.body.appendChild(savedExerciseElement);
@@ -464,17 +468,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Добавляем созданный элемент на страницу
-document.body.appendChild(savedExerciseElement);
-
-
-
 // Функция для сохранения данных о тренировке в Firestore
 async function saveWorkoutToFirestore(userId, currentDate) {
     try {
         console.log("Saving workout data to Firestore:", {
             date: currentDate,
-            exercises: tempWorkoutData
+            exercises: tempWorkoutData // Убедитесь, что эта переменная определена
         }); // Отладочное сообщение
 
         await db.collection("userWorkouts").doc(userId).collection("workouts").add({
