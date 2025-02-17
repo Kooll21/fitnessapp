@@ -396,18 +396,30 @@ savedExerciseElement.innerHTML = `
     <input type="number" id="weight-${exerciseId}" name="weight-${exerciseId}" placeholder="Введите вес" min="1" step="0.5">
 `;
 
-// Добавляем обработчик события для поля ввода веса
+// Добавляем созданный элемент на страницу
+document.body.appendChild(savedExerciseElement);
+
+// Находим поле ввода веса после добавления элемента на страницу
 const weightInput = savedExerciseElement.querySelector(`#weight-${exerciseId}`);
-weightInput.addEventListener('input', (event) => {
-    const weightValue = parseFloat(event.target.value);
-    if (!isNaN(weightValue)) {
-        // Сохраняем значение в буфер
-        weightsBuffer[exerciseId] = weightValue;
-        console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
-    } else {
-        console.log(`Вес для упражнения ${exerciseId} не является числом.`);
-    }
-});
+
+// Проверяем, что поле ввода найдено
+if (weightInput) {
+    console.log(`Поле ввода веса найдено: ${weightInput.id}`);
+
+    // Добавляем обработчик события для поля ввода веса
+    weightInput.addEventListener('input', (event) => {
+        const weightValue = parseFloat(event.target.value);
+        if (!isNaN(weightValue)) {
+            // Сохраняем значение в буфер
+            weightsBuffer[exerciseId] = weightValue;
+            console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
+        } else {
+            console.log(`Вес для упражнения ${exerciseId} не является числом.`);
+        }
+    });
+} else {
+    console.error(`Поле ввода веса не найдено для exerciseId: ${exerciseId}`);
+}
 
 // Добавляем созданный элемент на страницу
 document.body.appendChild(savedExerciseElement);
