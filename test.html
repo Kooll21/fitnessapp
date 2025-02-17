@@ -402,18 +402,20 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
     }
 
     // Сбор данных о тренировке в временный буфер
-    tempWorkoutData = workoutPlan.map(exercise => {
-        const weightInput = document.querySelector(`#weight-${exercise.id}`); // Извлечение веса по id упражнения
-        const weightValue = weightInput ? weightInput.value : null; // Получаем значение веса
+tempWorkoutData = workoutPlan.map(exercise => {
+    const weightInput = document.querySelector(`#weight-${exercise.id}`); // Извлечение веса по id упражнения
+    const weightValue = weightInput ? weightInput.value : null; // Получаем значение веса
 
-        return {
-            exerciseid: exercise.id,
-            exercisename: exercise.exercisename,
-            reps: exercise.reps, // Количество повторений
-            sets: exercise.sets, // Количество подходов
-            weight: weightValue // Значение веса, введенное пользователем
-        };
-    });
+    console.log(`Exercise ID: ${exercise.id}, Weight: ${weightValue}`); // Отладочное сообщение
+
+    return {
+        exerciseid: exercise.id,
+        exercisename: exercise.exercisename,
+        reps: exercise.reps,
+        sets: exercise.sets,
+        weight: weightValue // Значение веса, введенное пользователем
+    };
+});
 
     // Вызов функции для сохранения данных в Firestore
     await saveWorkoutToFirestore(userId, currentDate); // Передаем userId в функцию
@@ -422,6 +424,11 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
 // Функция для сохранения данных о тренировке в Firestore
 async function saveWorkoutToFirestore(userId, currentDate) {
     try {
+        console.log("Saving workout data to Firestore:", {
+            date: currentDate,
+            exercises: tempWorkoutData
+        }); // Отладочное сообщение
+
         await db.collection("userWorkouts").doc(userId).collection("workouts").add({
             date: currentDate,
             exercises: tempWorkoutData // Сохраняем массив с упражнениями из временного буфера
