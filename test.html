@@ -102,33 +102,8 @@
       });
     }
 
-    window.showWorkoutDetails = function(index) {
-      const workoutElement = document.querySelectorAll("#workouts-list div")[index];
-      const workoutData = JSON.parse(workoutElement.dataset.details);
-
-      const exercisesList = workoutData.exercises
-        ? workoutData.exercises.map((exercise, idx) => 
-            `<li>
-              <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-              <input type="number" id="weight-${idx}" value="${exercise.weight || 0}" placeholder="Введите вес" />
-            </li>`
-          ).join("")
-        : "No details available";
-
-      document.getElementById("popup-content").innerHTML = `
-        <h3>Workout Details</h3>
-        <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-        <p><strong>Exercises:</strong></p>
-        <ul>${exercisesList}</ul>
-        <button onclick="updateWeights('${workoutData.id}', ${workoutData.exercises.length})">Сохранить изменения</button>
-      `;
-
-      document.body.classList.add("modal-open");
-      document.getElementById("overlay").style.display = "block";
-      document.getElementById("popup").style.display = "block";
-    };
-
-    async function updateWeights(workoutId, exerciseCount) {
+    // Объявляем функцию updateWeights в глобальной области видимости
+    window.updateWeights = async function(workoutId, exerciseCount, workoutData) {
       const user = auth.currentUser;
       if (!user) {
         console.error("User not authenticated");
@@ -153,7 +128,34 @@
       console.log("Weights updated successfully:", weights);
       closePopup();
       loadUserWorkouts(currentUserId);
-    }
+    };
+
+    window.showWorkoutDetails = function(index) {
+      const workoutElement = document.querySelectorAll("#workouts-list div")[index];
+      const workoutData = JSON.parse(workoutElement.dataset.details);
+
+      const exercisesList = workoutData.exercises
+        ? workoutData.exercises.map((exercise, idx) => 
+            `<li>
+              <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+              <input type="number" id="weight-${idx}" value="${exercise.weight || 0}" placeholder="Введите вес" />
+              <span>${exercise.reps} reps, ${exercise.sets} sets</span>
+            </li>`
+          ).join("")
+        : "No details available";
+
+      document.getElementById("popup-content").innerHTML = `
+        <h3>Workout Details</h3>
+        <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+        <p><strong>Exercises:</strong></p>
+        <ul>${exercisesList}</ul>
+        <button onclick="updateWeights('${workoutData.id}', ${workoutData.exercises.length}, ${JSON.stringify(workoutData)})">Сохранить изменения</button>
+      `;
+
+      document.body.classList.add("modal-open");
+      document.getElementById("overlay").style.display = "block";
+      document.getElementById("popup").style.display = "block";
+    };
 
     window.closePopup = function() {
       document.body.classList.remove("modal-open");
