@@ -412,9 +412,6 @@ weightInput.addEventListener('input', (event) => {
 // Добавляем созданный элемент на страницу
 document.body.appendChild(savedExerciseElement);
       
-    // Вызов функции для сохранения данных в Firestore
-    await saveWorkoutToFirestore(userId, currentDate); // Передаем userId в функцию
-});
 
 // Функция для сохранения данных о тренировке в Firestore
 async function saveWorkoutToFirestore(userId, currentDate) {
