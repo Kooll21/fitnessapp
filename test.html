@@ -314,7 +314,7 @@ function saveWorkout() {
             <h3>${exercisename}</h3>
             <p>Повторы: ${reps}</p>
             <p>Подходы: ${sets}</p>
-            <h1>Введите данные о весах</h1>
+            <p>Введите данные о весах<p>
     <div id="weightsContainer"></div>
     <button id="addWeightBtn">Добавить вес</button>
     <button id="saveWeightsBtn">Сохранить веса</button>
@@ -322,20 +322,50 @@ function saveWorkout() {
 
         container.appendChild(savedExerciseElement);
 
-        // Добавляем обработчик события для поля ввода веса
-        const weightInput = savedExerciseElement.querySelector(`#weight-${exerciseId}`);
-        if (weightInput) {
-            weightInput.addEventListener('change', (event) => {
-                const weightValue = parseFloat(event.target.value);
-                if (!isNaN(weightValue)) {
-                    weightsBuffer[exerciseId] = weightValue;
-                    console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
-                } else {
-                    console.log(`Вес для упражнения ${exerciseId} не является числом.`);
-                }
-            });
+      // Инициализация контейнера для весов
+const weightsContainer = document.getElementById("weightsContainer");
+const addWeightBtn = document.getElementById("addWeightBtn");
+const saveWeightsBtn = document.getElementById("saveWeightsBtn");
+
+// Функция для добавления нового поля ввода веса
+addWeightBtn.addEventListener("click", () => {
+    const weightInputDiv = document.createElement("div");
+    weightInputDiv.classList.add("weight-input");
+
+    const weightInput = document.createElement("input");
+    weightInput.type = "number";
+    weightInput.placeholder = "Введите вес";
+    weightInput.min = 1;
+    weightInput.step = 0.5;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "Удалить";
+    removeBtn.addEventListener("click", () => {
+        weightsContainer.removeChild(weightInputDiv);
+    });
+
+    weightInputDiv.appendChild(weightInput);
+    weightInputDiv.appendChild(removeBtn);
+    weightsContainer.appendChild(weightInputDiv);
+});
+
+// Функция для сохранения введенных весов
+saveWeightsBtn.addEventListener("click", () => {
+    const weightInputs = document.querySelectorAll(".weight-input input");
+    const weights = [];
+
+    weightInputs.forEach((input) => {
+        const weightValue = parseFloat(input.value);
+        if (!isNaN(weightValue)) {
+            weights.push(weightValue);
         }
     });
+
+    console.log("Сохраненные веса:", weights);
+    // Здесь вы можете сохранить веса на сервер или выполнить другие действия
+});
+
+    
 
 
     // Показываем кнопку "Тренировка выполнена"
