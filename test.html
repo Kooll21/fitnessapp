@@ -102,33 +102,34 @@
       });
     }
 
-    // Объявляем функцию updateWeights в глобальной области видимости
-    window.updateWeights = async function(workoutId, exerciseCount, workoutData) {
-      const user = auth.currentUser;
-      if (!user) {
-        console.error("User not authenticated");
-        return;
-      }
-      const currentUserId = user.uid;
+window.updateWeights = async function(workoutId, exerciseCount, workoutData) {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("User not authenticated");
+    return;
+  }
+  const currentUserId = user.uid;
 
-      const weights = [];
-      for (let i = 0; i < exerciseCount; i++) {
-        const weightInput = document.getElementById(`weight-${i}`);
-        weights.push(parseFloat(weightInput.value) || 0);
-      }
+  const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
 
-      const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
-      await updateDoc(workoutRef, {
-        exercises: weights.map((weight, index) => ({
-          ...workoutData.exercises[index],
-          weight: weight
-        }))
-      });
+  // Объект для обновления полей Firestore
+  const updates = {};
 
-      console.log("Weights updated successfully:", weights);
-      closePopup();
-      loadUserWorkouts(currentUserId);
-    };
+  for (let i = 0; i < exerciseCount; i++) {
+    const weightInput = document.getElementById(`weight-${i}`);
+    const weight = parseFloat(weightInput.value) || 0;
+    
+    // Формируем путь к полю в Firestore
+    updates[`exercises.${i}.weight`] = weight;
+  }
+
+  // Обновляем только измененные веса
+  await updateDoc(workoutRef, updates);
+
+  console.log("Weights updated successfully:", updates);
+  closePopup();
+  loadUserWorkouts(currentUserId);
+};
 
     window.showWorkoutDetails = function(index) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[index];
