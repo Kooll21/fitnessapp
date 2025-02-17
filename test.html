@@ -412,22 +412,6 @@ weightInput.addEventListener('input', (event) => {
 // Добавляем созданный элемент на страницу
 document.body.appendChild(savedExerciseElement);
       
-    // Сбор данных о тренировке в временный буфер
-tempWorkoutData = workoutPlan.map(exercise => {
-    const weightInput = document.querySelector(`#weight-${exercise.id}`); // Извлечение веса по id упражнения
-    const weightValue = weightInput ? weightInput.value : null; // Получаем значение веса
-
-    console.log(`Exercise ID: ${exercise.id}, Weight: ${weightValue}`); // Отладочное сообщение
-
-    return {
-        exerciseid: exercise.id,
-        exercisename: exercise.exercisename,
-        reps: exercise.reps,
-        sets: exercise.sets,
-        weight: weightValue // Значение веса, введенное пользователем
-    };
-});
-
     // Вызов функции для сохранения данных в Firestore
     await saveWorkoutToFirestore(userId, currentDate); // Передаем userId в функцию
 });
