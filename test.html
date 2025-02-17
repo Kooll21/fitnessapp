@@ -111,25 +111,24 @@ window.updateWeights = async function(workoutId, exerciseCount, workoutData) {
 
   const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
 
-  // Объект для обновления полей Firestore
+  // Object for updating Firestore fields
   const updates = {};
 
   for (let i = 0; i < exerciseCount; i++) {
-    const weightInput = document.getElementById(weight-${i});
+    const weightInput = document.getElementById(`weight-${i}`); // Corrected to use backticks
     const weight = parseFloat(weightInput.value) || 0;
     
-    // Формируем путь к полю в Firestore
-    updates[exercises.${i}.weight] = weight;
+    // Corrected syntax for accessing object properties
+    updates[`exercises.${i}.weight`] = weight; // Use backticks for the key
   }
 
-  // Обновляем только измененные веса
+  // Update only the changed weights
   await updateDoc(workoutRef, updates);
 
   console.log("Weights updated successfully:", updates);
   closePopup();
   loadUserWorkouts(currentUserId);
 };
-
     window.showWorkoutDetails = function(index) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[index];
       const workoutData = JSON.parse(workoutElement.dataset.details);
