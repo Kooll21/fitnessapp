@@ -382,6 +382,9 @@ function toggleButtons(isSaved) {
 }
 
 
+// Объявляем временный буфер для хранения данных о весах
+let tempWorkoutData = [];
+
 // Обработчик события для кнопки завершения тренировки
 document.getElementById("complete-workout-btn").addEventListener("click", async function () {
     const savedContainer = document.getElementById("savedWorkout");
@@ -390,36 +393,47 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
     // Получаем текущую дату
     const currentDate = new Date().toISOString();
 
-    // Сбор данных о тренировке
-    const workoutData = workoutPlan.map(exercise => {
-        const weightInput = document.querySelector(`#weight-${CSS.escape(exercise.id)}`);
+    // Получаем ID текущего пользователя
+    const userId = auth.currentUser ? auth.currentUser.uid : null; // Проверяем, есть ли текущий пользователь
+
+    if (!userId) {
+        alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
+        return; // Выходим, если пользователь не авторизован
+    }
+
+    // Сбор данных о тренировке в временный буфер
+    tempWorkoutData = workoutPlan.map(exercise => {
+        const weightInput = document.querySelector(`#weight-${exercise.id}`); // Извлечение веса по id упражнения
+        const weightValue = weightInput ? weightInput.value : null; // Получаем значение веса
+
         return {
             exerciseid: exercise.id,
             exercisename: exercise.exercisename,
-            reps: exercise.reps, // Предполагается, что количество повторений хранится в `exercise`
-            sets: exercise.sets, // Предполагается, что количество подходов хранится в `exercise`
-            weight: weightInput ? weightInput.value : null // Получаем значение веса
+            reps: exercise.reps, // Количество повторений
+            sets: exercise.sets, // Количество подходов
+            weight: weightValue // Значение веса, введенное пользователем
         };
     });
 
-    // Получаем uid текущего пользователя
-    const userId = auth.currentUser.uid;
+    // Вызов функции для сохранения данных в Firestore
+    await saveWorkoutToFirestore(userId, currentDate); // Передаем userId в функцию
+});
 
+// Функция для сохранения данных о тренировке в Firestore
+async function saveWorkoutToFirestore(userId, currentDate) {
     try {
-        // Сохраняем данные о тренировке в Firestore
         await db.collection("userWorkouts").doc(userId).collection("workouts").add({
             date: currentDate,
-            exercises: workoutData // Сохраняем массив с упражнениями
+            exercises: tempWorkoutData // Сохраняем массив с упражнениями из временного буфера
         });
 
-        console.log("Workout saved to Firestore:", workoutData);
+        console.log("Workout saved to Firestore:", tempWorkoutData);
         alert("Тренировка сохранена!");
     } catch (error) {
         console.error("Ошибка при сохранении тренировки:", error);
         alert("Произошла ошибка при сохранении тренировки.");
     }
-});
-
+}
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
 <div id="popup" class="popup" style="display:none;"></div>
