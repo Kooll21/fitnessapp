@@ -9,7 +9,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -61,51 +61,65 @@
     };
 
     async function loadUserWorkouts(userId) {
-      const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-      const snapshot = await getDocs(userWorkoutsRef);
-      let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      try {
+        const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
+        const snapshot = await getDocs(userWorkoutsRef);
+        let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-      for (let workout of workouts) {
-        workout.exercises = await loadExercises(workout.id); // Assuming you want to load exercises by workout ID
+        // Log the workouts to see if they are being fetched correctly
+        console.log("Fetched workouts:", workouts);
+
+        for (let workout of workouts) {
+          workout.exercises = await loadExercises(workout.id); // Assuming you want to load exercises by workout ID
+        }
+
+        displayWorkouts(workouts);
+      } catch (error) {
+        console.error("Error loading workouts:", error);
+      }
+    }
+
+    function displayWorkouts(workouts) {
+      const container = document.getElementById("workouts-list");
+      container.innerHTML = "<h2>Saved Workouts</h2>";
+
+      // Check if workouts array is empty
+      if (workouts.length === 0) {
+        container.innerHTML += "<p>No workouts found.</p>";
+        return;
       }
 
-      displayWorkouts(workouts);
+      workouts.forEach((workout, index) => {
+        const workoutElement = document.createElement("div");
+
+        // Log the workout to see its structure
+        console.log("Workout:", workout);
+
+        // Check if workout is defined and has necessary properties
+        if (workout && workout.date) {
+          workoutElement.innerHTML = 
+            `<p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+            <button onclick="showWorkoutDetails(${index})">Подробнее</button>`;
+          workoutElement.dataset.details = JSON.stringify(workout);
+          container.appendChild(workoutElement);
+        } else {
+          console.error("Workout is undefined or missing date:", workout);
+        }
+      });
     }
 
-   function displayWorkouts(workouts) {
-  const container = document.getElementById("workouts-list");
-  container.innerHTML = "<h2>Saved Workouts</h2>";
-  workouts.forEach((workout, index) => {
-    const workoutElement = document.createElement("div");
+    window.showWorkoutDetails = function(index) {
+      const workoutElement = document.getElementById("workouts-list").children[index];
+      const workoutData = workoutElement.dataset.details;
 
-    // Log the workout to see its structure
-    console.log("Workout:", workout);
-
-    // Check if workout is defined and has necessary properties
-    if (workout && workout.date) {
-      workoutElement.innerHTML = 
-        `<p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-        <button onclick="showWorkoutDetails(${index})">Подробнее</button>`;
-      workoutElement.dataset.details = JSON.stringify(workout);
-      container.appendChild(workoutElement);
-    } else {
-      console.error("Workout is undefined or missing date:", workout);
-    }
-  });
-}
-
-window.showWorkoutDetails = function(index) {
-  const workoutElement = document.getElementById("workouts-list").children[index];
-  const workoutData = workoutElement.dataset.details;
-
-  // Check if workoutData is defined before parsing
-  if (workoutData) {
-    const workout = JSON.parse(workoutData);
-    displayWorkoutDetails(workout);
-  } else {
-    console.error("Workout data is undefined for index:", index);
-  }
-};
+      // Check if workoutData is defined before parsing
+      if (workoutData) {
+        const workout = JSON.parse(workoutData);
+        displayWorkoutDetails(workout);
+      } else {
+        console.error("Workout data is undefined for index:", index);
+      }
+    };
 
     function displayWorkoutDetails(workoutData) {
       const exercisesList = workoutData.exercises.map((exercise, index) => `
