@@ -25,27 +25,27 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    function checkAuthState() {
-      const adminButton = document.getElementById("admin-panel");
-      const userStatus = document.getElementById("user-status");
-      const loginLink = document.getElementById("login-link");
-      const logoutBtn = document.getElementById("logout-btn");
+function checkAuthState() {
+  const adminButton = document.getElementById("admin-panel");
+  const userStatus = document.getElementById("user-status");
+  const loginLink = document.getElementById("login-link");
+  const logoutBtn = document.getElementById("logout-btn");
 
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          userStatus.textContent = Welcome, ${user.email};
-          loginLink.style.display = 'none';
-          logoutBtn.style.display = 'block';
-          adminButton.style.display = 'block';
-          await loadUserWorkouts(user.uid);
-        } else {
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-          adminButton.style.display = 'none';
-        }
-      });
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      userStatus.textContent = `Welcome, ${user.email}`; // Corrected
+      loginLink.style.display = 'none';
+      logoutBtn.style.display = 'block';
+      adminButton.style.display = 'block';
+      await loadUserWorkouts(user.uid);
+    } else {
+      userStatus.textContent = 'Please log in';
+      loginLink.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+      adminButton.style.display = 'none';
     }
+  });
+}
 
     window.logoutUser = function() {
       signOut(auth)
@@ -89,18 +89,17 @@
     }
 
     function displayWorkouts(workouts) {
-      const container = document.getElementById("workouts-list");
-      container.innerHTML = "<h2>Saved Workouts</h2>";
-      workouts.forEach((workout, index) => {
-        const workoutElement = document.createElement("div");
-        workoutElement.innerHTML = 
-          <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-          <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-        ;
-        workoutElement.dataset.details = JSON.stringify(workout);
-        container.appendChild(workoutElement);
-      });
-    }
+  const container = document.getElementById("workouts-list");
+  container.innerHTML = "<h2>Saved Workouts</h2>";
+  workouts.forEach((workout, index) => {
+    const workoutElement = document.createElement("div");
+    workoutElement.innerHTML = 
+      `<p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <button onclick="showWorkoutDetails(${index})">Подробнее</button>`; // Corrected
+    workoutElement.dataset.details = JSON.stringify(workout);
+    container.appendChild(workoutElement);
+  });
+}
 
 window.updateWeights = async function(workoutId, exerciseCount, workoutData) {
   const user = auth.currentUser;
