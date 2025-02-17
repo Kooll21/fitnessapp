@@ -100,8 +100,8 @@
         container.appendChild(workoutElement);
       });
     }
-
-   window.updateWeights = async function(workoutId, exerciseCount) {
+// AKTUALIZACE VAH
+  window.updateWeights = async function(workoutId, exerciseCount) {
   const user = auth.currentUser;
   if (!user) {
     console.error("User not authenticated");
@@ -111,7 +111,7 @@
 
   const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
 
-  // Získání aktuálních dat o cvičení
+  // Get the current workout data
   const workoutDoc = await getDoc(workoutRef);
   if (!workoutDoc.exists()) {
     console.error("Workout not found");
@@ -125,16 +125,20 @@
     const weightInput = document.getElementById(`weight-${i}`);
     const weight = parseFloat(weightInput.value) || 0;
 
-    // Aktualizace pouze pole weight pro konkrétní cvičení
-    updates[`exercises.${i}.weight`] = weight; // Použijeme backticks pro klíč
+    // Update only the weight field for the specific exercise
+    updates[`exercises.${i}.weight`] = weight; // Using backticks for key
   }
 
-  // Aktualizace pouze specifických váh
-  await updateDoc(workoutRef, updates);
-
-  console.log("Weights updated successfully:", updates);
-  closePopup();
-  loadUserWorkouts(currentUserId);
+  // Update only the specified fields
+  await updateDoc(workoutRef, updates)
+    .then(() => {
+      console.log("Weights updated successfully:", updates);
+      closePopup();
+      loadUserWorkouts(currentUserId);
+    })
+    .catch((error) => {
+      console.error("Error updating weights:", error);
+    });
 };
     window.showWorkoutDetails = function(index) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[index];
