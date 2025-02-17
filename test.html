@@ -407,15 +407,16 @@ if (weightInput) {
     console.log(`Поле ввода веса найдено: ${weightInput.id}`);
 
     // Добавляем обработчик события для поля ввода веса
-    weightInput.addEventListener('input', (event) => {
-        const weightValue = parseFloat(event.target.value);
-        if (!isNaN(weightValue)) {
-            // Сохраняем значение в буфер
-            weightsBuffer[exerciseId] = weightValue;
-            console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
-        } else {
-            console.log(`Вес для упражнения ${exerciseId} не является числом.`);
-        }
+weightInput.addEventListener('change', (event) => {
+    const weightValue = parseFloat(event.target.value);
+    if (!isNaN(weightValue)) {
+        weightsBuffer[exerciseId] = weightValue;
+        console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
+    } else {
+        console.log(`Вес для упражнения ${exerciseId} не является числом.`);
+    }
+});
+
     });
 } else {
     console.error(`Поле ввода веса не найдено для exerciseId: ${exerciseId}`);
@@ -423,7 +424,8 @@ if (weightInput) {
 
 // Добавляем созданный элемент на страницу
 document.body.appendChild(savedExerciseElement);
-      
+
+
 
 // Функция для сохранения данных о тренировке в Firestore
 async function saveWorkoutToFirestore(userId, currentDate) {
