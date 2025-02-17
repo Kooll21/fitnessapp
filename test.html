@@ -66,25 +66,16 @@
       let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
       for (let workout of workouts) {
-        if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-          workout.exercises = await loadExercises(workout.exerciseIds);
-        }
+        workout.exercises = await loadExercises(workout.id); // Assuming you want to load exercises by workout ID
       }
 
       displayWorkouts(workouts);
     }
 
-    async function loadExercises(exerciseIds) {
-      const exercises = [];
-      for (let id of exerciseIds) {
-        const exerciseRef = doc(db, "exercises", id);
-        const exerciseDoc = await getDoc(exerciseRef);
-        if (exerciseDoc.exists()) {
-          exercises.push(exerciseDoc.data());
-        } else {
-          console.error(`Exercise with ID ${id} not found.`);
-        }
-      }
+    async function loadExercises(workoutId) {
+      const exercisesRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId, "exercises");
+      const snapshot = await getDocs(exercisesRef);
+      const exercises = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
       return exercises;
     }
 
@@ -100,57 +91,64 @@
         container.appendChild(workoutElement);
       });
     }
-// AKTUALIZACE VAH
-  window.updateWeights = async function(workoutId, exerciseCount) {
-  const user = auth.currentUser;
-  if (!user) {
-    console.error("User not authenticated");
-    return;
-  }
 
-  const currentUserId = user.uid;
-  const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
+    window.showWorkoutDetails = function(index) {
+      const workout = JSON.parse(document.getElementById("workouts-list").children[index].dataset.details);
+      displayWorkoutDetails(workout);
+    };
 
-  // Prepare an array of promises for updating each exercise
-  const updatePromises = [];
-
-  for (let i = 0; i < exerciseCount; i++) {
-    const weightInput = document.getElementById(`weight-${i}`);
-    const weight = parseFloat(weightInput.value) || 0;
-
-    // Assuming you have a way to identify the exercise ID for each input
-    const exerciseId = document.getElementById(`exercise-id-${i}`).value; // Get the exercise ID
-
-    // Create a reference to the specific exercise document
-    const exerciseRef = doc(workoutRef, "exercises", exerciseId);
-
-    // Prepare the update operation for this specific exercise
-    const updatePromise = updateDoc(exerciseRef, { weight: weight });
-    updatePromises.push(updatePromise);
-  }
-
-  // Execute all update promises
-  try {
-    await Promise.all(updatePromises);
-    console.log("Weights updated successfully");
-  } catch (error) {
-    console.error("Error updating weights:", error);
-  }
-
-  closePopup();
-  loadUserWorkouts(currentUserId);
-};
+    function displayWorkoutDetails(workoutData) {
+      const exercisesList = workoutData.exercises.map((exercise, index) => `
+        <li>
+          ${exercise.name} - 
+          <input type="number" id="weight-${index}" value="${exercise.weight}" placeholder="Weight">
+          <input type="hidden" id="exercise-id-${index}" value="${exercise.id}">
+        </li>
+      `).join("");
 
       document.getElementById("popup-content").innerHTML = 
         `<h3>Workout Details</h3>
         <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
         <p><strong>Exercises:</strong></p>
         <ul>${exercisesList}</ul>
-        <button onclick="updateWeights('${workoutData.id}', ${workoutData.exercises.length})">Сохранить изменения</button>`; // Removed JSON.stringify for workoutData
+        <button onclick="updateWeights('${workoutData.id}', ${workoutData.exercises.length})">Сохранить изменения</button>`;
 
       document.body.classList.add("modal-open");
       document.getElementById("overlay").style.display = "block";
       document.getElementById("popup").style.display = "block";
+    }
+
+    window.updateWeights = async function(workoutId, exerciseCount) {
+      const user = auth.currentUser;
+      if (!user) {
+        console.error("User not authenticated");
+        return;
+      }
+
+      const currentUserId = user.uid;
+      const workoutRef = doc(db, "userWorkouts", currentUserId, "workouts", workoutId);
+
+      const updatePromises = [];
+      for (let i = 0; i < exerciseCount; i++) {
+        const weightInput = document.getElementById(`weight-${i}`);
+        const weight = parseFloat(weightInput.value) || 0;
+        const exerciseId = document.getElementById(`exercise-id-${i}`).value;
+
+        const exerciseRef = doc(workoutRef, "exercises", exerciseId);
+        const updatePromise = updateDoc(exerciseRef, { weight: weight });
+        updatePromises.push(updatePromise);
+      }
+
+      try {
+        await Promise.all(updatePromises);
+        console.log("Weights updated successfully");
+      } catch (error) {
+        console.error("Error updating weights:", error);
+      }
+
+      closePopup();
+      loadUserWorkouts(currentUserId);
+    };
 
     window.closePopup = function() {
       document.body.classList.remove("modal-open");
@@ -167,7 +165,7 @@
           initBurgerMenu();
         })
         .catch(err => {
-          console.error("Ошибка загрузky menu:", err);
+          console.error("Error loading menu:", err);
           document.getElementById("navbar-container").innerHTML = `
             <span id="user-status">Please log in</span>
             <a href="login.html" id="login-link">Login</a>
@@ -195,8 +193,8 @@
   <h1>Welcome to the Admin Page</h1>
   <div id="workouts-list"></div>
 
-  <div id="overlay" onclick="closePopup()"></div>
-  <div id="popup">
+  <div id="overlay" onclick="closePopup()" style="display:none;"></div>
+  <div id="popup" style="display:none;">
     <button class="close-btn" onclick="closePopup()">&times;</button>
     <div id="popup-content"></div>
   </div>
