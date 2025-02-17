@@ -60,6 +60,17 @@
         });
     };
 
+    async function loadExercises(workoutId) {
+      try {
+        const exercisesRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId, "exercises");
+        const snapshot = await getDocs(exercisesRef);
+        return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      } catch (error) {
+        console.error("Error loading exercises:", error);
+        return []; // Return an empty array if there's an error
+      }
+    }
+
     async function loadUserWorkouts(userId) {
       try {
         const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
@@ -70,7 +81,7 @@
         console.log("Fetched workouts:", workouts);
 
         for (let workout of workouts) {
-          workout.exercises = await loadExercises(workout.id); // Assuming you want to load exercises by workout ID
+          workout.exercises = await loadExercises(workout.id); // Load exercises for each workout
         }
 
         displayWorkouts(workouts);
