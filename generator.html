@@ -8,7 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
-  
+
   <script>
     // Конфигурация Firebase (v8)
     var firebaseConfig = {
@@ -96,17 +96,17 @@
   <select id="workout1" class="workout-select">
       <option value="">Выберите группу мышц</option>
   </select></p>
-  
+
   <p><label for="workout2">Вторая группа мышц:</label>
   <select id="workout2" class="workout-select">
       <option value="">Выберите группу мышц</option>
   </select></p>
-  
+
   <p><label for="workout3">Третья группа мышц:</label>
   <select id="workout3" class="workout-select">
       <option value="">Выберите группу мышц</option>
   </select></p>
-  
+
   <button id="generateWorkout">Сгенерировать тренировку</button>
   <button id="saveWorkoutBtn" style="display:none;">Сохранить тренировку</button>
   <button id="deleteWorkoutBtn" style="display:none;">Удалить тренировку</button>
@@ -207,20 +207,15 @@ document.getElementById("generateWorkout").addEventListener("click", async () =>
             .map(select => select.value)
             .filter(value => value);
     }
-
 function displayWorkout(workoutPlan) {
     const container = document.getElementById("workoutResults");
     container.innerHTML = "<h2>Сгенерированная тренировка:</h2>";
-
     workoutPlan.forEach((exercise, index) => {
         const embedUrl = exercise.video.replace("watch?v=", "embed/");
-
         const exerciseElement = document.createElement("div");
         exerciseElement.id = `exercise-${exercise.id}`;
-
         // Add the exercise ID as a hidden attribute
         exerciseElement.setAttribute('data-exercise-id', exercise.id);
-
         // Adding the exercise content
         exerciseElement.innerHTML = `
             <h3>${exercise.exercisename}</h3>
@@ -235,11 +230,10 @@ function displayWorkout(workoutPlan) {
             <div class="exercise-details" style="display:none;"></div>
             <button onclick="openReplaceModal('${exercise.id}', '${exercise.muscle}', '${exercise.exercisetype}')">Заменить</button>
         `;
-
         container.appendChild(exerciseElement);
     });
 }
-    
+
             function openReplaceModal(exerciseid, muscle, type) {
             const replacements = allExercises.filter(ex => ex.muscle === muscle && ex.exercisetype === type && ex.id !== exerciseid);
             let options = replacements.map(ex => `<option value="${ex.id}">${ex.exercisename}</option>`).join("");
@@ -261,7 +255,6 @@ function applyReplacement(exerciseid) {
     if (newExercise) {
         oldElement.id = `exercise-${newExercise.id}`;
         oldElement.setAttribute('data-exercise-id', newExercise.id); // Update the exercise id
-
         oldElement.innerHTML = `
             <h3>${newExercise.exercisename}</h3>
             <img src="${newExercise.photo}" width="150">
@@ -275,8 +268,7 @@ function applyReplacement(exerciseid) {
             <button onclick="openReplaceModal('${newExercise.id}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
             <div class="exercise-details" style="display:none;"></div>
         `;
-        
-        // Update workoutPlan with the new exercise
+          // Update workoutPlan with the new exercise
         workoutPlan = workoutPlan.map(exercise =>
             exercise.id === exerciseid ? newExercise : exercise
         );
@@ -291,24 +283,21 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     workoutPlan.forEach((exercise, index) => {
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
         const savedExercise = document.createElement("div");
-
-        // Create a checkbox
+  // Create a checkbox
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `checkbox-${exercise.id}`;
-
-        // Insert checkbox and exercise details
+         // Insert checkbox and exercise details
         savedExercise.innerHTML = `
             <label for="checkbox-${exercise.id}">
                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
             </label>
             <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
         `;
-        savedExercise.insertBefore(checkbox, savedExercise.firstChild);
+           savedExercise.insertBefore(checkbox, savedExercise.firstChild);
         savedContainer.appendChild(savedExercise);
     });
-    
-    document.getElementById("workoutResults").style.display = "none";
+      document.getElementById("workoutResults").style.display = "none";
     document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 
 });
@@ -419,66 +408,56 @@ function toggleDetails(button, videoUrl, description) {
 }
 
 document.getElementById("complete-workout-btn").addEventListener("click", function() {
-    // Находим контейнер для сохраненной тренировки и очищаем его содержимое
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
-
-    // Собираем данные о упражнениях, включая введенные веса
+    // Gather exercises with weight values and only necessary data
     const workoutData = workoutPlan.map(exercise => {
-        // Находим все поля ввода веса для данного упражнения
-        const weightInputs = document.querySelectorAll(`#exercise-${exercise.id} .weight-input input`);
+        // Get the weight value for each exercise
+        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";  // Default if no weight is provided
         
-        // Преобразуем NodeList в массив и собираем значения из полей ввода
-        const weights = Array.from(weightInputs).map(input => parseFloat(input.value)).filter(value => !isNaN(value));
-
-        // Возвращаем объект данных для данного упражнения
+        // Return only the necessary data, including exerciseid and weight
         return {
-            exerciseid: exercise.id,  // ID упражнения (должен быть ID документа в Firestore)
-            exercisename: exercise.exercisename || "Не указано",  // Название упражнения
-            reps: exercise.reps || 0,  // Количество повторов
-            sets: exercise.sets || 0,  // Количество подходов
-            weights: weights.length > 0 ? weights : [0]  // Массив введенных весов
+            exerciseid: exercise.id,  // Exercise ID (this should be the Firestore document ID)
+            exercisename: exercise.exercisename,  // Exercise name
+            reps: exercise.reps,  // Number of reps
+            sets: exercise.sets,  // Number of sets
+            weight: weight  // Weight value input by the user
         };
     });
 
-    // Проверяем, авторизован ли пользователь
+    // Check if the user is logged in
     const user = firebase.auth().currentUser;
     if (user) {
-        // Если пользователь авторизован, сохраняем данные тренировки в Firestore
+        // User is logged in, save the workout data
         db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
-            exercises: workoutData,  // Данные о упражнениях
-            date: new Date(),  // Текущая дата
-            status: "completed"  // Отмечаем тренировку как завершенную
+            exercises: workoutData,
+            date: new Date(),
+            status: "completed"  // Mark the workout as completed
         })
         .then(() => {
-            // Уведомляем пользователя об успешном сохранении тренировки
             alert("Тренировка успешно завершена и сохранена!");
             console.log("Workout saved to Firestore:", workoutData);
         })
         .catch((error) => {
-            // Обрабатываем ошибки при сохранении данных
             console.error("Error saving workout:", error);
         });
     } else {
-        // Если пользователь не авторизован, показываем сообщение или перенаправляем на страницу входа
+        // If the user is not logged in, show a message or redirect to login page
         alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
     }
-
-    // Отображаем завершенную тренировку с введенными весами
+    // Render the completed workout UI with weight
     workoutData.forEach((exercise, index) => {
         const savedExercise = document.createElement("div");
-
-        // Вставляем данные упражнения, включая введенные веса, в UI
+        // Insert the exercise data, including weight, in the UI
         savedExercise.innerHTML = ` 
             <label for="checkbox-${exercise.exerciseid}">
-                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.setс} подходов, Вес: ${exercise.weights.join(', ')} кг
+                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${exercise.weight} кг
             </label>
             <button onclick="showDetailsPopup('${exercise.exerciseid}')">Подробнее</button>
         `;
         savedContainer.appendChild(savedExercise);
     });
-
-    // Опционально скрываем секцию с результатами тренировки
+    // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
 });
 
