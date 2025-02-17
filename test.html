@@ -382,62 +382,34 @@ function toggleButtons(isSaved) {
 }
 
 
-// Функция для завершения тренировки
-function completeWorkout() {
-    const savedContainer = document.getElementById("savedWorkout");
-    savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
-
-    // Считывание веса с каждого упражнения
-    const workoutData = workoutPlan.map(exercise => {
-        const weightInput = document.querySelector(`#weight-${CSS.escape(exercise.id)}`);
-        return {
-            exerciseid: exercise.id,
-            exercisename: exercise.exercisename,
-            weight: weightInput ? weightInput.value : null
-        };
-    });
-
-    // Сохранение в Firestore
-    try {
-        db.collection("completed_workouts").add({
-            workoutData: workoutData,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        console.log("Workout saved to Firestore:", workoutData);
-        alert("Тренировка сохранена!");
-    } catch (error) {
-        console.error("Ошибка при сохранении тренировки:", error);
-        alert("Произошла ошибка при сохранении тренировки.");
-    }
-}
-
-    
-
+// Обработчик события для кнопки завершения тренировки
 document.getElementById("complete-workout-btn").addEventListener("click", async function () {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
-    // Проверяем, есть ли инпуты с весом
-    console.log("Поиск инпутов веса...");
+    // Получаем текущую дату
+    const currentDate = new Date().toISOString();
 
+    // Сбор данных о тренировке
     const workoutData = workoutPlan.map(exercise => {
         const weightInput = document.querySelector(`#weight-${CSS.escape(exercise.id)}`);
-        console.log(`exercise.id: ${exercise.id}, найден инпут:`, weightInput);
-
         return {
             exerciseid: exercise.id,
             exercisename: exercise.exercisename,
-            weight: weightInput ? weightInput.value : null  // Считываем значение веса
+            reps: exercise.reps, // Предполагается, что количество повторений хранится в `exercise`
+            sets: exercise.sets, // Предполагается, что количество подходов хранится в `exercise`
+            weight: weightInput ? weightInput.value : null // Получаем значение веса
         };
     });
 
-    console.log("Workout data перед сохранением:", workoutData);
+    // Получаем uid текущего пользователя
+    const userId = auth.currentUser.uid;
 
     try {
-        // Сохраняем в Firestore
-        await db.collection("completed_workouts").add({
-            workoutData: workoutData,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()  // Сохраняем время тренировки
+        // Сохраняем данные о тренировке в Firestore
+        await db.collection("userWorkouts").doc(userId).collection("workouts").add({
+            date: currentDate,
+            exercises: workoutData // Сохраняем массив с упражнениями
         });
 
         console.log("Workout saved to Firestore:", workoutData);
