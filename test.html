@@ -318,8 +318,6 @@ function saveWorkout() {
             <h3>${exercisename}</h3>
             <p>Повторы: ${reps}</p>
             <p>Подходы: ${sets}</p>
-            <label for="weight-${exerciseId}">Вес:</label>
-            <input type="number" id="weight-${exerciseId}" name="weight-${exerciseId}" placeholder="Введите вес" min="1" step="0.5">
         `;
 
         container.appendChild(savedExerciseElement);
@@ -385,41 +383,39 @@ function toggleButtons(isSaved) {
 // Объект для хранения весов
 const weightsBuffer = {};
 
-// Создаем блок с сохраненными упражнениями
-const savedExerciseElement = document.createElement("div");
-savedExerciseElement.id = `saved-exercise-${exerciseId}`;
-savedExerciseElement.innerHTML = `
-    <h3>${exercisename}</h3>
-    <p>Повторы: ${reps}</p>
-    <p>Подходы: ${sets}</p>
-    <label for="weight-${exerciseId}">Вес:</label>
-    <input type="number" id="weight-${exerciseId}" name="weight-${exerciseId}" placeholder="Введите вес" min="1" step="0.5">
-`;
+document.addEventListener('DOMContentLoaded', () => {
+    const weightsBuffer = {};
 
-// Добавляем созданный элемент на страницу
-document.body.appendChild(savedExerciseElement);
+    const savedExerciseElement = document.createElement("div");
+    savedExerciseElement.id = `saved-exercise-${exerciseId}`;
+    savedExerciseElement.innerHTML = `
+        <h3>${exercisename}</h3>
+        <p>Повторы: ${reps}</p>
+        <p>Подходы: ${sets}</p>
+        <label for="weight-${exerciseId}">Вес:</label>
+        <input type="number" id="weight-${exerciseId}" name="weight-${exerciseId}" placeholder="Введите вес" min="1" step="0.5">
+    `;
 
-// Находим поле ввода веса после добавления элемента на страницу
-const weightInput = savedExerciseElement.querySelector(`#weight-${exerciseId}`);
+    document.body.appendChild(savedExerciseElement);
+    console.log('Создан элемент для упражнения:', savedExerciseElement);
 
-// Проверяем, что поле ввода найдено
-if (weightInput) {
-    console.log(`Поле ввода веса найдено: ${weightInput.id}`);
+    const weightInput = savedExerciseElement.querySelector(`#weight-${exerciseId}`);
+    if (weightInput) {
+        console.log(`Поле ввода веса найдено: ${weightInput.id}`);
 
-    // Добавляем обработчик события для поля ввода веса
-weightInput.addEventListener('change', (event) => {
-    const weightValue = parseFloat(event.target.value);
-    if (!isNaN(weightValue)) {
-        weightsBuffer[exerciseId] = weightValue;
-        console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
+        weightInput.addEventListener('change', (event) => {
+            const weightValue = parseFloat(event.target.value);
+            if (!isNaN(weightValue)) {
+                weightsBuffer[exerciseId] = weightValue;
+                console.log(`Вес для упражнения ${exerciseId} обновлен: ${weightValue}`);
+            } else {
+                console.log(`Вес для упражнения ${exerciseId} не является числом.`);
+            }
+        });
     } else {
-        console.log(`Вес для упражнения ${exerciseId} не является числом.`);
+        console.error(`Поле ввода веса не найдено для exerciseId: ${exerciseId}`);
     }
 });
-
-    });
-} else {
-    console.error(`Поле ввода веса не найдено для exerciseId: ${exerciseId}`);
 }
 
 // Добавляем созданный элемент на страницу
