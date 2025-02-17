@@ -33,7 +33,7 @@
 
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          userStatus.textContent = `Welcome, ${user.email}`; // Corrected
+          userStatus.textContent = `Welcome, ${user.email}`;
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
@@ -82,7 +82,7 @@
         if (exerciseDoc.exists()) {
           exercises.push(exerciseDoc.data());
         } else {
-          console.error(`Exercise with ID ${id} not found.`); // Corrected
+          console.error(`Exercise with ID ${id} not found.`);
         }
       }
       return exercises;
@@ -95,13 +95,13 @@
         const workoutElement = document.createElement("div");
         workoutElement.innerHTML = 
           `<p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-          <button onclick="showWorkoutDetails(${index})">Подробнее</button>`; // Corrected
+          <button onclick="showWorkoutDetails(${index})">Подробнее</button>`;
         workoutElement.dataset.details = JSON.stringify(workout);
         container.appendChild(workoutElement);
       });
     }
 
-    window.updateWeights = async function(workoutId, exerciseCount, workoutData) {
+    window.updateWeights = async function(workoutId, exerciseCount) {
       const user = auth.currentUser;
       if (!user) {
         console.error("User not authenticated");
@@ -115,10 +115,9 @@
       const updates = {};
 
       for (let i = 0; i < exerciseCount; i++) {
-        const weightInput = document.getElementById(`weight-${i}`); // Corrected to use backticks
+        const weightInput = document.getElementById(`weight-${i}`);
         const weight = parseFloat(weightInput.value) || 0;
-        
-        // Corrected syntax for accessing object properties
+
         updates[`exercises.${i}.weight`] = weight; // Use backticks for the key
       }
 
@@ -149,7 +148,7 @@
         <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
         <p><strong>Exercises:</strong></p>
         <ul>${exercisesList}</ul>
-        <button onclick="updateWeights('${workoutData.id}', ${workoutData.exercises.length}, ${JSON.stringify(workoutData)})">Сохранить изменения</button>`;
+        <button onclick="updateWeights('${workoutData.id}', ${workoutData.exercises.length})">Сохранить изменения</button>`; // Removed JSON.stringify for workoutData
 
       document.body.classList.add("modal-open");
       document.getElementById("overlay").style.display = "block";
