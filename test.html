@@ -1,13 +1,27 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
+</head>
+<body>
+
+  <!-- Placeholder for dynamic menu -->
+  <div id="navbar-container"></div>
+
+  <h1>Добро пожаловать в свой профиль</h1>
+  <div id="workouts-list"></div>
+
+  <div id="overlay" onclick="closePopup()"></div>
+  <div id="popup">
+    <button class="close-btn" onclick="closePopup()">&times;</button>
+    <div id="popup-content"></div>
+  </div>
 
   <!-- Firebase SDK -->
-  <script type=" } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
@@ -21,12 +35,16 @@
       measurementId: "G-MJ8K8ZNQM4"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Function to check authentication state
+    window.closePopup = function() {
+      document.body.classList.remove("modal-open");
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("popup").style.display = "none";
+    };
+
     function checkAuthState() {
       const adminButton = document.getElementById("admin-panel");
       const userStatus = document.getElementById("user-status");
@@ -35,12 +53,11 @@
 
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          userStatus.textContent = `Welcome, ${user.email}`;
+          userStatus.textContent = Welcome, ${user.email};
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
 
-          // Load user workouts
           await loadUserWorkouts(user.uid);
         } else {
           userStatus.textContent = 'Please log in';
@@ -51,7 +68,6 @@
       });
     }
 
-    // Log out function
     window.logoutUser = function() {
       signOut(auth)
         .then(() => {
@@ -70,12 +86,8 @@
       const snapshot = await getDocs(userWorkoutsRef);
       let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-      console.log("Loaded workouts:", workouts); // Отладочная информация
-
-      // Now, fetch exercises for each workout
       for (let workout of workouts) {
         if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-          // Assuming each workout document contains an array of exercise IDs
           workout.exercises = await loadExercises(workout.exerciseIds);
         }
       }
@@ -85,18 +97,16 @@
 
     async function loadExercises(exerciseIds) {
       const exercises = [];
-
       for (let id of exerciseIds) {
-        const exerciseRef = doc(db, "exercises", id);  // Assuming exercises are stored in "exercises" collection
+        const exerciseRef = doc(db, "exercises", id);
         const exerciseDoc = await getDoc(exerciseRef);
 
         if (exerciseDoc.exists()) {
-          exercises.push(exerciseDoc.data());  // Store the exercise data
+          exercises.push(exerciseDoc.data());
         } else {
-          console.error(`Exercise with ID ${id} not found.`);
+          console.error(Exercise with ID ${id} not found.);
         }
       }
-
       return exercises;
     }
 
@@ -112,39 +122,12 @@
         workoutElement.dataset.details = JSON.stringify(workout);
         container.appendChild(workoutElement);
       });
-
-      console.log("Displayed workouts:", workouts); // Отладочная информация
-    }
-
-    function displayWorkoutDetails(workoutData) {
-      const exercisesList = workoutData.exercises
-        ? workoutData.exercises.map((exercise, exerciseIndex) => 
-            `<li>
-              <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-              <input type="number" value="${exercise.weight || ""}" id="weight-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-              <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-            </li>`
-          ).join("")
-        : "Нет доступных данных";
-
-      document.getElementById("popup-content").innerHTML = `
-        <h3>Детали тренировки</h3>
-        <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-        <p><strong>Упражнения:</strong></p>
-        <ul>${exercisesList}</ul>
-        <button onclick="updateWorkout('${workoutData.id}')">Сохранить изменения</button>
-      `;
-
-      document.body.classList.add("modal-open");
-      document.getElementById("overlay").style.display = "block";
-      document.getElementById("popup").style.display = "block";
     }
 
     window.showWorkoutDetails = function(index) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[index];
       const workoutData = JSON.parse(workoutElement.dataset.details);
 
-      // Создание списка упражнений с полями ввода для редактирования веса
       const exercisesList = workoutData.exercises
         ? workoutData.exercises.map((exercise, exerciseIndex) => 
             `<li>
@@ -168,91 +151,32 @@
       document.getElementById("popup").style.display = "block";
     };
 
-    window.closePopup = function() {
-      document.body.classList.remove("modal-open");
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("popup").style.display = "none";
-    };
-
     window.updateWorkout = async function(workoutId, workoutIndex) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
       const workoutData = JSON.parse(workoutElement.dataset.details);
-      
+
       workoutData.exercises.forEach((exercise, exerciseIndex) => {
-        const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
-        exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
+        const weightInput = document.getElementById(weight-${workoutIndex}-${exerciseIndex});
+        exercise.weight = parseFloat(weightInput.value) || null;
       });
-const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-      await updateDoc(workoutRef, {
-        exercises: workoutData.exercises // Обновляем массив упражнений
-      });
+
+      const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
+      await updateDoc(workoutRef, { exercises: workoutData.exercises });
 
       closePopup();
-      loadUserWorkouts(auth.currentUser.uid); // Перезагрузить тренировки для отображения обновлений
+      loadUserWorkouts(auth.currentUser.uid);
     };
 
-    // Load menu and check authentication on page load
     document.addEventListener("DOMContentLoaded", function () {
       fetch('menu.html')
         .then(response => response.text())
         .then(html => {
           document.getElementById("navbar-container").innerHTML = html;
           checkAuthState();
-          initBurgerMenu();
-          
-          const urlParams = new URLSearchParams(window.location.search);
-          const workoutId = urlParams.get('workoutId');
-          if (workoutId) {
-            showWorkoutDetailsById(workoutId);
-          }
         })
-        .catch(err => {
-          console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = `
-            <span id="user-status">Please log in</span>
-            <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-          checkAuthState();
-        });
+        .catch(err => console.error("Ошибка загрузки меню:", err));
     });
-
-    async function showWorkoutDetailsById(workoutId) {
-      const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-      const workoutDoc = await getDoc(workoutRef);
-      if (workoutDoc.exists()) {
-        const workoutData = workoutDoc.data();
-        displayWorkoutDetails(workoutData);
-      } else {
-        console.error("Workout not found");
-      }
-    }
-
-    // Function to initialize burger menu
-    function initBurgerMenu() {
-      const menuToggle = document.querySelector(".menu-toggle");
-      const navbarList = document.querySelector(".navbar-list");
-
-      if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", function () {
-          navbarList.classList.toggle("active");
-          menuToggle.classList.toggle("active");
-        });
-      }
-    }
   </script>
-</head>
-<body>
-  <!-- Placeholder for dynamic menu -->
-  <div id="navbar-container"></div>
 
-  <h1>Добро пожаловать в свой профиль</h1>
-  <div id="workouts-list"></div>
-
-  <div id="overlay" onclick="closePopup()"></div>
-  <div id="popup">
-    <button class="close-btn" onclick="closePopup()">&times;</button>
-    <div id="popup-content"></div>
-  </div>
 </body>
 </html>
-     
