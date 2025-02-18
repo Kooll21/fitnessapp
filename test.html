@@ -438,6 +438,15 @@ function toggleDetails(button, videoUrl, description) {
 }
 
 document.getElementById("complete-workout-btn").addEventListener("click", function () {
+    const button = this;
+
+    // Проверяем, если тренировка уже завершена
+    if (button.disabled) {
+        return; // Если кнопка уже была нажата, ничего не делаем
+    }
+
+    button.disabled = true; // Отключаем кнопку, чтобы предотвратить повторные нажатия
+
     const user = firebase.auth().currentUser;
     if (user) {
         const workoutData = workoutPlan.map(exercise => {
@@ -455,11 +464,14 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
 
         // Получаем список сохраненных тренировок пользователя
         userDocRef.collection("workouts").get().then(snapshot => {
-            // Предположим, что тренировку нужно обновить по ID (например, "saved")
+            // Проверка наличия сохраненных тренировок для обновления
             if (snapshot.empty) {
                 console.log("Нет сохраненных тренировок для обновления.");
+                button.disabled = false; // Включаем кнопку обратно, если нет тренировок
                 return;
             }
+
+            let updateCount = 0;  // Счётчик обновлений
 
             snapshot.forEach(doc => {
                 const workoutRef = doc.ref;  // Получаем ссылку на документ тренировки
@@ -468,16 +480,21 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
                     date: new Date(),
                     status: "completed"
                 }).then(() => {
+                    updateCount++;
                     console.log("Тренировка обновлена успешно!");
-                    // Скрываем кнопку после завершения тренировки
-                    document.getElementById("complete-workout-btn").style.display = "none";
-                    alert("Тренировка завершена!");
+                    if (updateCount === snapshot.size) {
+                        // Показываем сообщение и скрываем кнопку только после последнего обновления
+                        alert("Тренировка завершена!");
+                        document.getElementById("complete-workout-btn").style.display = "none";
+                    }
                 }).catch(error => {
                     console.error("Ошибка обновления тренировки:", error);
+                    button.disabled = false; // Включаем кнопку обратно в случае ошибки
                 });
             });
         }).catch(error => {
             console.error("Ошибка при получении тренировок:", error);
+            button.disabled = false; // Включаем кнопку обратно в случае ошибки
         });
     }
 
