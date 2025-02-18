@@ -437,29 +437,50 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-document.getElementById("complete-workout-btn").addEventListener("click", function() {
+document.getElementById("complete-workout-btn").addEventListener("click", function () {
     const user = firebase.auth().currentUser;
     if (user) {
         const workoutData = workoutPlan.map(exercise => {
-            const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
+            const weight = document.getElementById(`saved-weight-${exercise.id}`).value || "не указан";
             return {
                 exerciseid: exercise.id,
+                exercisename: exercise.exercisename,
+                reps: exercise.reps,
+                sets: exercise.sets,
                 weight: weight
             };
         });
 
         const userDocRef = db.collection("userWorkouts").doc(user.uid);
-        const workoutDocRef = userDocRef.collection("workouts").doc("saved"); // Получаем сохраненную тренировку
 
-        workoutDocRef.update({
-            exercises: workoutData,
-            status: "completed"
-        }).then(() => {
-            console.log("Тренировка обновлена");
+        // Получаем список сохраненных тренировок пользователя
+        userDocRef.collection("workouts").get().then(snapshot => {
+            // Предположим, что тренировку нужно обновить по ID (например, "saved")
+            if (snapshot.empty) {
+                console.log("Нет сохраненных тренировок для обновления.");
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const workoutRef = doc.ref;  // Получаем ссылку на документ тренировки
+                workoutRef.update({
+                    exercises: workoutData,
+                    date: new Date(),
+                    status: "completed"
+                }).then(() => {
+                    console.log("Тренировка обновлена успешно!");
+                    document.getElementById("deleteWorkoutBtn").style.display = "none";
+                    document.getElementById("complete-workout-btn").style.display = "none";
+                    alert("Тренировка завершена!");
+                }).catch(error => {
+                    console.error("Ошибка обновления тренировки:", error);
+                });
+            });
         }).catch(error => {
-            console.error("Ошибка обновления тренировки:", error);
+            console.error("Ошибка при получении тренировок:", error);
         });
     }
+
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
 });
