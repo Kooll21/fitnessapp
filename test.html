@@ -200,7 +200,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
             <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
           checkAuthState();
         });
-    });
+
 async function showWorkoutDetailsById(workoutId) {
   const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
   const workoutDoc = await getDoc(workoutRef);
