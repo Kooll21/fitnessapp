@@ -1,107 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Details</title>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+            authDomain: "fitnessapp-f519f.firebaseapp.com",
+            projectId: "fitnessapp-f519f",
+            storageBucket: "fitnessapp-f519f.appspot.com",
+            messagingSenderId: "1000735476286",
+            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+            measurementId: "G-MJ8K8ZNQM4"
+        };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-      authDomain: "fitnessapp-f519f.firebaseapp.com",
-      projectId: "fitnessapp-f519f",
-      storageBucket: "fitnessapp-f519f.appspot.com",
-      messagingSenderId: "1000735476286",
-      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-      measurementId: "G-MJ8K8ZNQM4"
-    };
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        // Проверка авторизации
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById("user-status").textContent = Вы вошли как ${user.email};
+            } else {
+                document.getElementById("user-status").textContent = "Войдите в аккаунт";
+            }
+        });
 
-    // Function to check authentication state
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("user-status").textContent = Welcome, ${user.email};
-      } else {
-        document.getElementById("user-status").textContent = 'Please log in';
-      }
-    });
+        // Глобальные функции
+        window.loadWorkoutDetails = async function() {
+            const workoutId = document.getElementById("workout-id").value.trim();
+            if (!workoutId) {
+                alert("Введите Workout ID!");
+                return;
+            }
 
-    // Load workout details by workout ID
-    window.loadWorkoutDetails = async function() {
-      const workoutId = document.getElementById("workout-id").value;
-      if (!workoutId) {
-        alert("Please enter a workout ID.");
-        return;
-      }
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Сначала войдите в систему!");
+                return;
+            }
 
-      const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-      const workoutDoc = await getDoc(workoutRef);
+            const workoutRef = doc(db, "userWorkouts", user.uid, "workouts", workoutId);
+            const workoutDoc = await getDoc(workoutRef);
 
-      if (workoutDoc.exists()) {
-        const workoutData = workoutDoc.data();
-        displayWorkoutDetails(workoutData, workoutId);
-      } else {
-        alert("Workout not found!");
-      }
-    };
+            if (!workoutDoc.exists()) {
+                alert("Тренировка не найдена!");
+                return;
+            }
 
-    // Display workout details
-    function displayWorkoutDetails(workoutData, workoutId) {
-      const container = document.getElementById("workout-details");
-      container.innerHTML = `
-        <h3>Workout Details</h3>
-        <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-        <p><strong>Exercises:</strong></p>
-        <ul>
-          ${workoutData.exercises.map((exercise, index) => `
-            <li>
-              <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-              <input type="number" value="${exercise.weight || ""}" id="weight-${workoutId}-${index}" placeholder="Weight (kg)" />
-              <span>${exercise.reps} reps, ${exercise.sets} sets</span>
-            </li>
-          `).join('')}
-        </ul>
-        <button onclick="updateWorkout('${workoutId}')">Save Changes</button>
-      `;
-    }
+            const workoutData = workoutDoc.data();
+            displayWorkoutDetails(workoutData, workoutId);
+        };
 
-    // Update workout details
-    window.updateWorkout = async function(workoutId) {
-      const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-      const workoutDoc = await getDoc(workoutRef);
-      const workoutData = workoutDoc.data();
+        function displayWorkoutDetails(workoutData, workoutId) {
+            const container = document.getElementById("workout-details");
+            container.innerHTML = `
+                <h3>Детали тренировки</h3>
+                <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+                <p><strong>Упражнения:</strong></p>
+                <ul>
+                    ${workoutData.exercises.map((exercise, index) => `
+                        <li>
+                            <strong>${exercise.exercisename || "Без названия"}</strong>: 
+                            <input type="number" value="${exercise.weight || ""}" id="weight-${index}" /> кг
+                            <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
+                        </li>
+                    `).join("")}
+                </ul>
+                <button onclick="updateWorkout('${workoutId}')">Сохранить изменения</button>
+            `;
+        }
 
-      workoutData.exercises.forEach((exercise, index) => {
-        const weightInput = document.getElementById(weight-${workoutId}-${index});
-        exercise.weight = parseFloat(weightInput.value) || null;
-      });
+        window.updateWorkout = async function(workoutId) {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Сначала войдите в систему!");
+                return;
+            }
 
-      await updateDoc(workoutRef, {
-        exercises: workoutData.exercises
-      });
+            const workoutRef = doc(db, "userWorkouts", user.uid, "workouts", workoutId);
+            const workoutDoc = await getDoc(workoutRef);
+            const workoutData = workoutDoc.data();
 
-      alert("Workout updated!");
-    };
-  </script>
+            workoutData.exercises.forEach((exercise, index) => {
+                const weightInput = document.getElementById(weight-${index});
+                exercise.weight = parseFloat(weightInput.value) || null;
+            });
+
+            await updateDoc(workoutRef, { exercises: workoutData.exercises });
+
+            alert("Тренировка обновлена!");
+        };
+    </script>
 </head>
 <body>
 
-  <div id="user-status"></div>
+    <div id="user-status"></div>
 
-  <h1>Enter Workout ID</h1>
-  <input type="text" id="workout-id" placeholder="Enter workout ID (e.g., K1TSfG6tFHBMcGRbqLgS)" />
-  <button onclick="loadWorkoutDetails()">Load Workout</button>
+    <h1>Введите ID тренировки</h1>
+    <input type="text" id="workout-id" placeholder="Например: K1TSfG6tFHBMcGRbqLgS" />
+    <button onclick="loadWorkoutDetails()">Загрузить тренировку</button>
 
-  <div id="workout-details"></div>
+    <div id="workout-details"></div>
 
 </body>
 </html>
