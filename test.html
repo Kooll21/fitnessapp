@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
@@ -77,7 +76,8 @@
         </li>
       `).join("") : "Нет доступных данных";
 
-      document.getElementById("popup-content").innerHTML = `
+      // Create and display the popup with workout details
+      const popupContent = `
         <h3>Детали тренировки</h3>
         <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
         <p><strong>Упражнения:</strong></p>
@@ -85,17 +85,31 @@
         <button onclick="updateWorkout('${workoutId}')">Сохранить изменения</button>
       `;
 
+      // Create a new popup dynamically
+      const popupElement = document.createElement('div');
+      popupElement.id = popupId;
+      popupElement.classList.add('popup');
+      popupElement.innerHTML = `
+        <div class="popup-content">
+          ${popupContent}
+          <button onclick="closePopup('${popupId}')">&times; Закрыть</button>
+        </div>
+      `;
+
+      document.body.appendChild(popupElement);
       document.body.classList.add("modal-open");
       document.getElementById("overlay").style.display = "block";
-      document.getElementById(popupId).style.display = "block";
       history.pushState(null, "", ?id=${workoutId});  // Update URL with workout ID
     };
 
-    window.closePopup = function() {
+    window.closePopup = function(popupId) {
+      const popup = document.getElementById(popupId);
+      if (popup) {
+        popup.remove(); // Remove the popup from DOM
+      }
       document.body.classList.remove("modal-open");
       document.getElementById("overlay").style.display = "none";
-      document.querySelectorAll(".popup").forEach(popup => popup.style.display = "none");  // Hide all popups
-      history.pushState(null, "", window.location.pathname);  // Revert URL when closing popup
+      history.pushState(null, "", window.location.pathname);  // Reset URL when closing popup
     };
 
     window.updateWorkout = async function(workoutId) {
@@ -112,7 +126,7 @@
       });
 
       await updateDoc(workoutRef, { exercises: workoutData.exercises });
-      closePopup();
+      closePopup(popup-${workoutId});
       loadUserWorkouts(auth.currentUser.uid);  // Reload workouts
     };
 
@@ -127,9 +141,6 @@
   <div id="workouts-list"></div>
 
   <div id="overlay" onclick="closePopup()"></div>
-  <div id="popup" class="popup">
-    <button class="close-btn" onclick="closePopup()">&times;</button>
-    <div id="popup-content"></div>
-  </div>
+
 </body>
 </html>
