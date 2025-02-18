@@ -433,7 +433,7 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-document.getElementById("completeWorkoutBtn").addEventListener("click", async function() {
+document.getElementById("complete-workout-btn").addEventListener("click", async function() {
     const user = firebase.auth().currentUser;
     if (user) {
         const workoutData = [];
