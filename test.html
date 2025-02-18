@@ -437,6 +437,7 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
+      // Изменяем вес и щавершаем тренировку 
 document.getElementById("complete-workout-btn").addEventListener("click", function () {
     const button = this;
 
@@ -494,6 +495,8 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
 
                         // Скрыть кнопку "Тренировка выполнена"
                         document.getElementById("complete-workout-btn").style.display = "none";
+                        // Скрыть кнопку "Удалить тренировку"
+                        document.getElementById("deleteWorkoutBtn").style.display = "none";
 
                         // Показать кнопки для выбора группы мышц и генерации тренировки
                         document.getElementById("selectMuscleGroupBtn").style.display = "inline-block";
@@ -509,6 +512,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
             button.disabled = false; // Включаем кнопку обратно в случае ошибки
         });
     }
+
 
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
