@@ -191,7 +191,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
   if (workoutId) {
     showWorkoutDetailsById(workoutId);
      
-        })
+        });
         .catch(err => {
           console.error("Ошибка загрузки меню:", err);
           document.getElementById("navbar-container").innerHTML = `
