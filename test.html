@@ -284,7 +284,7 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", async functi
 
     // Сбор данных о весах, повторениях и подходах для каждой тренировки
     for (const exercise of workoutPlan) {
-        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан"; // Получаем значение веса
+        const weight = document.getElementById(`weight-${newExercise.id}`).value || "не указан"; // Получаем значение веса
 
         // Извлечение повторений и подходов из workoutPlan
         const reps = exercise.reps || "не указано"; // Получаем количество повторений из workoutPlan
