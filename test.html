@@ -263,8 +263,8 @@ function applyReplacement(exerciseid) {
             <p>Подходы: ${newExercise.sets}</p>
             <p>Повторы: ${newExercise.reps}</p>
             <!-- Скрываем поле для ввода веса при замене упражнения -->
-            <label for="weight-${newExercise.id}" class="hidden-weight">Вес (кг):</label>
-            <input type="number" id="weight-${newExercise.id}" placeholder="Введите вес" min="0" class="hidden-weight">
+            <label for="weight-${newExercise.id}" class="hidden">Вес (кг):</label>
+            <input type="number" id="weight-${newExercise.id}" placeholder="Введите вес" min="0" class="hidden">
             <button onclick="toggleDetails(this, '${newExercise.video.replace('watch?v=', 'embed/')}', '${newExercise.description}')">Подробнее</button>
             <button onclick="openReplaceModal('${newExercise.id}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
             <div class="exercise-details" style="display:none;"></div>
