@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Display User IDs and Workouts</title>
+  <title>Search Workout by ID</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -22,76 +22,84 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function loadUserIDs() {
+    async function searchWorkoutById(workoutId) {
       try {
-        console.log("Loading user IDs..."); // Отладочная информация
+        console.log(`Searching for workout with ID: ${workoutId}`); // Отладочная информация
         const userWorkoutsRef = collection(db, "userWorkouts");
-        const snapshot = await getDocs(userWorkoutsRef);
-        let userIds = snapshot.docs.map(doc => {
-          console.log(`Document ID: ${doc.id}, Data:`, doc.data()); // Отладочная информация
-          return doc.id;
-        });
+        const userSnapshot = await getDocs(userWorkoutsRef);
 
-        console.log("Loaded user IDs:", userIds); // Отладочная информация
-        displayUserIDs(userIds);
+        for (let userDoc of userSnapshot.docs) {
+          const userId = userDoc.id;
+          const workoutRef = doc(db, "userWorkouts", userId, "workouts", workoutId);
+          const workoutDoc = await getDoc(workoutRef);
+
+          if (workoutDoc.exists()) {
+            console.log(`Found workout for user ${userId}:`, workoutDoc.data()); // Отладочная информация
+            displayWorkoutDetails(userId, workoutDoc.id, workoutDoc.data());
+            updateURLWithWorkoutID(workoutId);
+            return;
+          }
+        }
+
+        console.log("Workout not found"); // Отладочная информация
+        displayWorkoutDetails(null, null, null);
+        updateURLWithWorkoutID(null);
       } catch (error) {
-        console.error('Error loading user IDs:', error);
+        console.error('Error searching for workout:', error);
       }
     }
 
-    async function loadWorkouts(userId) {
-      try {
-        console.log(`Loading workouts for user: ${userId}`); // Отладочная информация
-        const workoutsRef = collection(db, "userWorkouts", userId, "workouts");
-        const snapshot = await getDocs(workoutsRef);
-        let workouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        console.log(`Loaded workouts for user ${userId}:`, workouts); // Отладочная информация
-        return workouts;
-      } catch (error) {
-        console.error(`Error loading workouts for user ${userId}:`, error);
-        return [];
+    function displayWorkoutDetails(userId, workoutId, workoutData) {
+      const container = document.getElementById("workout-details-container");
+      if (workoutData) {
+        container.innerHTML = `
+          <h2>Workout Details</h2>
+          <p><strong>User ID:</strong> ${userId}</p>
+          <p><strong>Workout ID:</strong> ${workoutId}</p>
+          <p><strong>Workout Date:</strong> ${workoutData.date ? new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU") : "Дата не указана"}</p>
+          <p><strong>Exercises:</strong></p>
+          <ul>
+            ${workoutData.exercises ? workoutData.exercises.map(exercise => `
+              <li>
+                <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+                ${exercise.weight || ""} кг, ${exercise.reps} повторений, ${exercise.sets} сета
+              </li>
+            `).join("") : "No exercises available"}
+          </ul>
+        `;
+      } else {
+        container.innerHTML = "<p>Workout not found</p>";
       }
     }
 
-    async function displayUserIDs(userIds) {
-      const container = document.getElementById("user-ids-container");
-      container.innerHTML = "<h2>User IDs and Workouts from Firestore</h2>";
-      for (let userId of userIds) {
-        const userElement = document.createElement("div");
-        userElement.innerHTML = `<h3>User ID: ${userId}</h3>`;
-        container.appendChild(userElement);
-
-        const workouts = await loadWorkouts(userId);
-        const workoutsElement = document.createElement("div");
-        workoutsElement.innerHTML = "<h4>Workouts:</h4>";
-        workouts.forEach(workout => {
-          const workoutElement = document.createElement("div");
-          workoutElement.innerHTML = `
-            <p><strong>Workout ID:</strong> ${workout.id}</p>
-            <p><strong>Workout Date:</strong> ${workout.date ? new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU") : "Дата не указана"}</p>
-            <p><strong>Exercises:</strong></p>
-            <ul>
-              ${workout.exercises ? workout.exercises.map(exercise => `
-                <li>
-                  <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-                  ${exercise.weight || ""} кг, ${exercise.reps} повторений, ${exercise.sets} сета
-                </li>
-              `).join("") : "No exercises available"}
-            </ul>
-          `;
-          workoutsElement.appendChild(workoutElement);
-        });
-        userElement.appendChild(workoutsElement);
+    function updateURLWithWorkoutID(workoutId) {
+      if (workoutId) {
+        history.pushState(null, '', `?workoutId=${workoutId}`);
+      } else {
+        history.pushState(null, '', window.location.pathname);
       }
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      loadUserIDs();
+      const searchButton = document.getElementById("search-button");
+      searchButton.addEventListener("click", function () {
+        const workoutId = document.getElementById("workout-id-input").value;
+        searchWorkoutById(workoutId);
+      });
+
+      // Check if there's a workout ID in the URL and load it
+      const urlParams = new URLSearchParams(window.location.search);
+      const workoutIdFromURL = urlParams.get('workoutId');
+      if (workoutIdFromURL) {
+        searchWorkoutById(workoutIdFromURL);
+      }
     });
   </script>
 </head>
 <body>
-  <div id="user-ids-container"></div>
+  <h1>Search Workout by ID</h1>
+  <input type="text" id="workout-id-input" placeholder="Enter Workout ID">
+  <button id="search-button">Search</button>
+  <div id="workout-details-container"></div>
 </body>
 </html>
