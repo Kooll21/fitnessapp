@@ -276,7 +276,6 @@ function applyReplacement(exerciseid) {
 }
 
 // Функция для сохранения тренировки
-// Функция для сохранения тренировки
 document.getElementById("saveWorkoutBtn").addEventListener("click", async function() {
     const savedContainer = document.getElementById("savedWorkout");
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
@@ -297,10 +296,11 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", async functi
             sets: sets
         }); // Добавляем данные в массив
 
-        const savedExercise = document.createElement("div");
+ const savedExercise = document.createElement("div");
         savedExercise.innerHTML = `
-            <label>${exercise.exercisename}, Вес: ${weight} кг, Повторения: ${reps}, Подходы: ${sets}</label>
-            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+            <label>${exercise.exercisename}</label>
+            <input type="number" id="weight-${exercise.id}" value="${weight}" placeholder="Введите вес (кг)" min="0">
+            <label>Повторения: ${exercise.reps}, Подходы: ${exercise.sets}</label>
         `;
         savedContainer.appendChild(savedExercise); // Добавляем сохраненные данные на страницу
     }
