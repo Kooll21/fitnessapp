@@ -225,8 +225,8 @@ function displayWorkout(workoutPlan) {
             <p>Мышцы: ${exercise.muscle}</p>
             <p>Подходы: ${exercise.sets}</p>
             <p>Повторы: ${exercise.reps}</p>
-            <label for="weight-${exercise.id}">Вес (кг):</label>
-            <input type="number" id="weight-${exercise.id}" placeholder="Введите вес" min="0" style="display:none;">
+            <label for="weight-${index}">Вес (кг):</label>
+            <input type="number" id="weight-${index}" placeholder="Введите вес" min="0">
             <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
             <div class="exercise-details" style="display:none;"></div>
             <button onclick="openReplaceModal('${exercise.id}', '${exercise.muscle}', '${exercise.exercisetype}')">Заменить</button>
@@ -436,34 +436,32 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
+      window.updateWorkout = async function(workoutId) {
+    const workoutData = workoutPlan.map((exercise, index) => {
+        const weightInput = document.getElementById(`weight-${index}`);
+        return {
+            ...exercise,
+            weight: parseFloat(weightInput.value) || null // Обновляем вес или устанавливаем в null
+        };
+    });
+
+    const workoutRef = db.collection("userWorkouts").doc(auth.currentUser.uid).collection("workouts").doc(workoutId);
+    await workoutRef.update({
+        exercises: workoutData // Обновляем массив упражнений
+    });
+    alert("Данные о весе успешно обновлены!");
+};
+      
 document.getElementById("complete-workout-btn").addEventListener("click", async function() {
     const user = firebase.auth().currentUser;
     if (user && currentWorkoutId) {
-        const workoutData = [];
-
-        // Сбор данных о весах для обновления
-        for (const exercise of workoutPlan) {
-            const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан"; // Получаем значение веса из поля ввода
-            workoutData.push({
-                exerciseid: exercise.id,
-                weight: weight,
-                reps: exercise.reps || "не указано", // Используем значения из workoutPlan
-                sets: exercise.sets || "не указано"
-            });
-        }
-
-        // Обновление данных в базе данных
-        await db.collection("userWorkouts").doc(user.uid).collection("workouts").doc(currentWorkoutId).update({
-            exercises: workoutData
-        });
-        alert("Данные о весе успешно обновлены!");
+        await updateWorkout(currentWorkoutId);
     } else {
         alert("Пожалуйста, войдите в систему, чтобы обновить данные.");
     }
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
 });
-
 
   </script>
   <div id="overlay" style="display:none;" onclick="closePopup()" class="overlay"></div>
