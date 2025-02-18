@@ -119,15 +119,16 @@ window.showWorkoutDetails = function(index) {
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
   // Создание списка упражнений с полями ввода для редактирования веса
-  const exercisesList = workoutData.exercises
-    ? workoutData.exercises.map((exercise, exerciseIndex) => 
-        `<li>
-          <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-          <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" />
-          <span>${exercise.reps} reps, ${exercise.sets} sets</span>
-        </li>`
-      ).join("")
-    : "No details available";
+const exercisesList = workoutData.exercises
+  ? workoutData.exercises.map((exercise, exerciseIndex) => 
+      `<li>
+        <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+        <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
+        <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
+
+      </li>`
+    ).join("")
+  : "Нет доступных данных";
 
 document.getElementById("popup-content").innerHTML = `
   <h3>Workout Details</h3>
