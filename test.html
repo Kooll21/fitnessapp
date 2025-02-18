@@ -269,10 +269,12 @@ function applyReplacement(exerciseid) {
             <button onclick="openReplaceModal('${newExercise.id}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
             <div class="exercise-details" style="display:none;"></div>
         `;
-          // Update workoutPlan with the new exercise
+        // Update workoutPlan with the new exercise
         workoutPlan = workoutPlan.map(exercise =>
             exercise.id === exerciseid ? newExercise : exercise
         );
+    } else {
+        console.error(`Exercise with id ${selectedId} not found`);
     }
 }
 
