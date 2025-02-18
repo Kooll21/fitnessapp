@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Workout by ID</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+      authDomain: "fitnessapp-f519f.firebaseapp.com",
+      projectId: "fitnessapp-f519f",
+      storageBucket: "fitnessapp-f519f.appspot.com",
+      messagingSenderId: "1000735476286",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+      measurementId: "G-MJ8K8ZNQM4"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function searchWorkoutById(workoutId) {
+      try {
+        console.log(`Searching for workout with ID: ${workoutId}`); // Отладочная информация
+        const userWorkoutsRef = collection(db, "userWorkouts");
+        const userSnapshot = await getDocs(userWorkoutsRef);
+
+        for (let userDoc of userSnapshot.docs) {
+          const userId = userDoc.id;
+          const workoutRef = doc(db, "userWorkouts", userId, "workouts", workoutId);
+          const workoutDoc = await getDoc(workoutRef);
+
+          if (workoutDoc.exists()) {
+            console.log(`Found workout for user ${userId}:`, workoutDoc.data()); // Отладочная информация
+            displayWorkoutDetails(userId, workoutDoc.id, workoutDoc.data());
+            return;
+          }
+        }
+
+        console.log("Workout not found"); // Отладочная информация
+        displayWorkoutDetails(null, null, null);
+      } catch (error) {
+        console.error('Error searching for workout:', error);
+      }
+    }
+
+    function displayWorkoutDetails(userId, workoutId, workoutData) {
+      const container = document.getElementById("workout-details-container");
+      if (workoutData) {
+        container.innerHTML = `
+          <h2>Workout Details</h2>
+          <p><strong>User ID:</strong> ${userId}</p>
+          <p><strong>Workout ID:</strong> ${workoutId}</p>
+          <p><strong>Workout Date:</strong> ${workoutData.date ? new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU") : "Дата не указана"}</p>
+          <p><strong>Exercises:</strong></p>
+          <ul>
+            ${workoutData.exercises ? workoutData.exercises.map(exercise => `
+              <li>
+                <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+                ${exercise.weight || ""} кг, ${exercise.reps} повторений, ${exercise.sets} сета
+              </li>
+            `).join("") : "No exercises available"}
+          </ul>
+        `;
+      } else {
+        container.innerHTML = "<p>Workout not found</p>";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchButton = document.getElementById("search-button");
+      searchButton.addEventListener("click", function () {
+        const workoutId = document.getElementById("workout-id-input").value;
+        searchWorkoutById(workoutId);
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Search Workout by ID</h1>
+  <input type="text" id="workout-id-input" placeholder="Enter Workout ID">
+  <button id="search-button">Search</button>
+  <div id="workout-details-container"></div>
+</body>
+</html>
