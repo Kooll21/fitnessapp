@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Тренировки</title>
   <style>
-    /* Добавим стили для модального окна */
+    /* Стили для модального окна */
     body.modal-open {
       overflow: hidden;
     }
@@ -40,7 +40,7 @@
   <div id="user-status"></div>
   <div id="workouts-list"></div>
 
-  <!-- Overlay for the popup -->
+  <!-- Overlay для модального окна -->
   <div id="overlay"></div>
 
   <script type="module">
@@ -59,12 +59,12 @@
       measurementId: "G-MJ8K8ZNQM4"
     };
 
-    // Initialize Firebase
+    // Инициализация Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Function to check authentication state
+    // Проверка состояния аутентификации
     function checkAuthState() {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -75,7 +75,7 @@
       });
     }
 
-    // Load user workouts
+    // Загрузка тренировок пользователя
     async function loadUserWorkouts(userId) {
       const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
       const snapshot = await getDocs(userWorkoutsRef);
@@ -83,6 +83,7 @@
       displayWorkouts(workouts);
     }
 
+    // Отображение тренировок на странице
     function displayWorkouts(workouts) {
       const container = document.getElementById("workouts-list");
       container.innerHTML = "<h2>Сохраненные тренировки</h2>";
@@ -96,6 +97,7 @@
       });
     }
 
+    // Показ подробностей тренировки
     window.showWorkoutDetails = async function(workoutId) {
       const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
       const workoutDoc = await getDoc(workoutRef);
@@ -107,7 +109,7 @@
       const workoutData = workoutDoc.data();
       workoutData.id = workoutId;
 
-      // Display exercises if available
+      // Отображаем упражнения
       let exercisesList = '';
       if (workoutData.exercises && workoutData.exercises.length > 0) {
         exercisesList = workoutData.exercises.map(exercise => `
@@ -142,19 +144,21 @@
       document.body.appendChild(popupElement);
       document.body.classList.add("modal-open");
       document.getElementById("overlay").style.display = "block";
-      history.pushState(null, "", ?id=${workoutId});  // Update URL with workout ID
+      history.pushState(null, "", ?id=${workoutId});  // Обновление URL с ID тренировки
     };
 
+    // Закрытие модального окна
     window.closePopup = function(popupId) {
       const popup = document.getElementById(popupId);
       if (popup) {
-        popup.remove(); // Remove the popup from DOM
+        popup.remove(); // Удаляем popup из DOM
       }
       document.body.classList.remove("modal-open");
       document.getElementById("overlay").style.display = "none";
-      history.pushState(null, "", window.location.pathname);  // Reset URL when closing popup
+      history.pushState(null, "", window.location.pathname);  // Сброс URL после закрытия
     };
 
+    // Обновление тренировки
     window.updateWorkout = async function(workoutId) {
       const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
       const workoutDoc = await getDoc(workoutRef);
@@ -173,10 +177,11 @@
       });
 
       alert("Данные тренировки обновлены!");
-      closePopup(workoutId); // Close the popup after update
+      closePopup(workoutId); // Закрытие окна после обновления
     };
 
-    checkAuthState(); // Call checkAuthState to load user workouts
+    checkAuthState(); // Вызов для проверки аутентификации и загрузки данных
   </script>
+
 </body>
 </html>
