@@ -53,6 +53,7 @@
     }
 
     // Log out function
+  
     window.logoutUser = function() {
       signOut(auth)
         .then(() => {
@@ -102,7 +103,7 @@ async function loadExercises(exerciseIds) {
 
 function displayWorkouts(workouts) {
   const container = document.getElementById("workouts-list");
-  container.innerHTML = "<h2>Saved Workouts</h2>";
+  container.innerHTML = "<h2>Сохраненные тренировкиs</h2>";
   workouts.forEach((workout, index) => {
     const workoutElement = document.createElement("div");
     workoutElement.innerHTML = `
@@ -208,7 +209,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 
 <body>
   <div id="navbar-container"></div>
-  <h1>Welcome to the Admin Page</h1>
+  <h1>Добро пожаловать в свой профиль</h1>
   <div id="workouts-list"></div>
 
   <div id="overlay" onclick="closePopup()"></div>
