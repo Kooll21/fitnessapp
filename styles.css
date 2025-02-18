@@ -232,3 +232,7 @@ body.modal-open #overlay {
   display: none; /* По умолчанию скрыты */
 }
 
+.hidden {
+    display: none;
+}
+
