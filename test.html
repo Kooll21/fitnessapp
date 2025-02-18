@@ -485,7 +485,19 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
                     if (updateCount === snapshot.size) {
                         // Показываем сообщение и скрываем кнопку только после последнего обновления
                         alert("Тренировка завершена!");
+
+                        // Очистка списка workoutPlan и сохраненных тренировок
+                        document.getElementById("savedWorkout").innerHTML = ""; // Очистить сохраненные тренировки
+                        workoutPlan = []; // Очистить список упражнений
+                        document.getElementById("workoutResults").innerHTML = ""; // Очистить список результата
+                        document.getElementById("workoutResults").style.display = "none"; // Скрыть результат
+
+                        // Скрыть кнопку "Тренировка выполнена"
                         document.getElementById("complete-workout-btn").style.display = "none";
+
+                        // Показать кнопки для выбора группы мышц и генерации тренировки
+                        document.getElementById("selectMuscleGroupBtn").style.display = "inline-block";
+                        document.getElementById("generateWorkoutBtn").style.display = "inline-block";
                     }
                 }).catch(error => {
                     console.error("Ошибка обновления тренировки:", error);
