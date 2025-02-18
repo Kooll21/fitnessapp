@@ -141,6 +141,13 @@ document.getElementById("popup-content").innerHTML = `
   document.getElementById("overlay").style.display = "block";
   document.getElementById("popup").style.display = "block";
 };
+
+    window.closePopup = function() {
+  document.body.classList.remove("modal-open");
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("popup").style.display = "none";
+};
+    
 window.updateWorkout = async function(workoutId, workoutIndex) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
   const workoutData = JSON.parse(workoutElement.dataset.details);
