@@ -281,28 +281,37 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function() {
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
     workoutPlan.forEach((exercise) => {
-        // Показываем поле ввода веса и добавляем к каждому упражнению вес
-        document.getElementById(`weight-${exercise.id}`).style.display = "inline-block";
-        document.querySelector(`label[for="weight-${exercise.id}"]`).style.display = "inline-block";
+        // Показываем поле ввода веса и метку
+        const weightInput = document.getElementById(`weight-${exercise.id}`);
+        const weightLabel = document.querySelector(`label[for="weight-${exercise.id}"]`);
 
-        const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
+        // Убедитесь, что поле для веса отображается
+        if (weightInput && weightLabel) {
+            weightInput.style.display = "inline-block";
+            weightLabel.style.display = "inline-block";
+        }
+
+        // Получаем введенный вес или отображаем "не указан", если поле пустое
+        const weight = weightInput.value || "не указан";
+        
+        // Создаем элемент для сохраненного упражнения
         const savedExercise = document.createElement("div");
 
+        // Создаем чекбокс
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = `checkbox-${exercise.id}`;
 
+        // Добавляем информацию о сохраненном упражнении
         savedExercise.innerHTML = 
             `<label for="checkbox-${exercise.id}">
                 ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
             </label>
             <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>`;
+        
         savedExercise.insertBefore(checkbox, savedExercise.firstChild);
         savedContainer.appendChild(savedExercise);
     });
-
-    document.getElementById("workoutResults").style.display = "none";
-    document.getElementById("deleteWorkoutBtn").style.display = "inline-block";
 });
 
 function showDetailsPopup(exerciseId) {
