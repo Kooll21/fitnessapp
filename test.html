@@ -129,13 +129,13 @@ window.showWorkoutDetails = function(index) {
       ).join("")
     : "No details available";
 
-  document.getElementById("popup-content").innerHTML = `
-    <h3>Workout Details</h3>
-    <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-    <p><strong>Exercises:</strong></p>
-    <ul>${exercisesList}</ul>
-    <button onclick="updateWorkout(${workoutData.id}, ${index})">Сохранить изменения</button>
-  `;
+document.getElementById("popup-content").innerHTML = `
+  <h3>Workout Details</h3>
+  <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+  <p><strong>Exercises:</strong></p>
+  <ul>${exercisesList}</ul>
+  <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
+`;
 
   document.body.classList.add("modal-open");
   document.getElementById("overlay").style.display = "block";
