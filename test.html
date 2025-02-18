@@ -454,8 +454,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
 
         // Обновление данных в базе данных
         await db.collection("userWorkouts").doc(user.uid).collection("workouts").doc(currentWorkoutId).update({
-            exercises: workoutData,
-            date: new Date() // Обновляем дату
+            exercises: workoutData
         });
         alert("Данные о весе успешно обновлены!");
     } else {
