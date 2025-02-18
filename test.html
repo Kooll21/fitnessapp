@@ -254,7 +254,7 @@ function applyReplacement(exerciseid) {
 
     if (newExercise) {
         oldElement.id = `exercise-${newExercise.id}`;
-        oldElement.setAttribute('data-exercise-id', newExercise.id); // Update the exercise id
+        oldElement.setAttribute('data-exercise-id', newExercise.id); // Обновляем ID упражнения
         oldElement.innerHTML = `
             <h3>${newExercise.exercisename}</h3>
             <img src="${newExercise.photo}" width="150">
@@ -262,13 +262,15 @@ function applyReplacement(exerciseid) {
             <p>Мышцы: ${newExercise.muscle}</p>
             <p>Подходы: ${newExercise.sets}</p>
             <p>Повторы: ${newExercise.reps}</p>
-            <label for="weight-${newExercise.id}">Вес (кг):</label>
-            <input type="number" id="weight-${newExercise.id}" placeholder="Введите вес" min="0">
+            <!-- Скрываем поле для ввода веса при замене упражнения -->
+            <label for="weight-${newExercise.id}" class="hidden-weight">Вес (кг):</label>
+            <input type="number" id="weight-${newExercise.id}" placeholder="Введите вес" min="0" class="hidden-weight">
             <button onclick="toggleDetails(this, '${newExercise.video.replace('watch?v=', 'embed/')}', '${newExercise.description}')">Подробнее</button>
             <button onclick="openReplaceModal('${newExercise.id}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
             <div class="exercise-details" style="display:none;"></div>
         `;
-          // Update workoutPlan with the new exercise
+
+        // Обновляем workoutPlan с новым упражнением
         workoutPlan = workoutPlan.map(exercise =>
             exercise.id === exerciseid ? newExercise : exercise
         );
