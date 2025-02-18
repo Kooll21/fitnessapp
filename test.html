@@ -274,7 +274,8 @@ function applyReplacement(exerciseid) {
         );
     }
 }
-
+      
+let currentWorkoutDocRef = null; // Переменная для хранения ссылки на текущий документ тренировки
 // Функция для сохранения тренировки
 document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
     const user = firebase.auth().currentUser;
@@ -292,11 +293,15 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
         });
 
         const userDocRef = db.collection("userWorkouts").doc(user.uid);
+ // Создаем новый документ для тренировки
         userDocRef.collection("workouts").add({
             exercises: workoutData,
             date: new Date(),
             status: "saved"
-        }).then(() => {
+        }).then(docRef => {
+            currentWorkoutDocRef = docRef; // Сохраняем ссылку на только что добавленный документ
+            console.log("Тренировка сохранена успешно!");
+            
             // После успешного сохранения тренировки, скрываем текущий список и показываем сокращенный
             const savedContainer = document.getElementById("savedWorkout");
             savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
@@ -449,7 +454,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     button.disabled = true; // Отключаем кнопку, чтобы предотвратить повторные нажатия
 
     const user = firebase.auth().currentUser;
-    if (user) {
+    if (user && currentWorkoutDocRef) {
         const workoutData = workoutPlan.map(exercise => {
             const weight = document.getElementById(`saved-weight-${exercise.id}`).value || "не указан";
             return {
@@ -461,57 +466,37 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
             };
         });
 
-        const userDocRef = db.collection("userWorkouts").doc(user.uid);
+        // Обновляем только тот документ, который был сохранен
+        currentWorkoutDocRef.update({
+            exercises: workoutData,
+            date: new Date(),
+            status: "completed"
+        }).then(() => {
+            console.log("Тренировка обновлена успешно!");
 
-        // Получаем список сохраненных тренировок пользователя
-        userDocRef.collection("workouts").get().then(snapshot => {
-            // Проверка наличия сохраненных тренировок для обновления
-            if (snapshot.empty) {
-                console.log("Нет сохраненных тренировок для обновления.");
-                button.disabled = false; // Включаем кнопку обратно, если нет тренировок
-                return;
-            }
+            // Показать сообщение и очистить всё
+            alert("Тренировка завершена!");
 
-            let updateCount = 0;  // Счётчик обновлений
+            // Очистка списка workoutPlan и сохраненных тренировок
+            document.getElementById("savedWorkout").innerHTML = ""; // Очистить сохраненные тренировки
+            workoutPlan = []; // Очистить список упражнений
+            document.getElementById("workoutResults").innerHTML = ""; // Очистить список результата
+            document.getElementById("workoutResults").style.display = "none"; // Скрыть результат
 
-            snapshot.forEach(doc => {
-                const workoutRef = doc.ref;  // Получаем ссылку на документ тренировки
-                workoutRef.update({
-                    exercises: workoutData,
-                    date: new Date(),
-                    status: "completed"
-                }).then(() => {
-                    updateCount++;
-                    console.log("Тренировка обновлена успешно!");
-                    if (updateCount === snapshot.size) {
-                        // Показываем сообщение и скрываем кнопку только после последнего обновления
-                        alert("Тренировка завершена!");
+            // Скрыть кнопку "Тренировка выполнена"
+            document.getElementById("complete-workout-btn").style.display = "none";
+            // Скрыть кнопку "Удалить тренировку"
+            document.getElementById("deleteWorkoutBtn").style.display = "none";
 
-                        // Очистка списка workoutPlan и сохраненных тренировок
-                        document.getElementById("savedWorkout").innerHTML = ""; // Очистить сохраненные тренировки
-                        workoutPlan = []; // Очистить список упражнений
-                        document.getElementById("workoutResults").innerHTML = ""; // Очистить список результата
-                        document.getElementById("workoutResults").style.display = "none"; // Скрыть результат
-
-                        // Скрыть кнопку "Тренировка выполнена"
-                        document.getElementById("complete-workout-btn").style.display = "none";
-                        // Скрыть кнопку "Удалить тренировку"
-                        document.getElementById("deleteWorkoutBtn").style.display = "none";
-
-                        // Показать кнопки для выбора группы мышц и генерации тренировки
-                        document.getElementById("selectMuscleGroupBtn").style.display = "inline-block";
-                        document.getElementById("generateWorkoutBtn").style.display = "inline-block";
-                    }
-                }).catch(error => {
-                    console.error("Ошибка обновления тренировки:", error);
-                    button.disabled = false; // Включаем кнопку обратно в случае ошибки
-                });
-            });
+            // Показать кнопки для выбора группы мышц и генерации тренировки
+            document.getElementById("selectMuscleGroupBtn").style.display = "inline-block";
+            document.getElementById("generateWorkoutBtn").style.display = "inline-block";
         }).catch(error => {
-            console.error("Ошибка при получении тренировок:", error);
+            console.error("Ошибка обновления тренировки:", error);
             button.disabled = false; // Включаем кнопку обратно в случае ошибки
         });
     }
+
 
 
     // Optionally, hide the workout results section
