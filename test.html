@@ -1,14 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Page</title>
+  <title>Тренировки</title>
+  <style>
+    /* Добавим стили для модального окна */
+    body.modal-open {
+      overflow: hidden;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 1000;
+    }
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
+      max-width: 500px;
+      z-index: 1001;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .popup button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="user-status"></div>
+  <div id="workouts-list"></div>
+
+  <!-- Overlay for the popup -->
+  <div id="overlay"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -60,23 +99,28 @@
     window.showWorkoutDetails = async function(workoutId) {
       const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
       const workoutDoc = await getDoc(workoutRef);
-      if (!workoutDoc.exists()) return;
+      if (!workoutDoc.exists()) {
+        console.log("Workout not found");
+        return;
+      }
 
       const workoutData = workoutDoc.data();
       workoutData.id = workoutId;
 
-      // Create a unique popup id based on the workout ID
-      const popupId = popup-${workoutId};
+      // Display exercises if available
+      let exercisesList = '';
+      if (workoutData.exercises && workoutData.exercises.length > 0) {
+        exercisesList = workoutData.exercises.map(exercise => `
+          <li>
+            <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+            <input type="number" value="${exercise.weight || ""}" id="weight-${workoutId}-${exercise.exercisename}" placeholder="Weight (kg)" /> кг,
+            <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
+          </li>
+        `).join("");
+      } else {
+        exercisesList = "Нет доступных упражнений";
+      }
 
-      const exercisesList = workoutData.exercises ? workoutData.exercises.map(exercise => `
-        <li>
-          <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-          <input type="number" value="${exercise.weight || ""}" id="weight-${workoutId}-${exercise.exercisename}" placeholder="Weight (kg)" /> кг,
-          <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-        </li>
-      `).join("") : "Нет доступных данных";
-
-      // Create and display the popup with workout details
       const popupContent = `
         <h3>Детали тренировки</h3>
         <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
@@ -85,14 +129,13 @@
         <button onclick="updateWorkout('${workoutId}')">Сохранить изменения</button>
       `;
 
-      // Create a new popup dynamically
       const popupElement = document.createElement('div');
-      popupElement.id = popupId;
+      popupElement.id = popup-${workoutId};
       popupElement.classList.add('popup');
       popupElement.innerHTML = `
         <div class="popup-content">
           ${popupContent}
-          <button onclick="closePopup('${popupId}')">&times; Закрыть</button>
+          <button onclick="closePopup('${workoutId}')">&times; Закрыть</button>
         </div>
       `;
 
@@ -121,26 +164,19 @@
       workoutData.exercises.forEach(exercise => {
         const weightInput = document.getElementById(weight-${workoutId}-${exercise.exercisename});
         if (weightInput) {
-          exercise.weight = parseFloat(weightInput.value) || null;
+          exercise.weight = parseFloat(weightInput.value);
         }
       });
 
-      await updateDoc(workoutRef, { exercises: workoutData.exercises });
-      closePopup(popup-${workoutId});
-      loadUserWorkouts(auth.currentUser.uid);  // Reload workouts
+      await updateDoc(workoutRef, {
+        exercises: workoutData.exercises
+      });
+
+      alert("Данные тренировки обновлены!");
+      closePopup(workoutId); // Close the popup after update
     };
 
-    document.addEventListener("DOMContentLoaded", function () {
-      checkAuthState();
-    });
+    checkAuthState(); // Call checkAuthState to load user workouts
   </script>
-</head>
-<body>
-  <h1>Добро пожаловать в свой профиль</h1>
-  <div id="user-status"></div>
-  <div id="workouts-list"></div>
-
-  <div id="overlay" onclick="closePopup()"></div>
-
 </body>
 </html>
