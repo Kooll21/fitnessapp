@@ -429,10 +429,19 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
     const user = firebase.auth().currentUser;
     if (user) {
         // User is logged in, save the workout data
-        db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
+        const userDocRef = db.collection("userWorkouts").doc(user.uid);
+        
+        // Add the workout data to the workouts subcollection
+        userDocRef.collection("workouts").add({
             exercises: workoutData,
             date: new Date(),
             status: "completed"  // Mark the workout as completed
+        })
+        .then(() => {
+            // Update the user document with the Username field
+            return userDocRef.set({
+                Username: user.uid
+            }, { merge: true });
         })
         .then(() => {
             alert("Тренировка успешно завершена и сохранена!");
@@ -445,6 +454,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
         // If the user is not logged in, show a message or redirect to login page
         alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
     }
+
     // Render the completed workout UI with weight
     workoutData.forEach((exercise, index) => {
         const savedExercise = document.createElement("div");
@@ -457,6 +467,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
         `;
         savedContainer.appendChild(savedExercise);
     });
+
     // Optionally, hide the workout results section
     document.getElementById("workoutResults").style.display = "none";
 });
