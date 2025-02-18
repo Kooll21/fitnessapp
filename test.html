@@ -131,9 +131,9 @@ const exercisesList = workoutData.exercises
   : "Нет доступных данных";
 
 document.getElementById("popup-content").innerHTML = `
-  <h3>Workout Details</h3>
-  <p><strong>Date:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-  <p><strong>Exercises:</strong></p>
+  <h3>Детали тренировки</h3>
+  <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+  <p><strong>Упражнения:</strong></p>
   <ul>${exercisesList}</ul>
   <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
 `;
