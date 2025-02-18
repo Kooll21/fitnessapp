@@ -302,6 +302,7 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
             savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
 
             workoutPlan.forEach((exercise, index) => {
+                // Вставляем поле для ввода веса
                 const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан";
                 const savedExercise = document.createElement("div");
                 const checkbox = document.createElement("input");
@@ -310,7 +311,8 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
 
                 savedExercise.innerHTML = 
                     `<label for="checkbox-${exercise.id}">
-                        ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, Вес: ${weight} кг
+                        ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов, 
+                        Вес: <input type="text" id="saved-weight-${exercise.id}" value="${weight}" placeholder="Введите вес">
                     </label>
                     <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>`;
                 savedExercise.insertBefore(checkbox, savedExercise.firstChild);
@@ -326,8 +328,9 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
             console.error("Ошибка сохранения тренировки:", error);
         });
     }
-
 });
+
+      
 function showDetailsPopup(exerciseId) {
     const popup = document.getElementById("popup");
     const overlay = document.getElementById("overlay");
