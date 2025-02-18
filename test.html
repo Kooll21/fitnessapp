@@ -141,26 +141,23 @@ window.showWorkoutDetails = function(index) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("popup").style.display = "block";
 };
-    async function updateWorkout(workoutId, workoutIndex) {
+window.updateWorkout = async function(workoutId, workoutIndex) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
   const workoutData = JSON.parse(workoutElement.dataset.details);
   
-  // Обновляем веса упражнений
   workoutData.exercises.forEach((exercise, exerciseIndex) => {
     const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
     exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
   });
 
-  // Обновление документа в Firestore
   const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
   await updateDoc(workoutRef, {
     exercises: workoutData.exercises // Обновляем массив упражнений
   });
 
-  // Закрыть модальное окно и обновить интерфейс
   closePopup();
   loadUserWorkouts(auth.currentUser.uid); // Перезагрузить тренировки для отображения обновлений
-}
+};
 
     // Load menu and check authentication on page load
     document.addEventListener("DOMContentLoaded", function () {
