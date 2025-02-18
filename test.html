@@ -146,6 +146,7 @@
 
     let allExercises = [];
     let workoutPlan = [];
+    let currentWorkoutId = null; // Переменная для хранения идентификатора текущей тренировки
 
 // Обработчик для генерации тренировки
 document.getElementById("generateWorkout").addEventListener("click", async () => {
@@ -305,17 +306,19 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", async functi
         savedContainer.appendChild(savedExercise); // Добавляем сохраненные данные на страницу
     }
 
-    // Сохранение в базу данных
-    const user = firebase.auth().currentUser;
-    if (user) {
-        await db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
-            exercises: workoutData,
-            date: new Date() // Сохраняем дату
-        });
-        alert("Тренировка успешно сохранена!");
-    } else {
-        alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
-    }
+        // Сохранение в базу данных
+        const user = firebase.auth().currentUser;
+        if (user) {
+            const docRef = await db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
+                exercises: workoutData,
+                date: new Date() // Сохраняем дату
+            });
+            currentWorkoutId = docRef.id; // Сохраняем идентификатор текущей тренировки
+            alert("Тренировка успешно сохранена!");
+        } else {
+            alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
+        }
+
 
     // Отображение полей для изменения веса после сохранения
     workoutData.forEach(({ exerciseid }) => {
@@ -435,7 +438,7 @@ function toggleDetails(button, videoUrl, description) {
 
 document.getElementById("complete-workout-btn").addEventListener("click", async function() {
     const user = firebase.auth().currentUser;
-    if (user) {
+    if (user && currentWorkoutId) {
         const workoutData = [];
 
         // Сбор данных о весах для обновления
@@ -450,9 +453,9 @@ document.getElementById("complete-workout-btn").addEventListener("click", async 
         }
 
         // Обновление данных в базе данных
-        await db.collection("userWorkouts").doc(user.uid).collection("workouts").add({
+        await db.collection("userWorkouts").doc(user.uid).collection("workouts").doc(currentWorkoutId).update({
             exercises: workoutData,
-            date: new Date() // Сохраняем дату
+            date: new Date() // Обновляем дату
         });
         alert("Данные о весе успешно обновлены!");
     } else {
