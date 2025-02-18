@@ -379,22 +379,36 @@ function closePopup() {
     document.body.classList.remove("modal-open");
 }
 // Функция для удаления тренировки
-document.getElementById("deleteWorkoutBtn").addEventListener("click", function() {
-    // Очистить сохраненные упражнения
-    document.getElementById("savedWorkout").innerHTML = "";
+document.getElementById("deleteWorkoutBtn").addEventListener("click", async function() {
+    const user = firebase.auth().currentUser;
 
-    // Скрыть кнопки сохранения, удаления и выполнения тренировки
-    toggleButtons(false);
+    if (user && currentWorkoutDocRef) {
+        try {
+            // Удаление тренировки из Firestore
+            await currentWorkoutDocRef.delete();
+            console.log("Тренировка удалена успешно!");
 
-    // Показать кнопку генерации тренировки
-    document.getElementById("generateWorkout").style.display = "inline-block";
+            // Очистить сохраненные упражнения
+            document.getElementById("savedWorkout").innerHTML = "";
 
-    // Очистить блок с сгенерированными результатами
-    document.getElementById("workoutResults").innerHTML = "";
-    document.getElementById("workoutResults").style.display = "none"; // Скрыть блок с результатами
+            // Скрыть кнопки сохранения, удаления и выполнения тренировки
+            toggleButtons(false);
 
-    // Скрыть кнопку "Сохранить тренировку"
-    document.getElementById("saveWorkoutBtn").style.display = "none";
+            // Показать кнопку генерации тренировки
+            document.getElementById("generateWorkout").style.display = "inline-block";
+
+            // Очистить блок с сгенерированными результатами
+            document.getElementById("workoutResults").innerHTML = "";
+            document.getElementById("workoutResults").style.display = "none"; // Скрыть блок с результатами
+
+            // Скрыть кнопку "Сохранить тренировку"
+            document.getElementById("saveWorkoutBtn").style.display = "none";
+        } catch (error) {
+            console.error("Ошибка удаления тренировки:", error);
+        }
+    } else {
+        console.log("Нет текущей тренировки для удаления.");
+    }
 });
 
 // Показать кнопку "Сохранить тренировку" после генерации тренировки
