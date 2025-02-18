@@ -281,13 +281,22 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", async functi
     savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
     const workoutData = [];
 
-    // Сбор данных о весах для каждой тренировки
+    // Сбор данных о весах, повторениях и подходах для каждой тренировки
     for (const exercise of workoutPlan) {
         const weight = document.getElementById(`weight-${exercise.id}`).value || "не указан"; // Получаем значение веса
-        workoutData.push({ exerciseid: exercise.id, weight: weight }); // Добавляем данные в массив
+        const reps = document.getElementById(`reps-${exercise.id}`).value || "не указано"; // Получаем количество повторений
+        const sets = document.getElementById(`sets-${exercise.id}`).value || "не указано"; // Получаем количество подходов
+
+        workoutData.push({
+            exerciseid: exercise.id,
+            weight: weight,
+            reps: reps,
+            sets: sets
+        }); // Добавляем данные в массив
+
         const savedExercise = document.createElement("div");
         savedExercise.innerHTML = `
-            <label>${exercise.exercisename}, Вес: ${weight} кг</label>
+            <label>${exercise.exercisename}, Вес: ${weight} кг, Повторения: ${reps}, Подходы: ${sets}</label>
             <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
         `;
         savedContainer.appendChild(savedExercise); // Добавляем сохраненные данные на страницу
@@ -305,10 +314,14 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", async functi
         alert("Пожалуйста, войдите в систему, чтобы сохранить тренировку.");
     }
 
-    // Отображение полей для изменения веса после сохранения
+    // Отображение полей для изменения веса, повторений и подходов после сохранения
     workoutData.forEach(({ exerciseid }) => {
         document.getElementById(`weight-${exerciseid}`).style.display = "inline-block"; // Показываем поля для изменения веса
+        document.getElementById(`reps-${exerciseid}`).style.display = "inline-block"; // Показываем поля для изменения повторений
+        document.getElementById(`sets-${exerciseid}`).style.display = "inline-block"; // Показываем поля для изменения подходов
         document.querySelector(`label[for="weight-${exerciseid}"]`).style.display = "inline"; // Показываем соответствующие метки
+        document.querySelector(`label[for="reps-${exerciseid}"]`).style.display = "inline"; // Показываем метки для повторений
+        document.querySelector(`label[for="sets-${exerciseid}"]`).style.display = "inline"; // Показываем метки для подходов
     });
 
     document.getElementById("workoutResults").style.display = "none"; // Скрываем результаты тренировки
