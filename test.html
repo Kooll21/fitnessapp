@@ -436,13 +436,13 @@ function toggleDetails(button, videoUrl, description) {
     }
 }
 
-     window.updateWorkout = async function(workoutId) {
+window.updateWorkout = async function(workoutId) {
     const workoutData = workoutPlan.map((exercise, index) => {
         const weightInput = document.getElementById(`weight-${index}`);
-        const weight = weightInput ? parseFloat(weightInput.value) : null; // Проверка на существование элемента
+        const weight = weightInput && weightInput.value ? parseFloat(weightInput.value) : 0; // Устанавливаем значение 0, если поле пустое
         return {
             ...exercise,
-            weight: weight // Обновляем вес или устанавливаем в null
+            weight: weight // Обновляем вес
         };
     });
 
