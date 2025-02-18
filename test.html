@@ -103,7 +103,7 @@ async function loadExercises(exerciseIds) {
 
 function displayWorkouts(workouts) {
   const container = document.getElementById("workouts-list");
-  container.innerHTML = "<h2>Сохраненные тренировкиs</h2>";
+  container.innerHTML = "<h2>Сохраненные тренировки</h2>";
   workouts.forEach((workout, index) => {
     const workoutElement = document.createElement("div");
     workoutElement.innerHTML = `
