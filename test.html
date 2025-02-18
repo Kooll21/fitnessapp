@@ -469,7 +469,7 @@ document.getElementById("complete-workout-btn").addEventListener("click", functi
                     status: "completed"
                 }).then(() => {
                     console.log("Тренировка обновлена успешно!");
-                    document.getElementById("deleteWorkoutBtn").style.display = "none";
+                    // Скрываем кнопку после завершения тренировки
                     document.getElementById("complete-workout-btn").style.display = "none";
                     alert("Тренировка завершена!");
                 }).catch(error => {
