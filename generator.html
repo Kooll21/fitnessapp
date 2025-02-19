@@ -114,6 +114,9 @@
 
   <div id="workoutResults"></div>
   <div id="savedWorkout"></div>
+<!-- Popup and overlay elements -->
+  <div id="overlay" class="overlay" onclick="closePopup()"></div>
+  <div id="popup" class="popup"></div>
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -444,18 +447,35 @@ function toggleButtons(isSaved) {
 
 // Функция для показа/скрытия деталей видео
 function toggleDetails(button, videoUrl, description) {
-    const detailsDiv = button.nextElementSibling;
-    if (detailsDiv.style.display === "none") {
-        detailsDiv.innerHTML = `
-            <iframe width="560" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            <p>${description}</p>
-        `;
-        detailsDiv.style.display = "block";
-        button.textContent = "Скрыть";
-    } else {
-        detailsDiv.style.display = "none";
-        button.textContent = "Подробнее";
-    }
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
+
+    // Fill the popup with the workout details
+    popup.innerHTML = `
+        <h2>Детали упражнения</h2>
+        <iframe width="560" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <p>${description}</p>
+        <button class="close-btn" onclick="closePopup()">X</button>
+    `;
+
+    // Show the popup and overlay
+    popup.style.display = "block";
+    overlay.style.display = "block";
+
+    // Prevent background scrolling
+    document.body.classList.add("modal-open");
+}
+
+function closePopup() {
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
+
+    // Hide the popup and overlay
+    popup.style.display = "none";
+    overlay.style.display = "none";
+
+    // Allow background scrolling
+    document.body.classList.remove("modal-open");
 }
 
       // Изменяем вес и щавершаем тренировку 
