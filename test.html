@@ -216,15 +216,15 @@ function displayWorkouts(workouts) {
   });
 }
 
-        window.showWorkoutDetails = function (index) {
-            const workoutElement = document.querySelectorAll("# workouts-list div")[index];
-            const workoutData = JSON.parse(workoutElement.dataset.details);
-            const exercisesList = workoutData.exercises ? workoutData.exercises.map((exercise, exerciseIndex) => `<li><strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span> <span>${exercise.reps} повторений, ${exercise.sets} сета</span> <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button></li>`).join("") : "Нет доступных данных";
-            document.getElementById("popup-content").innerHTML = `<h3>Детали тренировки</h3><p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p><p><strong>Упражнения:</strong></p><ul>${exercisesList}</ul><button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>`;
-            document.body.classList.add("modal-open");
-            document.getElementById("overlay").style.display = "block";
-            document.getElementById("popup").style.display = "block";
-        };
+window.showWorkoutDetails = function (index) {
+    const workoutElement = document.querySelectorAll("#workouts-list div")[index]; // Corrected line
+    const workoutData = JSON.parse(workoutElement.dataset.details);
+    const exercisesList = workoutData.exercises ? workoutData.exercises.map((exercise, exerciseIndex) => `<li><strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span> <span>${exercise.reps} повторений, ${exercise.sets} сета</span> <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button></li>`).join("") : "Нет доступных данных";
+    document.getElementById("popup-content").innerHTML = `<h3>Детали тренировки</h3><p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p><p><strong>Упражнения:</strong></p><ul>${exercisesList}</ul><button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>`;
+    document.body.classList.add("modal-open");
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("popup").style.display = "block";
+};
 
         window.showExerciseHistory = async function (exerciseName) {
             const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
