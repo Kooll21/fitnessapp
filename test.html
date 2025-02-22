@@ -41,6 +41,13 @@
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
 
+             function showModule(moduleName) {
+      const modules = document.querySelectorAll('.module');
+      modules.forEach(module => module.classList.remove('active'));
+      const activeModule = document.getElementById(moduleName);
+      if (activeModule) activeModule.classList.add('active');
+    }
+
           // Load user workouts
           await loadUserWorkouts(user.uid);
         } else {
@@ -294,6 +301,12 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
         });
       }
     }
+    // Function to toggle the sidebar visibility
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
+    
   </script>
 </head>
 <body>
@@ -303,6 +316,23 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 
 
 <body>
+
+    <!-- Sidebar Menu -->
+  <div class="sidebar" id="sidebar">
+    <a href="javascript:void(0)" onclick="showModule('workouts')">Сохраненные тренировки</a>
+    <a href="javascript:void(0)" onclick="showModule('nutrition')">Трекер питания</a>
+    <a href="javascript:void(0)" onclick="showModule('bodyweight')">Вес тела</a>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Добро пожаловать в свой личный кабинет</h1>
+    <div id="workouts-list"></div>
+    
+
+  <!-- Menu Toggle Button -->
+  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+  
   <div id="navbar-container"></div>
   <h1>Добро пожаловать в свой личный кабинет</h1>
   <div id="workouts-list"></div>
