@@ -295,6 +295,11 @@
       loadUserWorkouts(auth.currentUser.uid);
     };
 
+    // New function to show content based on button clicks
+    function showContent(contentText) {
+      document.getElementById("content-text").textContent = contentText;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       fetch('menu.html')
         .then(response => response.text())
