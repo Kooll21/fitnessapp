@@ -54,19 +54,7 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <button onclick="displayWorkouts(workouts)">Button 1</button>
-    <button onclick="showContent('Content for Button 2')">Button 2</button>
-    <button onclick="showContent('Content for Button 3')">Button 3</button>
-  </div>
-
-  <!-- Content area -->
-  <div class="content">
-    <h2>Test Content</h2>
-    <p id="content-text">Click a button to see some content.</p>
-  </div>
-
+ 
   <script>
     // Function to display content based on the button clicked
     function showContent(content) {
@@ -364,6 +352,20 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
       }
     }
   </script>
+
+   <!-- Sidebar -->
+  <div class="sidebar">
+    <button onclick="displayWorkouts(workouts)">Button 1</button>
+    <button onclick="showContent('Content for Button 2')">Button 2</button>
+    <button onclick="showContent('Content for Button 3')">Button 3</button>
+  </div>
+
+  <!-- Content area -->
+  <div class="content">
+    <h2>Test Content</h2>
+    <p id="content-text">Click a button to see some content.</p>
+  </div>
+
   
 </body>
 </html>
