@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
@@ -177,9 +177,39 @@ window.showExerciseHistory = async function(exerciseName) {
   const historyContainer = document.getElementById("exercise-history");
 
   if (exerciseHistory.length > 0) {
+    // Display the history text
     historyContainer.innerHTML = exerciseHistory.map(entry => 
       `<p>${entry.date}: ${entry.weight} кг</p>`
     ).join('');
+    
+    // Prepare data for the chart
+    const labels = exerciseHistory.map(entry => entry.date);
+    const data = exerciseHistory.map(entry => entry.weight);
+
+    // Create the line graph
+    const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels, // X-axis: Dates
+        datasets: [{
+          label: 'Weight History',
+          data: data, // Y-axis: Weights
+          borderColor: 'rgba(75, 192, 192, 1)', // Line color
+          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fill color
+          fill: true,
+          borderWidth: 2,
+          tension: 0.4
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: false // Adjust this based on your needs
+          }
+        }
+      }
+    });
   } else {
     historyContainer.innerHTML = "История отсутствует";
   }
@@ -275,10 +305,13 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
     <div id="popup-content"></div>
   </div>
 <!-- Exercise History Modal -->
-<div id="history-popup" style="display: none;">
+<div id="history-popup">
   <button onclick="closeHistoryPopup()">Close</button>
   <h3>История упражнений</h3>
   <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
+
+  <!-- Canvas for the chart -->
+  <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
 </div>
 
   <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
