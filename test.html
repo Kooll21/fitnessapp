@@ -103,7 +103,7 @@
     }
 
     // Log out function
-    window.logoutUser = function() {
+    function logoutUser() {
       signOut(auth)
         .then(() => {
           document.getElementById("user-status").textContent = 'Please log in';
@@ -169,7 +169,7 @@
       });
     }
 
-    window.showWorkoutDetails = function(index) {
+    function showWorkoutDetails(index) {
       const workoutElement = document.querySelectorAll("#workouts-list div")[index];
       const workoutData = JSON.parse(workoutElement.dataset.details);
 
@@ -197,145 +197,26 @@
       document.getElementById("popup").style.display = "block";
     };
 
-    window.showExerciseHistory = async function(exerciseName) {
-      console.log("Fetching history for exercise:", exerciseName); 
-
-      const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
-      const snapshot = await getDocs(userWorkoutsRef);
-
-      let exerciseHistory = [];
-
-      snapshot.docs.forEach(doc => {
-        const workout = doc.data();
-        workout.exercises.forEach(exercise => {
-          if (exercise.exercisename === exerciseName) {
-            if (exercise.weight) {
-              exerciseHistory.push({
-                date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
-                weight: exercise.weight
-              });
-            }
-          }
-        });
-      });
-
-      const historyContainer = document.getElementById("exercise-history");
-
-      if (exerciseHistory.length > 0) {
-        historyContainer.innerHTML = exerciseHistory.map(entry => 
-          `<p>${entry.date}: ${entry.weight} кг</p>`
-        ).join('');
-
-        const labels = exerciseHistory.map(entry => entry.date);
-        const data = exerciseHistory.map(entry => entry.weight);
-
-        if (currentChart) {
-          currentChart.destroy();
-        }
-
-        const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
-        currentChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Weight History',
-              data: data,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              fill: true,
-              borderWidth: 2,
-              tension: 0.4
-            }]
-          },
-          options: {
-            scales: {
-              y: {
-                beginAtZero: false
-              }
-            }
-          }
-        });
-      } else {
-        historyContainer.innerHTML = "История отсутствует";
-      }
-
-      document.body.classList.add("modal-open");
-      document.getElementById("overlay").style.display = "block";
-      document.getElementById("history-popup").style.display = "block"; 
-    };
-
-    window.closeHistoryPopup = function() {
-      document.body.classList.remove("modal-open");
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("history-popup").style.display = "none"; 
-    };
-
-    window.closePopup = function() {
-      document.body.classList.remove("modal-open");
-      document.getElementById("overlay").style.display = "none";
-      document.getElementById("popup").style.display = "none";
-    };
-
-    window.updateWorkout = async function(workoutId, workoutIndex) {
-      const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
-      const workoutData = JSON.parse(workoutElement.dataset.details);
-      
-      workoutData.exercises.forEach((exercise, exerciseIndex) => {
-        const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
-        exercise.weight = parseFloat(weightInput.value) || null;
-      });
-
-      const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-      await updateDoc(workoutRef, {
-        exercises: workoutData.exercises
-      });
-
-      closePopup();
-      loadUserWorkouts(auth.currentUser.uid);
-    };
-
-    // New function to show content based on button clicks
     function showContent(contentText) {
       document.getElementById("content-text").textContent = contentText;
     }
 
+    // Wait for DOM to be loaded before accessing elements
     document.addEventListener("DOMContentLoaded", function () {
-      fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById("navbar-container").innerHTML = html;
-          checkAuthState();
-          initBurgerMenu();
-        })
-        .catch(err => {
-          console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = `
-            <span id="user-status">Please log in</span>
-            <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-          checkAuthState();
-        });
+      const button1 = document.querySelector("button#button1");
+      const button2 = document.querySelector("button#button2");
+
+      button1.addEventListener('click', () => loadUserWorkouts('some-user-id'));
+      button2.addEventListener('click', () => showContent('Content for Button 2'));
+      
+      checkAuthState();
     });
-
-    function initBurgerMenu() {
-      const menuToggle = document.querySelector(".menu-toggle");
-      const navbarList = document.querySelector(".navbar-list");
-
-      if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", function () {
-          navbarList.classList.toggle("active");
-          menuToggle.classList.toggle("active");
-        });
-      }
-    }
   </script>
 
   <!-- Sidebar -->
   <div class="sidebar">
-    <button onclick="loadUserWorkouts('some-user-id')">Button 1</button>
-    <button onclick="showContent('Content for Button 2')">Button 2</button>
-    <button onclick="showContent('Content for Button 3')">Button 3</button>
+    <button id="button1">Button 1</button>
+    <button id="button2">Button 2</button>
   </div>
 
   <!-- Content area -->
