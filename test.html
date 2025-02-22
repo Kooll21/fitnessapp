@@ -36,10 +36,37 @@
 
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          userStatus.textContent = `Welcome, ${user.email}`;
+          userStatus.textContent = Welcome, ${user.email};
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
+
+          // Load user workouts
+          await loadUserWorkouts(user.uid);
+        } else {
+          userStatus.textContent = 'Please log in';
+          loginLink.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+          adminButton.style.display = 'none';
+        }
+      });
+    }
+
+    // Log out function
+  
+    window.logoutUser = function() {
+      signOut(auth)
+        .then(() => {
+          document.getElementById("user-status").textContent = 'Please log in';
+          document.getElementById("login-link").style.display = 'inline-block';
+          document.getElementById("logout-btn").style.display = 'none';
+          document.getElementById("admin-panel").style.display = 'none';
+        })
+        .catch((error) => {
+          console.error('Error logging out:', error);
+        });
+    };
+
 
 async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
@@ -58,38 +85,6 @@ async function loadUserWorkouts(userId) {
   displayWorkouts(workouts);
 }
 
-    // Log out function
-  
-    window.logoutUser = function() {
-      signOut(auth)
-        .then(() => {
-          document.getElementById("user-status").textContent = 'Please log in';
-          document.getElementById("login-link").style.display = 'inline-block';
-          document.getElementById("logout-btn").style.display = 'none';
-          document.getElementById("admin-panel").style.display = 'none';
-        })
-        .catch((error) => {
-          console.error('Error logging out:', error);
-        });
-    };
-
-
-  async function loadUserWorkouts(userId) {
-  const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-  const snapshot = await getDocs(userWorkoutsRef);
-  let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-
-  // Now, fetch exercises for each workout
-  for (let workout of workouts) {
-    if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-      // Assuming each workout document contains an array of exercise IDs
-      workout.exercises = await loadExercises(workout.exerciseIds);
-    }
-  }
-
-  displayWorkouts(workouts);
-}
-
 async function loadExercises(exerciseIds) {
     const exercises = [];
 
@@ -100,7 +95,7 @@ async function loadExercises(exerciseIds) {
         if (exerciseDoc.exists()) {
             exercises.push({ ...exerciseDoc.data(), id: id }); // Include ID for potential future use
         } else {
-            console.error(`Exercise with ID ${id} not found.`);
+            console.error(Exercise with ID ${id} not found.);
         }
     }
 
@@ -112,10 +107,10 @@ function displayWorkouts(workouts) {
   container.innerHTML = "<h2>Сохраненные тренировки</h2>";
   workouts.forEach((workout, index) => {
     const workoutElement = document.createElement("div");
-    workoutElement.innerHTML = `
+    workoutElement.innerHTML = 
       <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
       <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-    `;
+    ;
     workoutElement.dataset.details = JSON.stringify(workout); // Store full workout details in a dataset attribute
     container.appendChild(workoutElement);
   });
@@ -136,21 +131,21 @@ window.showWorkoutDetails = function(index) {
     // Create the list of exercises with input fields for editing weights
     const exercisesList = sortedExercises
         ? sortedExercises.map((exercise, exerciseIndex) =>
-              `<li>
+              <li>
                   <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>:
                   <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
                   <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-              </li>`
+              </li>
           ).join("")
         : "Нет доступных данных";
 
-    document.getElementById("popup-content").innerHTML = `
+    document.getElementById("popup-content").innerHTML = 
         <h3>Детали тренировки</h3>
         <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
         <p><strong>Упражнения:</strong></p>
         <ul>${exercisesList}</ul>
         <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
-    `;
+    ;
 
     document.body.classList.add("modal-open");
     document.getElementById("overlay").style.display = "block";
@@ -168,7 +163,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
   const workoutData = JSON.parse(workoutElement.dataset.details);
   
   workoutData.exercises.forEach((exercise, exerciseIndex) => {
-    const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
+    const weightInput = document.getElementById(weight-${workoutIndex}-${exerciseIndex});
     exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
   });
 
@@ -192,10 +187,10 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
         })
         .catch(err => {
           console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = `
+          document.getElementById("navbar-container").innerHTML = 
             <span id="user-status">Please log in</span>
             <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>;
           checkAuthState();
         });
     });
