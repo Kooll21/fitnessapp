@@ -75,56 +75,12 @@ async function loadUserWorkouts(userId) {
   
   let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-  let exerciseWeights = {};
-
   // Now, fetch exercises for each workout
   for (let workout of workouts) {
     if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-      const exercises = await loadExercises(workout.exerciseIds);
-      
-      // Store the latest weight for each exercise
-      exercises.forEach(exercise => {
-        if (exercise.weight) {
-          if (!exerciseWeights[exercise.exercisename]) {
-            exerciseWeights[exercise.exercisename] = [];
-          }
-          exerciseWeights[exercise.exercisename].push({
-            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
-            weight: exercise.weight
-          });
-        }
-      });
+      workout.exercises = await loadExercises(workout.exerciseIds);
     }
   }
-
-  displayWorkouts(workouts, exerciseWeights);
-}
-
-function displayWorkouts(workouts, exerciseWeights) {
-  const container = document.getElementById("workouts-list");
-  container.innerHTML = "<h2>Сохраненные тренировки</h2>";
-
-  workouts.forEach((workout, index) => {
-    const workoutNumber = workouts.length - index;
-    
-    const workoutElement = document.createElement("div");
-    workoutElement.innerHTML = `
-      <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-      <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-    `;
-    workoutElement.dataset.details = JSON.stringify(workout);
-    container.appendChild(workoutElement);
-    
-    // Display the most recent weight for each exercise
-    const exercises = workout.exercises || [];
-    exercises.forEach(exercise => {
-      if (exerciseWeights[exercise.exercisename]) {
-        const latestWeight = exerciseWeights[exercise.exercisename].slice(-1)[0].weight;
-        exercise.latestWeight = latestWeight; // Add this to the exercise for display purposes
-      }
-    });
-  });
-}
 
   displayWorkouts(workouts);
 }
@@ -169,29 +125,58 @@ window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
-  // Создание списка упражнений с полями ввода для редактирования веса
-const exercisesList = workoutData.exercises
-  ? workoutData.exercises.map((exercise, exerciseIndex) => 
-      `<li>
-        <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-        <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-        <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
+  // Create the exercises list
+  const exercisesList = workoutData.exercises
+    ? workoutData.exercises.map((exercise, exerciseIndex) => 
+        `<li>
+          <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+          <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" />
+          <span> кг,</span>
+          <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
+          <button onclick="showExerciseHistory('${exercise.id}')">История веса</button>
+        </li>`
+      ).join("")
+    : "Нет доступных данных";
 
-      </li>`
-    ).join("")
-  : "Нет доступных данных";
-
-document.getElementById("popup-content").innerHTML = `
-  <h3>Детали тренировки</h3>
-  <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-  <p><strong>Упражнения:</strong></p>
-  <ul>${exercisesList}</ul>
-  <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
-`;
+  document.getElementById("popup-content").innerHTML = `
+    <h3>Детали тренировки</h3>
+    <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+    <p><strong>Упражнения:</strong></p>
+    <ul>${exercisesList}</ul>
+    <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
+  `;
 
   document.body.classList.add("modal-open");
   document.getElementById("overlay").style.display = "block";
   document.getElementById("popup").style.display = "block";
+};
+
+window.showExerciseHistory = async function(exerciseId) {
+  // Fetch the history of this exercise (you can customize this to your needs)
+  const exerciseHistoryRef = collection(db, "exerciseHistory", exerciseId, "weights");
+  const historySnapshot = await getDocs(exerciseHistoryRef);
+  const history = historySnapshot.docs.map(doc => doc.data());
+
+  // Create the history modal
+  const historyContent = history.length > 0
+    ? history.map(item => `<p>${new Date(item.date.seconds * 1000).toLocaleDateString("ru-RU")}: ${item.weight} кг</p>`).join("")
+    : "<p>История отсутствует</p>";
+
+  document.getElementById("history-popup-content").innerHTML = `
+    <h3>История веса упражнения</h3>
+    ${historyContent}
+  `;
+
+  // Show history modal
+  document.body.classList.add("modal-open");
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById("history-popup").style.display = "block";
+};
+
+window.closeHistoryPopup = function() {
+  document.body.classList.remove("modal-open");
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("history-popup").style.display = "none";
 };
 
     window.closePopup = function() {
