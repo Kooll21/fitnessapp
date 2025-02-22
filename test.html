@@ -68,16 +68,15 @@
     };
 
 
-async function loadUserWorkouts(userId) {
+  async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-  const q = query(userWorkoutsRef, orderBy("date", "desc")); // Order by date (newest first)
-  const snapshot = await getDocs(q);
-  
+  const snapshot = await getDocs(userWorkoutsRef);
   let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
   // Now, fetch exercises for each workout
   for (let workout of workouts) {
     if (workout.exerciseIds && workout.exerciseIds.length > 0) {
+      // Assuming each workout document contains an array of exercise IDs
       workout.exercises = await loadExercises(workout.exerciseIds);
     }
   }
@@ -86,20 +85,20 @@ async function loadUserWorkouts(userId) {
 }
 
 async function loadExercises(exerciseIds) {
-    const exercises = [];
+  const exercises = [];
 
-    for (let id of exerciseIds) {
-        const exerciseRef = doc(db, "exercises", id);
-        const exerciseDoc = await getDoc(exerciseRef);
+  for (let id of exerciseIds) {
+    const exerciseRef = doc(db, "exercises", id);  // Assuming exercises are stored in "exercises" collection
+    const exerciseDoc = await getDoc(exerciseRef);
 
-        if (exerciseDoc.exists()) {
-            exercises.push({ ...exerciseDoc.data(), id: id }); // Include ID for potential future use
-        } else {
-            console.error(`Exercise with ID ${id} not found.`);
-        }
+    if (exerciseDoc.exists()) {
+      exercises.push(exerciseDoc.data());  // Store the exercise data
+    } else {
+      console.error(`Exercise with ID ${id} not found.`);
     }
+  }
 
-    return exercises;
+  return exercises;
 }
 
 function displayWorkouts(workouts) {
@@ -107,49 +106,42 @@ function displayWorkouts(workouts) {
   container.innerHTML = "<h2>Сохраненные тренировки</h2>";
   workouts.forEach((workout, index) => {
     const workoutElement = document.createElement("div");
-workoutElement.innerHTML = `
-  <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-  <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-`;
+    workoutElement.innerHTML = `
+      <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <button onclick="showWorkoutDetails(${index})">Подробнее</button>
+    `;
     workoutElement.dataset.details = JSON.stringify(workout); // Store full workout details in a dataset attribute
     container.appendChild(workoutElement);
   });
 }
 
 window.showWorkoutDetails = function(index) {
-    const workoutElement = document.querySelectorAll("#workouts-list div")[index];
-    const workoutData = JSON.parse(workoutElement.dataset.details);
+  const workoutElement = document.querySelectorAll("#workouts-list div")[index];
+  const workoutData = JSON.parse(workoutElement.dataset.details);
 
-    // Sort exercises by timestamp (assuming it's a Firestore Timestamp object)
-    const sortedExercises = workoutData.exercises
-        ? [...workoutData.exercises].sort((a, b) => {
-              if (!a.timestamp || !b.timestamp) return 0; // Handle missing timestamps
-              return b.timestamp.seconds - a.timestamp.seconds; // Newest first
-          })
-        : [];
+  // Создание списка упражнений с полями ввода для редактирования веса
+const exercisesList = workoutData.exercises
+  ? workoutData.exercises.map((exercise, exerciseIndex) => 
+      `<li>
+        <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+        <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
+        <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
 
-    // Create the list of exercises with input fields for editing weights
-    const exercisesList = sortedExercises
-        ? sortedExercises.map((exercise, exerciseIndex) =>
-              <li>
-                  <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>:
-                  <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-                  <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-              </li>
-          ).join("")
-        : "Нет доступных данных";
+      </li>`
+    ).join("")
+  : "Нет доступных данных";
 
-    document.getElementById("popup-content").innerHTML = 
-        <h3>Детали тренировки</h3>
-        <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-        <p><strong>Упражнения:</strong></p>
-        <ul>${exercisesList}</ul>
-        <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
-    ;
+document.getElementById("popup-content").innerHTML = `
+  <h3>Детали тренировки</h3>
+  <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+  <p><strong>Упражнения:</strong></p>
+  <ul>${exercisesList}</ul>
+  <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
+`;
 
-    document.body.classList.add("modal-open");
-    document.getElementById("overlay").style.display = "block";
-    document.getElementById("popup").style.display = "block";
+  document.body.classList.add("modal-open");
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById("popup").style.display = "block";
 };
 
     window.closePopup = function() {
@@ -163,7 +155,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
   const workoutData = JSON.parse(workoutElement.dataset.details);
   
   workoutData.exercises.forEach((exercise, exerciseIndex) => {
-    const weightInput = document.getElementById(weight-${workoutIndex}-${exerciseIndex});
+    const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
     exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
   });
 
@@ -187,10 +179,10 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
         })
         .catch(err => {
           console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = 
+          document.getElementById("navbar-container").innerHTML = `
             <span id="user-status">Please log in</span>
             <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>;
+            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
           checkAuthState();
         });
     });
