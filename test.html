@@ -105,13 +105,18 @@ async function loadExercises(exerciseIds) {
 function displayWorkouts(workouts) {
   const container = document.getElementById("workouts-list");
   container.innerHTML = "<h2>Сохраненные тренировки</h2>";
+
+  const totalWorkouts = workouts.length; // Get the total count
+
   workouts.forEach((workout, index) => {
+    const workoutNumber = totalWorkouts - index; // Reverse the numbering
+
     const workoutElement = document.createElement("div");
     workoutElement.innerHTML = `
-      <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <p><strong>№ ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
       <button onclick="showWorkoutDetails(${index})">Подробнее</button>
     `;
-    workoutElement.dataset.details = JSON.stringify(workout); // Store full workout details in a dataset attribute
+    workoutElement.dataset.details = JSON.stringify(workout);
     container.appendChild(workoutElement);
   });
 }
