@@ -152,6 +152,9 @@ window.showWorkoutDetails = function(index) {
 };
 
 // Show history for the selected exercise
+let currentChart = null;  // Variable to store the current chart instance
+
+// Show history for the selected exercise
 window.showExerciseHistory = async function(exerciseName) {
   console.log("Fetching history for exercise:", exerciseName);  // Debugging line
 
@@ -186,9 +189,14 @@ window.showExerciseHistory = async function(exerciseName) {
     const labels = exerciseHistory.map(entry => entry.date);
     const data = exerciseHistory.map(entry => entry.weight);
 
+    // Destroy the previous chart if it exists
+    if (currentChart) {
+      currentChart.destroy();  // Destroy the previous chart instance
+    }
+
     // Create the line graph
     const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
-    new Chart(ctx, {
+    currentChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels, // X-axis: Dates
@@ -229,7 +237,7 @@ window.closeHistoryPopup = function() {
   document.getElementById("overlay").style.display = "none";
   document.getElementById("history-popup").style.display = "none";  // Hide history popup
 };
-
+    
 // Existing code for workout details popup close
 window.closePopup = function() {
   document.body.classList.remove("modal-open");
