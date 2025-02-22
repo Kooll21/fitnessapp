@@ -68,15 +68,16 @@
     };
 
 
-  async function loadUserWorkouts(userId) {
+async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-  const snapshot = await getDocs(userWorkoutsRef);
+  const q = query(userWorkoutsRef, orderBy("date", "desc")); // Order by date (newest first)
+  const snapshot = await getDocs(q);
+  
   let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
   // Now, fetch exercises for each workout
   for (let workout of workouts) {
     if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-      // Assuming each workout document contains an array of exercise IDs
       workout.exercises = await loadExercises(workout.exerciseIds);
     }
   }
