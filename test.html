@@ -36,7 +36,7 @@
 
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          userStatus.textContent = Welcome, ${user.email};
+          userStatus.textContent = `Welcome, ${user.email}`;
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
