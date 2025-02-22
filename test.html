@@ -142,36 +142,75 @@
         const db = getFirestore(app);
         let currentChart = null;
 
-        function checkAuthState() {
-            const userStatus = document.getElementById("user-status");
-            const loginLink = document.getElementById("login-link");
-            const logoutBtn = document.getElementById("logout-btn");
+// Function to check authentication state
+    function checkAuthState() {
+      const adminButton = document.getElementById("admin-panel");
+      const userStatus = document.getElementById("user-status");
+      const loginLink = document.getElementById("login-link");
+      const logoutBtn = document.getElementById("logout-btn");
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userStatus.textContent = `Welcome, ${user.email}`;
-                    loginLink.style.display = 'none';
-                    logoutBtn.style.display = 'block';
-                    logoutBtn.onclick = logoutUser;
-                    loadModule('workouts', user.uid);
-                } else {
-                    userStatus.textContent = 'Please log in';
-                    loginLink.style.display = 'inline-block';
-                    logoutBtn.style.display = 'none';
-                }
-            });
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is logged in
+          userStatus.textContent = `Welcome, ${user.email}`;
+          loginLink.style.display = 'none';
+          logoutBtn.style.display = 'block';
+          adminButton.style.display = 'block'; // Show Admin Panel button
+        } else {
+          // User is logged out
+          userStatus.textContent = 'Please log in';
+          loginLink.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+          adminButton.style.display = 'none'; // Hide Admin Panel button
         }
+      });
+    }
 
-        window.logoutUser = function () {
-            signOut(auth).then(() => {
-                document.getElementById("user-status").textContent = 'Please log in';
-                document.getElementById("login-link").style.display = 'inline-block';
-                document.getElementById("logout-btn").style.display = 'none';
-            }).catch((error) => {
-                console.error('Error logging out:', error);
-            });
-        };
+    // Log out function
+    window.logoutUser = function() {
+      signOut(auth)
+        .then(() => {
+          document.getElementById("user-status").textContent = 'Please log in';
+          document.getElementById("login-link").style.display = 'inline-block';
+          document.getElementById("logout-btn").style.display = 'none';
+          document.getElementById("admin-panel").style.display = 'none';
+        })
+        .catch((error) => {
+          console.error('Error logging out:', error);
+        });
+    };
 
+    // Загрузка меню из файла menu.html и проверка авторизации
+    document.addEventListener("DOMContentLoaded", function () {
+    fetch('menu.html')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("navbar-container").innerHTML = html;
+            checkAuthState();
+            initBurgerMenu(); // Запуск функции инициализации бургера после вставки меню
+        })
+        .catch(err => {
+            console.error("Ошибка загрузки меню:", err);
+            document.getElementById("navbar-container").innerHTML = `
+                <span id="user-status">Please log in</span>
+                <a href="login.html" id="login-link">Login</a>
+                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+            checkAuthState();
+        });
+});
+
+// Функция инициализации меню-бургера
+function initBurgerMenu() {
+    const menuToggle = document.querySelector(".menu-toggle");
+    const navbarList = document.querySelector(".navbar-list");
+
+    if (menuToggle && navbarList) {
+        menuToggle.addEventListener("click", function () {
+            navbarList.classList.toggle("active");
+            menuToggle.classList.toggle("active");
+        });
+    }
+}
       async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
   const q = query(userWorkoutsRef, orderBy("date", "desc")); // Order by date (newest first)
@@ -364,39 +403,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
   loadUserWorkouts(auth.currentUser.uid); // Перезагрузить тренировки для отображения обновлений
 };
 
-    // Load menu and check authentication on page load
-document.addEventListener("DOMContentLoaded", function () {
-    fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-            console.log("Fetched menu.html:", html); // Log the fetched HTML
-            document.getElementById("navbar-container").innerHTML = html;
-            console.log("Navbar container content:", document.getElementById("navbar-container").innerHTML); // Log the inserted HTML
-            checkAuthState();
-            initBurgerMenu();
-        })
-        .catch(err => {
-            console.error("Ошибка загрузки меню:", err);
-            document.getElementById("navbar-container").innerHTML = `
-                <span id="user-status">Please log in</span>
-                <a href="login.html" id="login-link">Login</a>
-                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-            checkAuthState();
-        });
-});
-
-    // Function to initialize burger menu
-    function initBurgerMenu() {
-      const menuToggle = document.querySelector(".menu-toggle");
-      const navbarList = document.querySelector(".navbar-list");
-
-      if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", function () {
-          navbarList.classList.toggle("active");
-          menuToggle.classList.toggle("active");
-        });
-      }
-    }
+  
 
 
         function loadModule(moduleName, userId) {
