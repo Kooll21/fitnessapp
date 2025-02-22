@@ -107,10 +107,10 @@ function displayWorkouts(workouts) {
   container.innerHTML = "<h2>Сохраненные тренировки</h2>";
   workouts.forEach((workout, index) => {
     const workoutElement = document.createElement("div");
-    workoutElement.innerHTML = 
-      <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-      <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-    ;
+workoutElement.innerHTML = `
+  <p><strong>№ ${index + 1}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+  <button onclick="showWorkoutDetails(${index})">Подробнее</button>
+`;
     workoutElement.dataset.details = JSON.stringify(workout); // Store full workout details in a dataset attribute
     container.appendChild(workoutElement);
   });
