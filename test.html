@@ -197,18 +197,24 @@
             return exercises;
         }
 
-        function displayWorkouts(workouts) {
-            const container = document.getElementById("workouts-list");
-            container.innerHTML = "<h2>Сохраненные тренировки</h2>";
-            const totalWorkouts = workouts.length;
-            workouts.forEach((workout, index) => {
-                const workoutNumber = totalWorkouts - index;
-                const workoutElement = document.createElement("div");
-                workoutElement.innerHTML = `<p><strong>Тренировка № ${workoutNumber}:</strong> <span class="math-inline">\{new Date\(workout\.date\.seconds \* 1000\)\.toLocaleDateString\("ru\-RU"\)\}</p\><button onclick\="showWorkoutDetails\(</span>{index})">Подробнее</button>`;
-                workoutElement.dataset.details = JSON.stringify(workout);
-                container.appendChild(workoutElement);
-            });
-        }
+function displayWorkouts(workouts) {
+  const container = document.getElementById("workouts-list");
+  container.innerHTML = "<h2>Сохраненные тренировки</h2>";
+
+  const totalWorkouts = workouts.length; // Get the total count
+
+  workouts.forEach((workout, index) => {
+    const workoutNumber = totalWorkouts - index; // Reverse the numbering
+
+    const workoutElement = document.createElement("div");
+    workoutElement.innerHTML = `
+      <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <button onclick="showWorkoutDetails(${index})">Подробнее</button>
+    `;
+    workoutElement.dataset.details = JSON.stringify(workout);
+    container.appendChild(workoutElement);
+  });
+}
 
         window.showWorkoutDetails = function (index) {
             const workoutElement = document.querySelectorAll("# workouts-list div")[index];
