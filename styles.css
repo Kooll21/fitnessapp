@@ -186,7 +186,7 @@ body.modal-open {
 }
 
 /* Стили для попапа (можно настроить по своему усмотрению) */
-#popup, #history-popup {
+#popup {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -249,6 +249,7 @@ body.modal-open #overlay {
   overflow-y: auto;
 }
 
+/* Ensure the history popup is hidden by default */
 #history-popup {
   position: fixed;
   top: 50%;
@@ -259,7 +260,6 @@ body.modal-open #overlay {
   max-height: 400px;
   overflow-y: auto;
   width: 400px;
-  display: none;
+  display: none; /* Make sure it's hidden initially */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-}
 
