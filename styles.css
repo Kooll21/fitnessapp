@@ -1,3 +1,4 @@
+/* General body styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -5,6 +6,7 @@ body {
     background-color: #f4f4f4;
 }
 
+/* Header styles */
 header {
     background: #333;
     color: white;
@@ -12,7 +14,7 @@ header {
     text-align: center;
 }
 
-/* Убираем конфликтующие стили */
+/* Basic navigation styles */
 nav {
     padding: 0;
 }
@@ -35,6 +37,7 @@ nav ul li a {
     font-weight: bold;
 }
 
+/* Content section */
 .content-section {
     padding: 20px;
     background: white;
@@ -43,15 +46,11 @@ nav ul li a {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.description {
-    white-space: pre-wrap;
-}
-
-/* Стили меню */
+/* Navbar styles */
 .navbar {
     background-color: #333;
     padding: 30px 0;
-    position: relative; /* Для позиционирования бургер-меню */
+    position: relative; /* For burger menu positioning */
 }
 
 .navbar-list {
@@ -83,7 +82,7 @@ nav ul li a {
     color: #d35400;
 }
 
-/* Кнопка выхода */
+/* Logout button */
 #logout-btn {
     display: none;
     color: white;
@@ -99,16 +98,16 @@ nav ul li a {
     background-color: #d35400;
 }
 
-/* Адаптивное меню */
+/* Responsive menu styles */
 .menu-toggle {
     display: none;
     flex-direction: column;
     cursor: pointer;
     padding: 5px;
-    position: absolute; /* Фиксируем в верхнем углу */
-    top: 15px; /* Подняли кнопку выше */
+    position: absolute; /* Fixed in the top left corner */
+    top: 15px; /* Raised the button */
     left: 15px;
-    z-index: 101; /* Больше, чем у меню */
+    z-index: 101; /* Higher than the menu */
 }
 
 .menu-toggle .bar {
@@ -127,10 +126,10 @@ nav ul li a {
     color: white;
     font-size: 24px;
     cursor: pointer;
-    z-index: 102; /* Обеспечиваем, чтобы кнопка закрытия была поверх */
+    z-index: 102; /* Above the close button */
 }
 
-/* Медиа-запросы для мобильных устройств */
+/* Media queries for mobile */
 @media (max-width: 768px) {
     .navbar-list {
         display: none;
@@ -139,10 +138,10 @@ nav ul li a {
         width: 100%;
         text-align: center;
         position: absolute;
-        top: 0px; /* Подняли на высоту меню */
+        top: 0px; /* Raised the menu */
         left: 0;
         padding: 10px 0;
-        z-index: 100; /* Меню должно быть ниже кнопки */
+        z-index: 100; /* Below the button */
         height: 60px;
     }
 
@@ -154,8 +153,8 @@ nav ul li a {
 
     .menu-toggle {
         display: flex;
-        top: 15px; /* Поднимаем кнопку бургер-меню */
-        left: 15px; /* Слева */
+        top: 15px; /* Raised the button */
+        left: 15px;
     }
 
     .menu-toggle.active .bar:nth-child(1) {
@@ -175,24 +174,24 @@ nav ul li a {
     }
 
     .close-menu {
-        display: block; /* Показываем кнопку закрытия */
+        display: block; /* Show the close button */
     }
 }
-  /* Стили для модального окна */
-/* Add some basic styles for the popup and overlay */
-/* Запрещаем прокрутку фона */
+
+/* Popup styles */
+/* Prevent background scroll when popup is open */
 body.modal-open {
     overflow: hidden;
 }
 
-/* Стили для попапа (можно настроить по своему усмотрению) */
+/* Main popup */
 #popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%; /* Ширина попапа в процентах */
-    max-width: 600px; /* Ограничение максимальной ширины */
+    width: 80%; /* Width of popup */
+    max-width: 600px;
     max-height: 80vh;
     overflow-y: auto;
     background-color: white;
@@ -207,13 +206,14 @@ body.modal-open {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000; /* Нижний слой для затемнения */
+    z-index: 1000; /* Lower than the popup */
     display: none;
 }
 
 body.modal-open #overlay {
     display: block;
 }
+
 .close-btn {
     position: absolute;
     top: 10px;
@@ -228,39 +228,42 @@ body.modal-open #overlay {
 .close-btn:hover {
     color: #f00;
 }
+
+/* Hidden class for popups */
 #overlay, #popup {
-  display: none; /* По умолчанию скрыты */
+    display: none; /* Hidden by default */
 }
 
 .hidden {
     display: none;
 }
+
+/* History popup */
+#history-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    width: 400px;
+    display: none; /* Hidden initially */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1002; /* Above the workout details popup */
+}
+
+/* History popup button */
 #history-popup button {
-  background-color: red;
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
+    background-color: red;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
+/* Ensuring the history popup is above other elements */
 #history-popup {
-  width: 400px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-/* Ensure the history popup is hidden by default */
-#history-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  max-height: 400px;
-  overflow-y: auto;
-  width: 400px;
-  display: none; /* Make sure it's hidden initially */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1002;
+    z-index: 1002; /* Above the default popup */
 }
