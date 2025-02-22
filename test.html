@@ -331,7 +331,19 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 <!-- Main Content -->
 <div class="main-content">
   <h1>Добро пожаловать в свой личный кабинет</h1>
-  <div id="workouts-list"></div>
+
+  <!-- Sections to show based on the menu clicked -->
+  <div id="workouts" class="module active">
+    <div id="workouts-list"></div> <!-- Show saved workouts -->
+  </div>
+
+  <div id="nutrition" class="module">
+    <p>Тестовый текст в разделе "Трекер питания"</p> <!-- Show test content for Nutrition -->
+  </div>
+
+  <div id="bodyweight" class="module">
+    <p>Тестовый текст в разделе "Вес тела"</p> <!-- Show test content for Bodyweight -->
+  </div>
 </div>
     
 
