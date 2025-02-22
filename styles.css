@@ -186,7 +186,7 @@ body.modal-open {
 }
 
 /* Стили для попапа (можно настроить по своему усмотрению) */
-#popup {
+#popup, #history-popup {
     position: fixed;
     top: 50%;
     left: 50%;
