@@ -365,23 +365,25 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 };
 
     // Load menu and check authentication on page load
-    document.addEventListener("DOMContentLoaded", function () {
-      fetch('menu.html')
+document.addEventListener("DOMContentLoaded", function () {
+    fetch('menu.html')
         .then(response => response.text())
         .then(html => {
-          document.getElementById("navbar-container").innerHTML = html;
-          checkAuthState();
-          initBurgerMenu();
+            console.log("Fetched menu.html:", html); // Log the fetched HTML
+            document.getElementById("navbar-container").innerHTML = html;
+            console.log("Navbar container content:", document.getElementById("navbar-container").innerHTML); // Log the inserted HTML
+            checkAuthState();
+            initBurgerMenu();
         })
         .catch(err => {
-          console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = `
-            <span id="user-status">Please log in</span>
-            <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-          checkAuthState();
+            console.error("Ошибка загрузки меню:", err);
+            document.getElementById("navbar-container").innerHTML = `
+                <span id="user-status">Please log in</span>
+                <a href="login.html" id="login-link">Login</a>
+                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+            checkAuthState();
         });
-    });
+});
 
     // Function to initialize burger menu
     function initBurgerMenu() {
