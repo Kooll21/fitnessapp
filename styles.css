@@ -269,10 +269,10 @@ body.modal-open #overlay {
 #history-popup {
     z-index: 1002; /* Above the default popup */
 }
- /* Sidebar Styles */
-/* Sidebar container */
+
+/* Sidebar Styles */
 .sidebar {
-  position: absolute;  /* Place the sidebar below the navbar */
+  position: fixed; /* Use fixed positioning to keep the sidebar in place */
   top: 50px; /* Adjust this depending on your navbar height */
   left: 0;
   width: 250px; /* Adjust sidebar width */
@@ -280,6 +280,8 @@ body.modal-open #overlay {
   padding: 10px;
   z-index: 5; /* Sidebar should stay below the navbar */
   display: block; /* Ensure the sidebar is visible */
+  height: 100vh; /* Make sidebar take full viewport height */
+  box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1); /* Optional: for shadow effect */
 }
 
 /* Sidebar links */
@@ -312,9 +314,14 @@ body.modal-open #overlay {
 
 /* Main content with space for sidebar */
 .main-content {
-  margin-left: 250px; /* Makes space for the sidebar */
+  margin-left: 0; /* Reset margin-left to 0 so content aligns with the screen */
   padding: 20px;
+  padding-left: 250px; /* Add space for sidebar */
+  background-color: #f4f4f4;
+  transition: padding-left 0.3s ease; /* Optional: smooth transition if sidebar toggles */
 }
+
+/* Module visibility */
 .module {
   display: none;
 }
