@@ -36,7 +36,7 @@
 
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          userStatus.textContent = Welcome, ${user.email};
+          userStatus.textContent = `Welcome, ${user.email}`;
           loginLink.style.display = 'none';
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
@@ -95,7 +95,7 @@ async function loadExercises(exerciseIds) {
     if (exerciseDoc.exists()) {
       exercises.push(exerciseDoc.data());  // Store the exercise data
     } else {
-      console.error(Exercise with ID ${id} not found.);
+      console.error(`Exercise with ID ${id} not found.`);
     }
   }
 
@@ -112,10 +112,10 @@ function displayWorkouts(workouts) {
     const workoutNumber = totalWorkouts - index; // Reverse the numbering
 
     const workoutElement = document.createElement("div");
-    workoutElement.innerHTML = 
+    workoutElement.innerHTML = `
       <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
       <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-    ;
+    `;
     workoutElement.dataset.details = JSON.stringify(workout);
     container.appendChild(workoutElement);
   });
@@ -129,22 +129,22 @@ window.showWorkoutDetails = function(index) {
   // Creating a list of exercises with buttons to show the weight history
   const exercisesList = workoutData.exercises
     ? workoutData.exercises.map((exercise, exerciseIndex) => 
-        <li>
+        `<li>
           <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
           <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
           <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
           <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button>
-        </li>
+        </li>`
       ).join("")
     : "Нет доступных данных";
 
-  document.getElementById("popup-content").innerHTML = 
+  document.getElementById("popup-content").innerHTML = `
     <h3>Детали тренировки</h3>
     <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
     <p><strong>Упражнения:</strong></p>
     <ul>${exercisesList}</ul>
     <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
-  ;
+  `;
 
   document.body.classList.add("modal-open");
   document.getElementById("overlay").style.display = "block";
@@ -182,7 +182,7 @@ window.showExerciseHistory = async function(exerciseName) {
   if (exerciseHistory.length > 0) {
     // Display the history text
     historyContainer.innerHTML = exerciseHistory.map(entry => 
-      <p>${entry.date}: ${entry.weight} кг</p>
+      `<p>${entry.date}: ${entry.weight} кг</p>`
     ).join('');
     
     // Prepare data for the chart
@@ -250,7 +250,7 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
   const workoutData = JSON.parse(workoutElement.dataset.details);
   
   workoutData.exercises.forEach((exercise, exerciseIndex) => {
-    const weightInput = document.getElementById(weight-${workoutIndex}-${exerciseIndex});
+    const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
     exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
   });
 
@@ -274,10 +274,10 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
         })
         .catch(err => {
           console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = 
+          document.getElementById("navbar-container").innerHTML = `
             <span id="user-status">Please log in</span>
             <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>;
+            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
           checkAuthState();
         });
     });
@@ -303,49 +303,26 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 
 
 <body>
-   <!-- Sidebar Menu -->
-  <div class="sidebar">
-    <h2>Админ Панель</h2>
-    <div class="menu-item" onclick="showModule('workouts')">Сохраненные тренировки</div>
-    <div class="menu-item" onclick="showModule('nutrition')">Трекер питания</div>
-    <div class="menu-item" onclick="showModule('bodyweight')">Вес тела</div>
-  </div>
+  <div id="navbar-container"></div>
+  <h1>Добро пожаловать в свой личный кабинет</h1>
+  <div id="workouts-list"></div>
 
-  <!-- Main Content Area -->
-  <div class="main-content">
-    <div id="workouts" class="module active">
-      <h2>Сохраненные тренировки</h2>
-      <p>Здесь вы можете просматривать и управлять своими тренировками.</p>
-    </div>
-
-    <div id="nutrition" class="module">
-      <h2>Трекер питания</h2>
-      <p>Следите за питанием и записывайте свои калории.</p>
-    </div>
-
-    <div id="bodyweight" class="module">
-      <h2>Вес тела</h2>
-      <p>Отслеживайте изменения вашего веса с течением времени.</p>
-    </div>
-  </div>
-
-  <!-- Exercise History Modal -->
-  <div id="history-popup">
-    <button onclick="closeHistoryPopup()">Close</button>
-    <h3>История упражнений</h3>
-    <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
-    <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
-  </div>
-
-  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
-
-  <!-- Overlay for modals -->
   <div id="overlay" onclick="closePopup()"></div>
   <div id="popup">
     <button class="close-btn" onclick="closePopup()">&times;</button>
     <div id="popup-content"></div>
   </div>
+<!-- Exercise History Modal -->
+<div id="history-popup">
+  <button onclick="closeHistoryPopup()">Close</button>
+  <h3>История упражнений</h3>
+  <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
 
+  <!-- Canvas for the chart -->
+  <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
+</div>
+
+  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
 
 </body>
 </html>
