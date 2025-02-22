@@ -313,21 +313,22 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 
   <!-- Main Content Area -->
   <div class="main-content">
-    <div id="workouts" class="module active">
-      <h2>Сохраненные тренировки</h2>
-      <p>Здесь вы можете просматривать и управлять своими тренировками.</p>
-    </div>
-
-    <div id="nutrition" class="module">
-      <h2>Трекер питания</h2>
-      <p>Следите за питанием и записывайте свои калории.</p>
-    </div>
-
-    <div id="bodyweight" class="module">
-      <h2>Вес тела</h2>
-      <p>Отслеживайте изменения вашего веса с течением времени.</p>
-    </div>
+  <div id="workouts" class="module active">
+    <h2>Сохраненные тренировки</h2>
+    <p>Здесь вы можете просматривать и управлять своими тренировками.</p>
+    <div id="workouts-list"></div> <!-- Workouts list will be populated here -->
   </div>
+
+  <div id="nutrition" class="module">
+    <h2>Трекер питания</h2>
+    <p>Следите за питанием и записывайте свои калории.</p>
+  </div>
+
+  <div id="bodyweight" class="module">
+    <h2>Вес тела</h2>
+    <p>Отслеживайте изменения вашего веса с течением времени.</p>
+  </div>
+</div>
 
   <!-- Exercise History Modal -->
   <div id="history-popup">
