@@ -314,12 +314,19 @@ body.modal-open #overlay {
 
 /* Main content with space for sidebar */
 .main-content {
-  margin-left: 0; /* Reset margin-left to 0 so content aligns with the screen */
+  margin-left: 250px; /* Make space for the sidebar */
   padding: 20px;
-  padding-left: 250px; /* Add space for sidebar */
   background-color: #f4f4f4;
-  transition: padding-left 0.3s ease; /* Optional: smooth transition if sidebar toggles */
+  transition: margin-left 0.3s ease;  /* Optional: smooth transition for sidebar toggle */
+  overflow-x: auto;  /* Prevent horizontal scroll */
 }
+
+/* Adjust layout on smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;  /* Reduce width on smaller screens */
+    top: 60px;  /* Adjust if needed for the navbar */
+  }
 
 /* Module visibility */
 .module {
