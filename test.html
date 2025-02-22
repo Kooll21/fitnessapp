@@ -313,9 +313,10 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
     <button class="close-btn" onclick="closePopup()">&times;</button>
     <div id="popup-content"></div>
   </div>
-  <div id="history-popup">
-  <button class="close-btn" onclick="closeHistoryPopup()">&times;</button>
-  <div id="history-popup-content"></div>
+<div id="history-popup">
+  <button onclick="closeHistoryPopup()">Close</button>
+  <h3>История упражнений</h3>
+  <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
 </div>
 
   <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
