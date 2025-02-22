@@ -292,6 +292,39 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
           checkAuthState();
         });
     });
+// Toggle content based on clicks
+    document.addEventListener("DOMContentLoaded", function() {
+    const savedWorkoutsLink = document.getElementById('saved-workouts');
+    const nutritionTrackerLink = document.getElementById('nutrition-tracker');
+    const bodyWeightLink = document.getElementById('body-weight');
+
+    const savedWorkoutsContent = document.getElementById('saved-workouts-content');
+    const nutritionTrackerContent = document.getElementById('nutrition-tracker-content');
+    const bodyWeightContent = document.getElementById('body-weight-content');
+
+    // Function to hide all content sections
+    function hideAllContent() {
+        savedWorkoutsContent.classList.add('hidden');
+        nutritionTrackerContent.classList.add('hidden');
+        bodyWeightContent.classList.add('hidden');
+    }
+
+    // Event listeners to toggle content visibility
+    savedWorkoutsLink.addEventListener('click', function() {
+        hideAllContent();
+        savedWorkoutsContent.classList.remove('hidden');
+    });
+
+    nutritionTrackerLink.addEventListener('click', function() {
+        hideAllContent();
+        nutritionTrackerContent.classList.remove('hidden');
+    });
+
+    bodyWeightLink.addEventListener('click', function() {
+        hideAllContent();
+        bodyWeightContent.classList.remove('hidden');
+    });
+});
 
     // Function to initialize burger menu
     function initBurgerMenu() {
