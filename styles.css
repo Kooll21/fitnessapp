@@ -313,3 +313,10 @@ body.modal-open #overlay {
   margin-left: 250px; /* Makes space for the sidebar */
   padding: 20px;
 }
+.module {
+  display: none;
+}
+
+.module.active {
+  display: block;
+}
