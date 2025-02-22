@@ -187,43 +187,20 @@ window.showExerciseHistory = async function(exerciseName) {
     historyContainer.innerHTML = "История отсутствует";
   }
 
-  // Show history modal
+  // Show the exercise history modal
   document.body.classList.add("modal-open");
   document.getElementById("overlay").style.display = "block";
-  document.getElementById("history-popup").style.display = "block";
+  document.getElementById("history-popup").style.display = "block";  // Ensure this is displayed
 };
 
-async function loadExerciseHistory(exerciseName) {
-  console.log(`Fetching history for exercise: ${exerciseName}`);  // Add log for debugging
-  
-  const exerciseHistoryRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
-  const snapshot = await getDocs(exerciseHistoryRef);
-  
-  let exerciseHistory = [];
-  
-  snapshot.docs.forEach(doc => {
-    const workout = doc.data();
-    workout.exercises.forEach(exercise => {
-      if (exercise.exercisename === exerciseName) {
-        if (exercise.weight) {
-          exerciseHistory.push({
-            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
-            weight: exercise.weight
-          });
-        }
-      }
-    });
-  });
-  
-  return exerciseHistory;
-}
-
+// Close the exercise history popup
 window.closeHistoryPopup = function() {
   document.body.classList.remove("modal-open");
   document.getElementById("overlay").style.display = "none";
-  document.getElementById("history-popup").style.display = "none";
+  document.getElementById("history-popup").style.display = "none";  // Hide the history popup
 };
 
+// Existing code for workout details popup close
 window.closePopup = function() {
   document.body.classList.remove("modal-open");
   document.getElementById("overlay").style.display = "none";
