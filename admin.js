@@ -1,86 +1,72 @@
-// admin.js
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js"; // Импортируем необходимые функции из Firebase
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+      authDomain: "fitnessapp-f519f.firebaseapp.com",
+      projectId: "fitnessapp-f519f",
+      storageBucket: "fitnessapp-f519f.appspot.com",
+      messagingSenderId: "1000735476286",
+      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+      measurementId: "G-MJ8K8ZNQM4"
+    };
 
-// Firebase initialization
-const firebaseConfig = {
-  apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-  authDomain: "fitnessapp-f519f.firebaseapp.com",
-  projectId: "fitnessapp-f519f",
-  storageBucket: "fitnessapp-f519f.appspot.com",
-  messagingSenderId: "1000735476286",
-  appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-  measurementId: "G-MJ8K8ZNQM4"
-};
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+    // Function to check authentication state
+    function checkAuthState() {
+      const adminButton = document.getElementById("admin-panel");
+      const userStatus = document.getElementById("user-status");
+      const loginLink = document.getElementById("login-link");
+      const logoutBtn = document.getElementById("logout-btn");
 
-document.addEventListener("DOMContentLoaded", () => {
-  fetch('menu.html')
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById("navbar-container").innerHTML = html;
-      checkAuthState();
-      initBurgerMenu();
-    })
-    .catch(err => {
-      console.error("Error loading menu:", err);
-      document.getElementById("navbar-container").innerHTML = `
-        <span id="user-status">Please log in</span>
-        <a href="login.html" id="login-link">Login</a>
-        <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-      checkAuthState();
-    });
-});
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          userStatus.textContent = `Welcome, ${user.email}`;
+          loginLink.style.display = 'none';
+          logoutBtn.style.display = 'block';
+          adminButton.style.display = 'block';
 
-// Authentication state check
-function checkAuthState() {
-  const adminButton = document.getElementById("admin-panel");
-  const userStatus = document.getElementById("user-status");
-  const loginLink = document.getElementById("login-link");
-  const logoutBtn = document.getElementById("logout-btn");
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      userStatus.textContent = `Welcome, ${user.email}`;
-      loginLink.style.display = 'none';
-      logoutBtn.style.display = 'block';
-      adminButton.style.display = 'block';
-      await loadUserWorkouts(user.uid);
-    } else {
-      userStatus.textContent = 'Please log in';
-      loginLink.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-      adminButton.style.display = 'none';
+          // Load user workouts
+          await loadUserWorkouts(user.uid);
+        } else {
+          userStatus.textContent = 'Please log in';
+          loginLink.style.display = 'inline-block';
+          logoutBtn.style.display = 'none';
+          adminButton.style.display = 'none';
+        }
+      });
     }
-  });
-}
 
-window.logoutUser = function() {
-  signOut(auth)
-    .then(() => {
-      document.getElementById("user-status").textContent = 'Please log in';
-      document.getElementById("login-link").style.display = 'inline-block';
-      document.getElementById("logout-btn").style.display = 'none';
-      document.getElementById("admin-panel").style.display = 'none';
-    })
-    .catch((error) => {
-      console.error('Error logging out:', error);
-    });
-};
+    // Log out function
+  
+    window.logoutUser = function() {
+      signOut(auth)
+        .then(() => {
+          document.getElementById("user-status").textContent = 'Please log in';
+          document.getElementById("login-link").style.display = 'inline-block';
+          document.getElementById("logout-btn").style.display = 'none';
+          document.getElementById("admin-panel").style.display = 'none';
+        })
+        .catch((error) => {
+          console.error('Error logging out:', error);
+        });
+    };
 
-// Load workouts for the user
+
 async function loadUserWorkouts(userId) {
   const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-  const q = query(userWorkoutsRef, orderBy("date", "desc"));
+  const q = query(userWorkoutsRef, orderBy("date", "desc")); // Order by date (newest first)
   const snapshot = await getDocs(q);
-
+  
   let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
+  // Now, fetch exercises for each workout
   for (let workout of workouts) {
     if (workout.exerciseIds && workout.exerciseIds.length > 0) {
       workout.exercises = await loadExercises(workout.exerciseIds);
@@ -90,29 +76,32 @@ async function loadUserWorkouts(userId) {
   displayWorkouts(workouts);
 }
 
-// Load exercises for a workout
 async function loadExercises(exerciseIds) {
   const exercises = [];
+
   for (let id of exerciseIds) {
-    const exerciseRef = doc(db, "exercises", id);
+    const exerciseRef = doc(db, "exercises", id);  // Assuming exercises are stored in "exercises" collection
     const exerciseDoc = await getDoc(exerciseRef);
+
     if (exerciseDoc.exists()) {
-      exercises.push(exerciseDoc.data());
+      exercises.push(exerciseDoc.data());  // Store the exercise data
     } else {
       console.error(`Exercise with ID ${id} not found.`);
     }
   }
+
   return exercises;
 }
 
-// Display workouts
 function displayWorkouts(workouts) {
   const container = document.getElementById("workouts-list");
   container.innerHTML = "<h2>Сохраненные тренировки</h2>";
-  const totalWorkouts = workouts.length;
+
+  const totalWorkouts = workouts.length; // Get the total count
 
   workouts.forEach((workout, index) => {
-    const workoutNumber = totalWorkouts - index;
+    const workoutNumber = totalWorkouts - index; // Reverse the numbering
+
     const workoutElement = document.createElement("div");
     workoutElement.innerHTML = `
       <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
@@ -123,12 +112,14 @@ function displayWorkouts(workouts) {
   });
 }
 
-// Show workout details in a popup
+// Update this section where the exercises are displayed in the modal
 window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
+
+  // Creating a list of exercises with buttons to show the weight history
   const exercisesList = workoutData.exercises
-    ? workoutData.exercises.map((exercise, exerciseIndex) =>
+    ? workoutData.exercises.map((exercise, exerciseIndex) => 
         `<li>
           <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
           <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
@@ -151,9 +142,146 @@ window.showWorkoutDetails = function(index) {
   document.getElementById("popup").style.display = "block";
 };
 
-// Function to close popup
+// Show history for the selected exercise
+let currentChart = null;  // Variable to store the current chart instance
+
+// Show history for the selected exercise
+window.showExerciseHistory = async function(exerciseName) {
+  console.log("Fetching history for exercise:", exerciseName);  // Debugging line
+
+  const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
+  const snapshot = await getDocs(userWorkoutsRef);
+
+  let exerciseHistory = [];
+
+  snapshot.docs.forEach(doc => {
+    const workout = doc.data();
+    workout.exercises.forEach(exercise => {
+      if (exercise.exercisename === exerciseName) {
+        if (exercise.weight) {
+          exerciseHistory.push({
+            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
+            weight: exercise.weight
+          });
+        }
+      }
+    });
+  });
+
+  const historyContainer = document.getElementById("exercise-history");
+
+  if (exerciseHistory.length > 0) {
+    // Display the history text
+    historyContainer.innerHTML = exerciseHistory.map(entry => 
+      `<p>${entry.date}: ${entry.weight} кг</p>`
+    ).join('');
+    
+    // Prepare data for the chart
+    const labels = exerciseHistory.map(entry => entry.date);
+    const data = exerciseHistory.map(entry => entry.weight);
+
+    // Destroy the previous chart if it exists
+    if (currentChart) {
+      currentChart.destroy();  // Destroy the previous chart instance
+    }
+
+    // Create the line graph
+    const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
+    currentChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels, // X-axis: Dates
+        datasets: [{
+          label: 'Weight History',
+          data: data, // Y-axis: Weights
+          borderColor: 'rgba(75, 192, 192, 1)', // Line color
+          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fill color
+          fill: true,
+          borderWidth: 2,
+          tension: 0.4
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: false // Adjust this based on your needs
+          }
+        }
+      }
+    });
+  } else {
+    historyContainer.innerHTML = "История отсутствует";
+  }
+
+  // Show history modal
+  console.log("Displaying history popup"); // Debugging line
+
+  // Show the exercise history modal when button is clicked
+  document.body.classList.add("modal-open");
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById("history-popup").style.display = "block";  // Only here should we display it
+};
+
+// Close the exercise history popup
+window.closeHistoryPopup = function() {
+  document.body.classList.remove("modal-open");
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("history-popup").style.display = "none";  // Hide history popup
+};
+    
+// Existing code for workout details popup close
 window.closePopup = function() {
   document.body.classList.remove("modal-open");
   document.getElementById("overlay").style.display = "none";
   document.getElementById("popup").style.display = "none";
 };
+    
+window.updateWorkout = async function(workoutId, workoutIndex) {
+  const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
+  const workoutData = JSON.parse(workoutElement.dataset.details);
+  
+  workoutData.exercises.forEach((exercise, exerciseIndex) => {
+    const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
+    exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
+  });
+
+  const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
+  await updateDoc(workoutRef, {
+    exercises: workoutData.exercises // Обновляем массив упражнений
+  });
+
+  closePopup();
+  loadUserWorkouts(auth.currentUser.uid); // Перезагрузить тренировки для отображения обновлений
+};
+
+    // Load menu and check authentication on page load
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch('menu.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById("navbar-container").innerHTML = html;
+          checkAuthState();
+          initBurgerMenu();
+        })
+        .catch(err => {
+          console.error("Ошибка загрузки меню:", err);
+          document.getElementById("navbar-container").innerHTML = `
+            <span id="user-status">Please log in</span>
+            <a href="login.html" id="login-link">Login</a>
+            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+          checkAuthState();
+        });
+    });
+
+    // Function to initialize burger menu
+    function initBurgerMenu() {
+      const menuToggle = document.querySelector(".menu-toggle");
+      const navbarList = document.querySelector(".navbar-list");
+
+      if (menuToggle && navbarList) {
+        menuToggle.addEventListener("click", function () {
+          navbarList.classList.toggle("active");
+          menuToggle.classList.toggle("active");
+        });
+      }
+    }
