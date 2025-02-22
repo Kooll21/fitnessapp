@@ -267,3 +267,49 @@ body.modal-open #overlay {
 #history-popup {
     z-index: 1002; /* Above the default popup */
 }
+ /* Sidebar Styles */
+    .sidebar {
+      width: 250px;
+      background: #333;
+      color: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .menu-item {
+      background: #444;
+      padding: 15px;
+      margin: 5px 0;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: 0.3s;
+    }
+
+    .menu-item:hover {
+      background: #555;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex-grow: 1;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+
+    .module {
+      display: none;
+    }
+
+    .module.active {
+      display: block;
+    }
