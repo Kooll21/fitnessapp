@@ -41,16 +41,22 @@
           logoutBtn.style.display = 'block';
           adminButton.style.display = 'block';
 
-          // Load user workouts
-          await loadUserWorkouts(user.uid);
-        } else {
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-          adminButton.style.display = 'none';
-        }
-      });
+async function loadUserWorkouts(userId) {
+  const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
+  const q = query(userWorkoutsRef, orderBy("date", "desc")); // Order by date (newest first)
+  const snapshot = await getDocs(q);
+  
+  let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+
+  // Now, fetch exercises for each workout
+  for (let workout of workouts) {
+    if (workout.exerciseIds && workout.exerciseIds.length > 0) {
+      workout.exercises = await loadExercises(workout.exerciseIds);
     }
+  }
+
+  displayWorkouts(workouts);
+}
 
     // Log out function
   
