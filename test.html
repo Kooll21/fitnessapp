@@ -121,18 +121,19 @@ function displayWorkouts(workouts) {
   });
 }
 
+// Update this section where the exercises are displayed in the modal
 window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
-  // Create a list of exercises with input fields for editing weight and a button to show history
+  // Creating a list of exercises with buttons to show the weight history
   const exercisesList = workoutData.exercises
     ? workoutData.exercises.map((exercise, exerciseIndex) => 
         `<li>
           <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
           <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
           <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-          <button onclick="showExerciseHistory('${exercise.exerciseId}')">Показать историю веса</button>
+          <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button>
         </li>`
       ).join("")
     : "Нет доступных данных";
@@ -149,59 +150,42 @@ window.showWorkoutDetails = function(index) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("popup").style.display = "block";
 };
-    
+
+// Show history for the selected exercise
 window.showExerciseHistory = async function(exerciseName) {
   console.log("Fetching history for exercise:", exerciseName);  // Debugging line
 
-  // Fetch the exercise history from the "exerciseHistory" collection
-  const exerciseHistory = await loadExerciseHistory(exerciseName);
+  const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
+  const snapshot = await getDocs(userWorkoutsRef);
 
-  // If no history is found, show a message
-  if (exerciseHistory.length === 0) {
-    document.getElementById("exercise-history").innerHTML = "История отсутствует";
-    return;
-  }
+  let exerciseHistory = [];
 
-  // Build the HTML for the history list
-  let historyList = "<ul>";
-  exerciseHistory.forEach(entry => {
-    historyList += `
-      <li>
-        <strong>${entry.date}</strong>: ${entry.weight} кг
-      </li>
-    `;
+  // Loop through each workout and each exercise to find matches for the specific exercise name
+  snapshot.docs.forEach(doc => {
+    const workout = doc.data();
+    workout.exercises.forEach(exercise => {
+      if (exercise.exercisename === exerciseName) {
+        if (exercise.weight) {
+          exerciseHistory.push({
+            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
+            weight: exercise.weight
+          });
+        }
+      }
+    });
   });
-  historyList += "</ul>";
 
-  // Display the history in the modal
-  document.getElementById("exercise-history").innerHTML = historyList;
-};
+  const historyContainer = document.getElementById("exercise-history");
 
-window.showExerciseHistory = async function(exerciseName) {
-  console.log("Fetching history for exercise:", exerciseName);  // Debugging line
-
-  // Fetch the exercise history from the "exerciseHistory" collection
-  const exerciseHistory = await loadExerciseHistory(exerciseName);
-
-  // If no history is found, show a message
-  if (exerciseHistory.length === 0) {
-    document.getElementById("exercise-history").innerHTML = "История отсутствует";
-    return;
+  if (exerciseHistory.length > 0) {
+    // Display the history
+    historyContainer.innerHTML = exerciseHistory.map(entry => 
+      `<p>${entry.date}: ${entry.weight} кг</p>`
+    ).join('');
+  } else {
+    // If no history exists
+    historyContainer.innerHTML = "История отсутствует";
   }
-
-  // Build the HTML for the history list
-  let historyList = "<ul>";
-  exerciseHistory.forEach(entry => {
-    historyList += `
-      <li>
-        <strong>${entry.date}</strong>: ${entry.weight} кг
-      </li>
-    `;
-  });
-  historyList += "</ul>";
-
-  // Display the history in the modal
-  document.getElementById("exercise-history").innerHTML = historyList;
 
   // Show history modal
   document.body.classList.add("modal-open");
