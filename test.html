@@ -177,33 +177,31 @@ window.showExerciseHistory = async function(exerciseName) {
   document.getElementById("exercise-history").innerHTML = historyList;
 };
 
-async function loadExerciseHistory(exerciseName) {
-  console.log(`Fetching history for exercise: ${exerciseName}`);  // Add log for debugging
-  
-  const exerciseHistoryRef = collection(db, "exerciseHistory");
-  const q = query(exerciseHistoryRef, where("exerciseName", "==", exerciseName), orderBy("date", "asc"));
-  const snapshot = await getDocs(q);
+window.showExerciseHistory = async function(exerciseName) {
+  console.log("Fetching history for exercise:", exerciseName);  // Debugging line
 
-  const history = snapshot.docs.map(doc => doc.data());
-  
-  console.log("Fetched exercise history:", history);  // Add log for debugging
-  
-  return history;
-}
+  // Fetch the exercise history from the "exerciseHistory" collection
+  const exerciseHistory = await loadExerciseHistory(exerciseName);
 
-  // Display the weight history if available
+  // If no history is found, show a message
   if (exerciseHistory.length === 0) {
-    document.getElementById("history-popup-content").innerHTML = "<p>История отсутствует</p>";
-  } else {
-    const historyHTML = exerciseHistory.map(entry => 
-      `<p>${entry.date}: ${entry.weight} кг</p>`
-    ).join("");
-    
-    document.getElementById("history-popup-content").innerHTML = `
-      <h3>История веса упражнения</h3>
-      ${historyHTML}
-    `;
+    document.getElementById("exercise-history").innerHTML = "История отсутствует";
+    return;
   }
+
+  // Build the HTML for the history list
+  let historyList = "<ul>";
+  exerciseHistory.forEach(entry => {
+    historyList += `
+      <li>
+        <strong>${entry.date}</strong>: ${entry.weight} кг
+      </li>
+    `;
+  });
+  historyList += "</ul>";
+
+  // Display the history in the modal
+  document.getElementById("exercise-history").innerHTML = historyList;
 
   // Show history modal
   document.body.classList.add("modal-open");
@@ -211,13 +209,38 @@ async function loadExerciseHistory(exerciseName) {
   document.getElementById("history-popup").style.display = "block";
 };
 
+async function loadExerciseHistory(exerciseName) {
+  console.log(`Fetching history for exercise: ${exerciseName}`);  // Add log for debugging
+  
+  const exerciseHistoryRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
+  const snapshot = await getDocs(exerciseHistoryRef);
+  
+  let exerciseHistory = [];
+  
+  snapshot.docs.forEach(doc => {
+    const workout = doc.data();
+    workout.exercises.forEach(exercise => {
+      if (exercise.exercisename === exerciseName) {
+        if (exercise.weight) {
+          exerciseHistory.push({
+            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
+            weight: exercise.weight
+          });
+        }
+      }
+    });
+  });
+  
+  return exerciseHistory;
+}
+
 window.closeHistoryPopup = function() {
   document.body.classList.remove("modal-open");
   document.getElementById("overlay").style.display = "none";
   document.getElementById("history-popup").style.display = "none";
 };
 
-    window.closePopup = function() {
+window.closePopup = function() {
   document.body.classList.remove("modal-open");
   document.getElementById("overlay").style.display = "none";
   document.getElementById("popup").style.display = "none";
