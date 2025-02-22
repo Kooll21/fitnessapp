@@ -235,4 +235,17 @@ body.modal-open #overlay {
 .hidden {
     display: none;
 }
+#history-popup button {
+  background-color: red;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#history-popup {
+  width: 400px;
+  max-height: 400px;
+  overflow-y: auto;
+}
 
