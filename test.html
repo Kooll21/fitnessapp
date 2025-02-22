@@ -7,400 +7,312 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Firebase SDK -->
 <script>
-      // Move this function to the global scope
-function showModule(moduleName) {
-  const modules = document.querySelectorAll('.module');
-  modules.forEach(module => module.classList.remove('active'));
-  const activeModule = document.getElementById(moduleName);
-  if (activeModule) activeModule.classList.add('active');
-}
-  </script>
-  
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-    import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js"; // Импортируем необходимые функции из Firebase
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-      authDomain: "fitnessapp-f519f.firebaseapp.com",
-      projectId: "fitnessapp-f519f",
-      storageBucket: "fitnessapp-f519f.appspot.com",
-      messagingSenderId: "1000735476286",
-      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-      measurementId: "G-MJ8K8ZNQM4"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
-
-    // Function to check authentication state
-    function checkAuthState() {
-      const adminButton = document.getElementById("admin-panel");
-      const userStatus = document.getElementById("user-status");
-      const loginLink = document.getElementById("login-link");
-      const logoutBtn = document.getElementById("logout-btn");
-
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          userStatus.textContent = `Welcome, ${user.email}`;
-          loginLink.style.display = 'none';
-          logoutBtn.style.display = 'block';
-          adminButton.style.display = 'block';
-
-          // Load user workouts
-          await loadUserWorkouts(user.uid);
-        } else {
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-          adminButton.style.display = 'none';
-        }
-      });
-    }
-
-    // Log out function
-  
-    window.logoutUser = function() {
-      signOut(auth)
-        .then(() => {
-          document.getElementById("user-status").textContent = 'Please log in';
-          document.getElementById("login-link").style.display = 'inline-block';
-          document.getElementById("logout-btn").style.display = 'none';
-          document.getElementById("admin-panel").style.display = 'none';
-        })
-        .catch((error) => {
-          console.error('Error logging out:', error);
-        });
-    };
-
-
-async function loadUserWorkouts(userId) {
-  const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-  const q = query(userWorkoutsRef, orderBy("date", "desc")); // Order by date (newest first)
-  const snapshot = await getDocs(q);
-  
-  let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-
-  // Now, fetch exercises for each workout
-  for (let workout of workouts) {
-    if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-      workout.exercises = await loadExercises(workout.exerciseIds);
-    }
+  // Move this function to the global scope
+  function showModule(moduleName) {
+    const modules = document.querySelectorAll('.module');
+    modules.forEach(module => module.classList.remove('active'));
+    const activeModule = document.getElementById(moduleName);
+    if (activeModule) activeModule.classList.add('active');
   }
+</script>
 
-  displayWorkouts(workouts);
-}
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+  import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js"; 
 
-async function loadExercises(exerciseIds) {
-  const exercises = [];
+  const firebaseConfig = {
+    apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+    authDomain: "fitnessapp-f519f.firebaseapp.com",
+    projectId: "fitnessapp-f519f",
+    storageBucket: "fitnessapp-f519f.appspot.com",
+    messagingSenderId: "1000735476286",
+    appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+    measurementId: "G-MJ8K8ZNQM4"
+  };
 
-  for (let id of exerciseIds) {
-    const exerciseRef = doc(db, "exercises", id);  // Assuming exercises are stored in "exercises" collection
-    const exerciseDoc = await getDoc(exerciseRef);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    if (exerciseDoc.exists()) {
-      exercises.push(exerciseDoc.data());  // Store the exercise data
-    } else {
-      console.error(`Exercise with ID ${id} not found.`);
-    }
-  }
+  function checkAuthState() {
+    const adminButton = document.getElementById("admin-panel");
+    const userStatus = document.getElementById("user-status");
+    const loginLink = document.getElementById("login-link");
+    const logoutBtn = document.getElementById("logout-btn");
 
-  return exercises;
-}
-
-function displayWorkouts(workouts) {
-  const container = document.getElementById("workouts-list");
-  container.innerHTML = "<h2>Сохраненные тренировки</h2>";
-
-  const totalWorkouts = workouts.length; // Get the total count
-
-  workouts.forEach((workout, index) => {
-    const workoutNumber = totalWorkouts - index; // Reverse the numbering
-
-    const workoutElement = document.createElement("div");
-    workoutElement.innerHTML = `
-      <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-      <button onclick="showWorkoutDetails(${index})">Подробнее</button>
-    `;
-    workoutElement.dataset.details = JSON.stringify(workout);
-    container.appendChild(workoutElement);
-  });
-}
-
-// Update this section where the exercises are displayed in the modal
-window.showWorkoutDetails = function(index) {
-  const workoutElement = document.querySelectorAll("#workouts-list div")[index];
-  const workoutData = JSON.parse(workoutElement.dataset.details);
-
-  // Creating a list of exercises with buttons to show the weight history
-  const exercisesList = workoutData.exercises
-    ? workoutData.exercises.map((exercise, exerciseIndex) => 
-        `<li>
-          <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-          <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-          <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-          <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button>
-        </li>`
-      ).join("")
-    : "Нет доступных данных";
-
-  document.getElementById("popup-content").innerHTML = `
-    <h3>Детали тренировки</h3>
-    <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-    <p><strong>Упражнения:</strong></p>
-    <ul>${exercisesList}</ul>
-    <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
-  `;
-
-  document.body.classList.add("modal-open");
-  document.getElementById("overlay").style.display = "block";
-  document.getElementById("popup").style.display = "block";
-};
-
-// Show history for the selected exercise
-let currentChart = null;  // Variable to store the current chart instance
-
-// Show history for the selected exercise
-window.showExerciseHistory = async function(exerciseName) {
-  console.log("Fetching history for exercise:", exerciseName);  // Debugging line
-
-  const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
-  const snapshot = await getDocs(userWorkoutsRef);
-
-  let exerciseHistory = [];
-
-  snapshot.docs.forEach(doc => {
-    const workout = doc.data();
-    workout.exercises.forEach(exercise => {
-      if (exercise.exercisename === exerciseName) {
-        if (exercise.weight) {
-          exerciseHistory.push({
-            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
-            weight: exercise.weight
-          });
-        }
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userStatus.textContent = `Welcome, ${user.email}`;
+        loginLink.style.display = 'none';
+        logoutBtn.style.display = 'block';
+        adminButton.style.display = 'block';
+        await loadUserWorkouts(user.uid);
+      } else {
+        userStatus.textContent = 'Please log in';
+        loginLink.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+        adminButton.style.display = 'none';
       }
     });
-  });
+  }
 
-  const historyContainer = document.getElementById("exercise-history");
+  window.logoutUser = function() {
+    signOut(auth)
+      .then(() => {
+        document.getElementById("user-status").textContent = 'Please log in';
+        document.getElementById("login-link").style.display = 'inline-block';
+        document.getElementById("logout-btn").style.display = 'none';
+        document.getElementById("admin-panel").style.display = 'none';
+      })
+      .catch((error) => {
+        console.error('Error logging out:', error);
+      });
+  };
 
-  if (exerciseHistory.length > 0) {
-    // Display the history text
-    historyContainer.innerHTML = exerciseHistory.map(entry => 
-      `<p>${entry.date}: ${entry.weight} кг</p>`
-    ).join('');
-    
-    // Prepare data for the chart
-    const labels = exerciseHistory.map(entry => entry.date);
-    const data = exerciseHistory.map(entry => entry.weight);
-
-    // Destroy the previous chart if it exists
-    if (currentChart) {
-      currentChart.destroy();  // Destroy the previous chart instance
+  async function loadUserWorkouts(userId) {
+    const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
+    const q = query(userWorkoutsRef, orderBy("date", "desc"));
+    const snapshot = await getDocs(q);
+  
+    let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    for (let workout of workouts) {
+      if (workout.exerciseIds && workout.exerciseIds.length > 0) {
+        workout.exercises = await loadExercises(workout.exerciseIds);
+      }
     }
+    displayWorkouts(workouts);
+  }
 
-    // Create the line graph
-    const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
-    currentChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels, // X-axis: Dates
-        datasets: [{
-          label: 'Weight History',
-          data: data, // Y-axis: Weights
-          borderColor: 'rgba(75, 192, 192, 1)', // Line color
-          backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fill color
-          fill: true,
-          borderWidth: 2,
-          tension: 0.4
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: false // Adjust this based on your needs
+  async function loadExercises(exerciseIds) {
+    const exercises = [];
+    for (let id of exerciseIds) {
+      const exerciseRef = doc(db, "exercises", id);
+      const exerciseDoc = await getDoc(exerciseRef);
+      if (exerciseDoc.exists()) {
+        exercises.push(exerciseDoc.data());
+      } else {
+        console.error(`Exercise with ID ${id} not found.`);
+      }
+    }
+    return exercises;
+  }
+
+  function displayWorkouts(workouts) {
+    const container = document.getElementById("workouts-list");
+    container.innerHTML = "<h2>Сохраненные тренировки</h2>";
+
+    const totalWorkouts = workouts.length;
+
+    workouts.forEach((workout, index) => {
+      const workoutNumber = totalWorkouts - index;
+
+      const workoutElement = document.createElement("div");
+      workoutElement.innerHTML = `
+        <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+        <button onclick="showWorkoutDetails(${index})">Подробнее</button>
+      `;
+      workoutElement.dataset.details = JSON.stringify(workout);
+      container.appendChild(workoutElement);
+    });
+  }
+
+  window.showWorkoutDetails = function(index) {
+    const workoutElement = document.querySelectorAll("#workouts-list div")[index];
+    const workoutData = JSON.parse(workoutElement.dataset.details);
+
+    const exercisesList = workoutData.exercises
+      ? workoutData.exercises.map((exercise, exerciseIndex) => 
+          `<li>
+            <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+            <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" />
+            <span> кг,</span>
+            <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
+            <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button>
+          </li>`
+        ).join("")
+      : "Нет доступных данных";
+
+    document.getElementById("popup-content").innerHTML = `
+      <h3>Детали тренировки</h3>
+      <p><strong>Дата:</strong> ${new Date(workoutData.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <p><strong>Упражнения:</strong></p>
+      <ul>${exercisesList}</ul>
+      <button onclick="updateWorkout('${workoutData.id}', ${index})">Сохранить изменения</button>
+    `;
+
+    document.body.classList.add("modal-open");
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("popup").style.display = "block";
+  };
+
+  let currentChart = null;
+
+  window.showExerciseHistory = async function(exerciseName) {
+    console.log("Fetching history for exercise:", exerciseName);
+
+    const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
+    const snapshot = await getDocs(userWorkoutsRef);
+
+    let exerciseHistory = [];
+
+    snapshot.docs.forEach(doc => {
+      const workout = doc.data();
+      workout.exercises.forEach(exercise => {
+        if (exercise.exercisename === exerciseName) {
+          if (exercise.weight) {
+            exerciseHistory.push({
+              date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
+              weight: exercise.weight
+            });
           }
         }
-      }
+      });
     });
-  } else {
-    historyContainer.innerHTML = "История отсутствует";
+
+    const historyContainer = document.getElementById("exercise-history");
+
+    if (exerciseHistory.length > 0) {
+      historyContainer.innerHTML = exerciseHistory.map(entry => 
+        `<p>${entry.date}: ${entry.weight} кг</p>`
+      ).join('');
+      
+      const labels = exerciseHistory.map(entry => entry.date);
+      const data = exerciseHistory.map(entry => entry.weight);
+
+      if (currentChart) {
+        currentChart.destroy();
+      }
+
+      const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
+      currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Weight History',
+            data: data,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            fill: true,
+            borderWidth: 2,
+            tension: 0.4
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    } else {
+      historyContainer.innerHTML = "История отсутствует";
+    }
+
+    document.body.classList.add("modal-open");
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("history-popup").style.display = "block";
+  };
+
+  window.closeHistoryPopup = function() {
+    document.body.classList.remove("modal-open");
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("history-popup").style.display = "none";
+  };
+
+  window.closePopup = function() {
+    document.body.classList.remove("modal-open");
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("popup").style.display = "none";
+  };
+
+  window.updateWorkout = async function(workoutId, workoutIndex) {
+    const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
+    const workoutData = JSON.parse(workoutElement.dataset.details);
+    
+    workoutData.exercises.forEach((exercise, exerciseIndex) => {
+      const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
+      exercise.weight = parseFloat(weightInput.value) || null;
+    });
+
+    const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
+    await updateDoc(workoutRef, {
+      exercises: workoutData.exercises
+    });
+
+    closePopup();
+    loadUserWorkouts(auth.currentUser.uid);
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch('menu.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
+        checkAuthState();
+        initBurgerMenu();
+      })
+      .catch(err => {
+        console.error("Ошибка загрузки меню:", err);
+        document.getElementById("navbar-container").innerHTML = `
+          <span id="user-status">Please log in</span>
+          <a href="login.html" id="login-link">Login</a>
+          <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+        checkAuthState();
+      });
+  });
+
+  function initBurgerMenu() {
+    const menuToggle = document.querySelector(".menu-toggle");
+    const navbarList = document.querySelector(".navbar-list");
+
+    if (menuToggle && navbarList) {
+      menuToggle.addEventListener("click", function () {
+        navbarList.classList.toggle("active");
+        menuToggle.classList.toggle("active");
+      });
+    }
   }
 
-  // Show history modal
-  console.log("Displaying history popup"); // Debugging line
-
-  // Show the exercise history modal when button is clicked
-  document.body.classList.add("modal-open");
-  document.getElementById("overlay").style.display = "block";
-  document.getElementById("history-popup").style.display = "block";  // Only here should we display it
-};
-
-// Close the exercise history popup
-window.closeHistoryPopup = function() {
-  document.body.classList.remove("modal-open");
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("history-popup").style.display = "none";  // Hide history popup
-};
-    
-// Existing code for workout details popup close
-window.closePopup = function() {
-  document.body.classList.remove("modal-open");
-  document.getElementById("overlay").style.display = "none";
-  document.getElementById("popup").style.display = "none";
-};
-    
-window.updateWorkout = async function(workoutId, workoutIndex) {
-  const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
-  const workoutData = JSON.parse(workoutElement.dataset.details);
-  
-  workoutData.exercises.forEach((exercise, exerciseIndex) => {
-    const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
-    exercise.weight = parseFloat(weightInput.value) || null; // Обновляем вес или устанавливаем в null
-  });
-
-  const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-  await updateDoc(workoutRef, {
-    exercises: workoutData.exercises // Обновляем массив упражнений
-  });
-
-  closePopup();
-  loadUserWorkouts(auth.currentUser.uid); // Перезагрузить тренировки для отображения обновлений
-};
-
-    // Load menu and check authentication on page load
-    document.addEventListener("DOMContentLoaded", function () {
-      fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById("navbar-container").innerHTML = html;
-          checkAuthState();
-          initBurgerMenu();
-        })
-        .catch(err => {
-          console.error("Ошибка загрузки меню:", err);
-          document.getElementById("navbar-container").innerHTML = `
-            <span id="user-status">Please log in</span>
-            <a href="login.html" id="login-link">Login</a>
-            <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-          checkAuthState();
-        });
-    });
-// Toggle content based on clicks
-    document.addEventListener("DOMContentLoaded", function() {
-    const savedWorkoutsLink = document.getElementById('saved-workouts');
-    const nutritionTrackerLink = document.getElementById('nutrition-tracker');
-    const bodyWeightLink = document.getElementById('body-weight');
-
-    const savedWorkoutsContent = document.getElementById('saved-workouts-content');
-    const nutritionTrackerContent = document.getElementById('nutrition-tracker-content');
-    const bodyWeightContent = document.getElementById('body-weight-content');
-
-    // Function to hide all content sections
-    function hideAllContent() {
-        savedWorkoutsContent.classList.add('hidden');
-        nutritionTrackerContent.classList.add('hidden');
-        bodyWeightContent.classList.add('hidden');
-    }
-
-    // Event listeners to toggle content visibility
-    savedWorkoutsLink.addEventListener('click', function() {
-        hideAllContent();
-        savedWorkoutsContent.classList.remove('hidden');
-    });
-
-    nutritionTrackerLink.addEventListener('click', function() {
-        hideAllContent();
-        nutritionTrackerContent.classList.remove('hidden');
-    });
-
-    bodyWeightLink.addEventListener('click', function() {
-        hideAllContent();
-        bodyWeightContent.classList.remove('hidden');
-    });
-});
-
-    // Function to initialize burger menu
-    function initBurgerMenu() {
-      const menuToggle = document.querySelector(".menu-toggle");
-      const navbarList = document.querySelector(".navbar-list");
-
-      if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", function () {
-          navbarList.classList.toggle("active");
-          menuToggle.classList.toggle("active");
-        });
-      }
-    }
-    // Function to toggle the sidebar visibility
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('active');
-    }
-    
-  </script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+  }
+</script>
 </head>
 <body>
 
-  <!-- Placeholder for dynamic menu -->
   <div id="navbar-container"></div>
 
-
-<body>
-
-<!-- Sidebar Menu (Always visible) -->
-<div class="sidebar" id="sidebar">
-  <a href="javascript:void(0)" onclick="showModule('workouts')">Сохраненные тренировки</a>
-  <a href="javascript:void(0)" onclick="showModule('nutrition')">Трекер питания</a>
-  <a href="javascript:void(0)" onclick="showModule('bodyweight')">Вес тела</a>
-</div>
-
-<!-- Main Content -->
-<div class="main-content">
-  <h1>Добро пожаловать в свой личный кабинет</h1>
-
-  <!-- Sections to show based on the menu clicked -->
-  <div id="workouts" class="module active">
-    <div id="workouts-list"></div> <!-- Show saved workouts -->
+  <div class="sidebar">
+    <a href="#" id="saved-workouts">Сохраненные тренировки</a>
+    <a href="#" id="nutrition-tracker">Трекер питания</a>
+    <a href="#" id="body-weight">Вес тела</a>
   </div>
 
-  <div id="nutrition" class="module">
-    <p>Тестовый текст в разделе "Трекер питания"</p> <!-- Show test content for Nutrition -->
+  <div class="main-content">
+    <div id="saved-workouts-content" class="content-section hidden">
+      <div id="workouts-list"></div>
+    </div>
+    <div id="nutrition-tracker-content" class="content-section hidden">
+      <h2>Трекер питания</h2>
+      <p>Тестовый текст в разделе "Трекер питания"</p>
+    </div>
+    <div id="body-weight-content" class="content-section hidden">
+      <h2>Вес тела</h2>
+      <p>Тестовый текст в разделе "Вес тела"</p>
+    </div>
   </div>
-
-  <div id="bodyweight" class="module">
-    <p>Тестовый текст в разделе "Вес тела"</p> <!-- Show test content for Bodyweight -->
-  </div>
-</div>
-    
-
-  <!-- Menu Toggle Button -->
-  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
   
-
-
-  <div id="overlay" onclick="closePopup()"></div>
-  <div id="popup">
-    <button class="close-btn" onclick="closePopup()">&times;</button>
-    <div id="popup-content"></div>
+  <!-- History and workout modals -->
+  <div id="history-popup">
+    <button onclick="closeHistoryPopup()">Close</button>
+    <h3>История упражнений</h3>
+    <div id="exercise-history"></div>
+    <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
   </div>
-<!-- Exercise History Modal -->
-<div id="history-popup">
-  <button onclick="closeHistoryPopup()">Close</button>
-  <h3>История упражнений</h3>
-  <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
-
-  <!-- Canvas for the chart -->
-  <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
-</div>
-
-  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
-
 </body>
 </html>
