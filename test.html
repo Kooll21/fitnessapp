@@ -125,15 +125,14 @@ window.showWorkoutDetails = function(index) {
   const workoutElement = document.querySelectorAll("#workouts-list div")[index];
   const workoutData = JSON.parse(workoutElement.dataset.details);
 
-  // Create the exercises list
+  // Create a list of exercises with input fields for editing weight and a button to show history
   const exercisesList = workoutData.exercises
     ? workoutData.exercises.map((exercise, exerciseIndex) => 
         `<li>
           <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-          <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" />
-          <span> кг,</span>
+          <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
           <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-          <button onclick="showExerciseHistory('${exercise.id}')">История веса</button>
+          <button onclick="showExerciseHistory('${exercise.exerciseId}')">Показать историю веса</button>
         </li>`
       ).join("")
     : "Нет доступных данных";
@@ -150,22 +149,43 @@ window.showWorkoutDetails = function(index) {
   document.getElementById("overlay").style.display = "block";
   document.getElementById("popup").style.display = "block";
 };
-
+    
 window.showExerciseHistory = async function(exerciseId) {
-  // Fetch the history of this exercise (you can customize this to your needs)
-  const exerciseHistoryRef = collection(db, "exerciseHistory", exerciseId, "weights");
-  const historySnapshot = await getDocs(exerciseHistoryRef);
-  const history = historySnapshot.docs.map(doc => doc.data());
+  console.log("Fetching history for exerciseId:", exerciseId);  // Debugging line
 
-  // Create the history modal
-  const historyContent = history.length > 0
-    ? history.map(item => `<p>${new Date(item.date.seconds * 1000).toLocaleDateString("ru-RU")}: ${item.weight} кг</p>`).join("")
-    : "<p>История отсутствует</p>";
+  // Loop through all user workouts to find the relevant exercise and its history
+  const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
+  const snapshot = await getDocs(userWorkoutsRef);
 
-  document.getElementById("history-popup-content").innerHTML = `
-    <h3>История веса упражнения</h3>
-    ${historyContent}
-  `;
+  let exerciseHistory = [];
+  
+  snapshot.docs.forEach(doc => {
+    const workout = doc.data();
+    workout.exercises.forEach(exercise => {
+      if (exercise.exerciseId === exerciseId) {
+        if (exercise.weight) {
+          exerciseHistory.push({
+            date: new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU"),
+            weight: exercise.weight
+          });
+        }
+      }
+    });
+  });
+
+  // Display the weight history if available
+  if (exerciseHistory.length === 0) {
+    document.getElementById("history-popup-content").innerHTML = "<p>История отсутствует</p>";
+  } else {
+    const historyHTML = exerciseHistory.map(entry => 
+      `<p>${entry.date}: ${entry.weight} кг</p>`
+    ).join("");
+    
+    document.getElementById("history-popup-content").innerHTML = `
+      <h3>История веса упражнения</h3>
+      ${historyHTML}
+    `;
+  }
 
   // Show history modal
   document.body.classList.add("modal-open");
