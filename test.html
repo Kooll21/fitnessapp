@@ -95,7 +95,7 @@ async function loadExercises(exerciseIds) {
         if (exerciseDoc.exists()) {
             exercises.push({ ...exerciseDoc.data(), id: id }); // Include ID for potential future use
         } else {
-            console.error(Exercise with ID ${id} not found.);
+            console.error(`Exercise with ID ${id} not found.`);
         }
     }
 
