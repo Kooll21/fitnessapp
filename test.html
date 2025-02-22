@@ -303,26 +303,49 @@ window.updateWorkout = async function(workoutId, workoutIndex) {
 
 
 <body>
-  <div id="navbar-container"></div>
-  <h1>Добро пожаловать в свой профиль</h1>
-  <div id="workouts-list"></div>
+   <!-- Sidebar Menu -->
+  <div class="sidebar">
+    <h2>Админ Панель</h2>
+    <div class="menu-item" onclick="showModule('workouts')">Сохраненные тренировки</div>
+    <div class="menu-item" onclick="showModule('nutrition')">Трекер питания</div>
+    <div class="menu-item" onclick="showModule('bodyweight')">Вес тела</div>
+  </div>
 
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <div id="workouts" class="module active">
+      <h2>Сохраненные тренировки</h2>
+      <p>Здесь вы можете просматривать и управлять своими тренировками.</p>
+    </div>
+
+    <div id="nutrition" class="module">
+      <h2>Трекер питания</h2>
+      <p>Следите за питанием и записывайте свои калории.</p>
+    </div>
+
+    <div id="bodyweight" class="module">
+      <h2>Вес тела</h2>
+      <p>Отслеживайте изменения вашего веса с течением времени.</p>
+    </div>
+  </div>
+
+  <!-- Exercise History Modal -->
+  <div id="history-popup">
+    <button onclick="closeHistoryPopup()">Close</button>
+    <h3>История упражнений</h3>
+    <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
+    <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
+  </div>
+
+  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
+
+  <!-- Overlay for modals -->
   <div id="overlay" onclick="closePopup()"></div>
   <div id="popup">
     <button class="close-btn" onclick="closePopup()">&times;</button>
     <div id="popup-content"></div>
   </div>
-<!-- Exercise History Modal -->
-<div id="history-popup">
-  <button onclick="closeHistoryPopup()">Close</button>
-  <h3>История упражнений</h3>
-  <div id="exercise-history"></div> <!-- This is where the history will be displayed -->
 
-  <!-- Canvas for the chart -->
-  <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
-</div>
-
-  <div id="workouts-list"></div> <!-- Make sure this exists for workouts -->
 
 </body>
 </html>
