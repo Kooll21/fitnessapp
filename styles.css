@@ -276,7 +276,7 @@ body.modal-open #overlay {
   top: 50px; /* Adjust this depending on your navbar height */
   left: 0;
   width: 250px; /* Adjust sidebar width */
-  background-color: #6598ba; /* Your sidebar background */
+  background-color: #333; /* Your sidebar background */
   padding: 10px;
   z-index: 5; /* Sidebar should stay below the navbar */
   display: block; /* Ensure the sidebar is visible */
@@ -314,7 +314,7 @@ body.modal-open #overlay {
 
 /* Main content with space for sidebar */
 .main-content {
-  margin-left: 250px; /* Make space for the sidebar */
+  margin-left: 350px; /* Make space for the sidebar */
   padding: 20px;
   background-color: #f4f4f4;
   transition: margin-left 0.3s ease;  /* Optional: smooth transition for sidebar toggle */
