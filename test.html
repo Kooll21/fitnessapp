@@ -3,34 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Page</title>
-  <link rel="stylesheet" href="styles.css"> <!-- External CSS file -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- External Chart.js -->
+  <title>Sidebar Example</title>
+  <style>
+    /* Basic styles for the sidebar and page content */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    /* Sidebar styling */
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 15px;
+      background-color: #444;
+      color: white;
+      border: none;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background-color: #555;
+    }
+
+    /* Content area styling */
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+    }
+
+    .content h2 {
+      margin: 0;
+    }
+
+    .content p {
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Placeholder for dynamic menu -->
-  <div id="navbar-container"></div>
-
-  <h1>Добро пожаловать в свой личный кабинет</h1>
-  <div id="workouts-list"></div>
-
-  <!-- Modal Popup for Workout Details -->
-  <div id="overlay" onclick="closePopup()"></div>
-  <div id="popup">
-    <button class="close-btn" onclick="closePopup()">&times;</button>
-    <div id="popup-content"></div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button onclick="showContent('Content for Button 1')">Button 1</button>
+    <button onclick="showContent('Content for Button 2')">Button 2</button>
+    <button onclick="showContent('Content for Button 3')">Button 3</button>
   </div>
 
-  <!-- Exercise History Modal -->
-  <div id="history-popup">
-    <button onclick="closeHistoryPopup()">Close</button>
-    <h3>История упражнений</h3>
-    <div id="exercise-history"></div>
-    <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
+  <!-- Content area -->
+  <div class="content">
+    <h2>Test Content</h2>
+    <p id="content-text">Click a button to see some content.</p>
   </div>
 
-  <script src="admin.js" type="module"></script> <!-- External JS file -->
+  <script>
+    // Function to display content based on the button clicked
+    function showContent(content) {
+      document.getElementById('content-text').textContent = content;
+    }
+  </script>
 
 </body>
 </html>
