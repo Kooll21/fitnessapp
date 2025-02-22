@@ -113,7 +113,7 @@ function displayWorkouts(workouts) {
 
     const workoutElement = document.createElement("div");
     workoutElement.innerHTML = `
-      <p><strong>№ ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+      <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
       <button onclick="showWorkoutDetails(${index})">Подробнее</button>
     `;
     workoutElement.dataset.details = JSON.stringify(workout);
