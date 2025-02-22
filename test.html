@@ -160,7 +160,6 @@ window.showExerciseHistory = async function(exerciseName) {
 
   let exerciseHistory = [];
 
-  // Loop through each workout and each exercise to find matches for the specific exercise name
   snapshot.docs.forEach(doc => {
     const workout = doc.data();
     workout.exercises.forEach(exercise => {
@@ -178,26 +177,27 @@ window.showExerciseHistory = async function(exerciseName) {
   const historyContainer = document.getElementById("exercise-history");
 
   if (exerciseHistory.length > 0) {
-    // Display the history
     historyContainer.innerHTML = exerciseHistory.map(entry => 
       `<p>${entry.date}: ${entry.weight} кг</p>`
     ).join('');
   } else {
-    // If no history exists
     historyContainer.innerHTML = "История отсутствует";
   }
 
-  // Show the exercise history modal
+  // Show history modal
+  console.log("Displaying history popup"); // Debugging line
+
+  // Show the exercise history modal when button is clicked
   document.body.classList.add("modal-open");
   document.getElementById("overlay").style.display = "block";
-  document.getElementById("history-popup").style.display = "block";  // Ensure this is displayed
+  document.getElementById("history-popup").style.display = "block";  // Only here should we display it
 };
 
 // Close the exercise history popup
 window.closeHistoryPopup = function() {
   document.body.classList.remove("modal-open");
   document.getElementById("overlay").style.display = "none";
-  document.getElementById("history-popup").style.display = "none";  // Hide the history popup
+  document.getElementById("history-popup").style.display = "none";  // Hide history popup
 };
 
 // Existing code for workout details popup close
