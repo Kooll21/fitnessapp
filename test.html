@@ -39,7 +39,10 @@
         </div>
         <div id="exercises-content" style="display: none;">
             <h2>Exercises Management</h2>
-            <p>This section will show exercises list and management.</p>
+            <button onclick="testFirestoreConnection('ex-status', 'ex-fileCount', 'ex-documentList')">Проверить подключение</button>
+            <p id="ex-status"></p>
+            <p id="ex-fileCount"></p>
+            <ul id="ex-documentList"></ul>
         </div>
     </div>
 
