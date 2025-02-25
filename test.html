@@ -11,6 +11,7 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar">
+        <button class="menu-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button>
         <div id="navbar-container"></div>
     </nav>
 
@@ -20,21 +21,9 @@
             <h3>Dashboard</h3>
         </div>
         <ul class="sidebar-menu">
-            <li>
-                <button id="workouts-button">
-                    <i class="fas fa-dumbbell"></i> Workouts
-                </button>
-            </li>
-            <li>
-                <button id="users-button">
-                    <i class="fas fa-users"></i> Users
-                </button>
-            </li>
-            <li>
-                <button id="exercises-button">
-                    <i class="fas fa-running"></i> Exercises
-                </button>
-            </li>
+            <li><button id="workouts-button"><i class="fas fa-dumbbell"></i> Workouts</button></li>
+            <li><button id="users-button"><i class="fas fa-users"></i> Users</button></li>
+            <li><button id="exercises-button"><i class="fas fa-running"></i> Exercises</button></li>
         </ul>
         <div class="sidebar-footer">
             <div id="user-status">Please log in</div>
@@ -72,7 +61,6 @@
         <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
     </div>
 
-    <!-- Подключение внешнего JS-файла -->
     <script type="module" src="admin.js"></script>
 </body>
 </html>
