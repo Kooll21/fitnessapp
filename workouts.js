@@ -1,7 +1,6 @@
 // workouts.js
 
-// Предполагается, что Firebase уже инициализирован в другом файле (например, auth.js)
-// Если это не так, можно добавить инициализацию здесь, но лучше вынести её в общий файл
+// Проверяем, инициализирован ли Firebase, и если нет, инициализируем
 if (!firebase.apps.length) {
     var firebaseConfig = {
         apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
@@ -78,13 +77,10 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
                     var photoUrl = doc.data().photo || "";
                     var videoUrl = doc.data().video || "";
 
-                    console.log("Исходное описание из Firestore:", description);
                     description = description.replace(/\\n/g, "\n");
-                    console.log("Обработанное описание после замены \\n:", description);
 
                     var attributes = document.createElement("ul");
 
-                    // Вывод изображения, если ссылка есть
                     if (photoUrl) {
                         var photoItem = document.createElement("li");
                         var img = document.createElement("img");
@@ -121,24 +117,18 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
                     descriptionDiv.classList.add("description");
                     descriptionDiv.style.display = "none";
                     descriptionDiv.innerHTML = description.replace(/\n/g, "<br>");
-                    console.log("HTML-код для описания:", descriptionDiv.innerHTML);
-
                     descriptionItem.appendChild(descriptionDiv);
 
-                    // Кнопка "Подробности"
                     var toggleButton = document.createElement("button");
                     toggleButton.textContent = "Подробнее";
                     toggleButton.onclick = function() {
                         var isVisible = descriptionDiv.style.display === "block";
                         var videoVisible = videoItem ? videoItem.style.display === "block" : false;
-
                         descriptionDiv.style.display = isVisible ? "none" : "block";
                         if (videoItem) videoItem.style.display = isVisible ? "none" : "block";
-
                         toggleButton.textContent = isVisible ? "Подробнее" : "Скрыть";
                     };
 
-                    // Вставка видео из YouTube, если ссылка есть
                     if (videoUrl) {
                         var videoItem = document.createElement("li");
                         var iframe = document.createElement("iframe");
@@ -167,12 +157,12 @@ function loadDocumentsInSubcollection(docId, subcollection, subListItem) {
         });
 }
 
-// Функция для тестирования подключения и отображения тренировок
+// Основная функция для тестирования подключения и отображения тренировок
 function testFirestoreConnection(statusElementId, fileCountElementId, documentListElementId) {
     var statusElement = document.getElementById(statusElementId);
     var fileCountElement = document.getElementById(fileCountElementId);
     var documentListElement = document.getElementById(documentListElementId);
-    documentListElement.innerHTML = ""; // Очистка списка
+    documentListElement.innerHTML = "";
     console.log("testFirestoreConnection вызвана");
 
     db.collection("workouts").get()
@@ -209,5 +199,5 @@ function testFirestoreConnection(statusElementId, fileCountElementId, documentLi
         });
 }
 
-// Экспорт функции в глобальную область для использования в HTML
+// Экспорт функции в глобальную область для вызова из HTML
 window.testFirestoreConnection = testFirestoreConnection;
