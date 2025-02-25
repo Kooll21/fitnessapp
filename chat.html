@@ -1,17 +1,18 @@
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-
-const db = getFirestore();
-const auth = getAuth();
-
-// После создания пользователя
 auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
         const user = userCredential.user;
+        // Создаём документ в Firestore
         return setDoc(doc(db, "users", user.uid), {
             email: user.email,
             role: "user" // По умолчанию обычный пользователь
-        });
+        }).then(() => user); // Возвращаем user для следующего .then
+    })
+    .then((user) => {
+        // Перенаправляем только после успешного создания пользователя и записи в Firestore
+        window.location.href = "admin.html";
     })
     .catch((error) => {
         console.error("Ошибка:", error);
+        // Здесь можно добавить уведомление пользователю, например:
+        alert("Не удалось зарегистрироваться: " + error.message);
     });
