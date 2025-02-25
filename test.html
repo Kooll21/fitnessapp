@@ -5,126 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-
-        #navbar-container {
-            width: 100%;
-            background-color: #f4f4f4;
-            padding: 10px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-        }
-
-        .navbar-list {
-            display: none;
-            list-style: none;
-            padding: 0;
-        }
-
-        .navbar-list.active {
-            display: block;
-        }
-
-        .menu-toggle {
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        .sidebar {
-            width: 250px;
-            height: 100vh;
-            background-color: #333;
-            color: white;
-            padding: 15px;
-            box-sizing: border-box;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-
-        .sidebar button {
-            width: 100%;
-            padding: 15px;
-            background-color: #444;
-            color: white;
-            border: none;
-            margin: 10px 0;
-            cursor: pointer;
-        }
-
-        .sidebar button:hover {
-            background-color: #555;
-        }
-
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-            margin-left: 250px; /* Отступ для sidebar */
-            margin-top: 60px; /* Отступ для navbar */
-        }
-
-        .content h2 {
-            margin: 0;
-        }
-
-        .content p {
-            font-size: 18px;
-        }
-
-        .modal-open {
-            overflow: hidden;
-        }
-
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            z-index: 1000;
-        }
-
-        #popup, #history-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            display: none;
-            z-index: 1001;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css"> <!-- Подключаем ваш файл стилей -->
 </head>
 <body>
-    <div id="navbar-container"></div>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div id="navbar-container"></div>
+    </nav>
+
+    <!-- Sidebar -->
     <div class="sidebar">
         <button id="workouts-button">Workouts</button>
         <button id="users-button">Users</button>
         <button id="exercises-button">Exercises</button>
         <div id="user-status">Please log in</div>
         <a href="login.html" id="login-link">Login</a>
-        <button id="logout-btn" style="display: none;">Logout</button>
+        <button id="logout-btn">Logout</button>
     </div>
-    <div class="content">
+
+    <!-- Main Content -->
+    <div class="main-content">
         <div id="workouts-content" style="display: block;">
             <h1>Добро пожаловать в свой личный кабинет</h1>
             <div id="workouts-list"></div>
@@ -138,6 +38,8 @@
             <p>This section will show exercises list and management.</p>
         </div>
     </div>
+
+    <!-- Popups -->
     <div id="overlay" onclick="closePopup()"></div>
     <div id="popup">
         <button class="close-btn" onclick="closePopup()">×</button>
@@ -170,7 +72,7 @@
         const db = getFirestore(app);
         let currentChart = null;
 
-        // Function to check authentication state
+        // Check authentication state
         function checkAuthState() {
             const adminButton = document.getElementById("admin-panel");
             const userStatus = document.getElementById("user-status");
@@ -219,10 +121,13 @@
                 .catch(err => {
                     console.error("Ошибка загрузки меню:", err);
                     document.getElementById("navbar-container").innerHTML = `
-                        <span id="user-status">Please log in</span>
-                        <a href="login.html" id="login-link">Login</a>
-                        <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
+                        <button class="menu-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button>
+                        <ul class="navbar-list">
+                            <li class="navbar-item"><a href="#" class="navbar-link">Home</a></li>
+                            <li class="navbar-item"><a href="#" class="navbar-link">Profile</a></li>
+                        </ul>`;
                     checkAuthState();
+                    initBurgerMenu();
                 });
         });
 
@@ -414,7 +319,7 @@
         };
 
         function loadModule(moduleName, userId) {
-            const modules = document.querySelectorAll('.content > div');
+            const modules = document.querySelectorAll('.main-content > div');
             modules.forEach(module => module.style.display = 'none');
             document.getElementById(`${moduleName}-content`).style.display = 'block';
 
