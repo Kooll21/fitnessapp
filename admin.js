@@ -1,110 +1,9 @@
 // admin.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+import { auth, db, checkAuthState, loadNavbar, initBurgerMenu, getUserRole } from './auth.js';
+import { collection, getDocs, query, orderBy, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
-// Конфигурация Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-    authDomain: "fitnessapp-f519f.firebaseapp.com",
-    projectId: "fitnessapp-f519f",
-    storageBucket: "fitnessapp-f519f.appspot.com",
-    messagingSenderId: "1000735476286",
-    appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-    measurementId: "G-MJ8K8ZNQM4"
-};
-
-// Инициализация Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Переменная для графика
 let currentChart = null;
-
-// Получение роли пользователя
-async function getUserRole(uid) {
-    try {
-        const userDoc = await getDoc(doc(db, "users", uid));
-        return userDoc.exists() ? userDoc.data().role : null;
-    } catch (error) {
-        console.error("Ошибка получения роли:", error);
-        return null;
-    }
-}
-
-// Проверка состояния авторизации и настройка интерфейса
-function checkAuthState() {
-    const userStatus = document.getElementById("user-status");
-    const loginLink = document.getElementById("login-link");
-    const logoutBtn = document.getElementById("logout-btn");
-    const workoutsBtn = document.getElementById("workouts-button");
-    const usersBtn = document.getElementById("users-button");
-    const exercisesBtn = document.getElementById("exercises-button");
-    const mainContent = document.querySelector(".main-content");
-    const navbar = document.querySelector(".navbar");
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            console.log("Авторизован:", user.email);
-            userStatus.textContent = `Welcome, ${user.email}`;
-            loginLink.style.display = "none";
-            logoutBtn.style.display = "block";
-            mainContent.style.display = "block";
-            navbar.style.display = "block";
-
-            const role = await getUserRole(user.uid);
-            console.log("Роль:", role);
-
-            if (role === "admin") {
-                workoutsBtn.style.display = "block";
-                usersBtn.style.display = "block";
-                exercisesBtn.style.display = "block";
-            } else if (role === "user") {
-                workoutsBtn.style.display = "block";
-                usersBtn.style.display = "none";
-                exercisesBtn.style.display = "none";
-                loadModule("workouts", user.uid); // Автоматическая загрузка тренировок для пользователя
-            } else {
-                workoutsBtn.style.display = "block";
-                usersBtn.style.display = "none";
-                exercisesBtn.style.display = "none";
-            }
-        } else {
-            console.log("Не авторизован");
-            userStatus.textContent = "Please log in";
-            loginLink.style.display = "inline-block";
-            logoutBtn.style.display = "none";
-            workoutsBtn.style.display = "none";
-            usersBtn.style.display = "none";
-            exercisesBtn.style.display = "none";
-            mainContent.style.display = "block";
-            navbar.style.display = "block";
-        }
-    });
-}
-
-// Функция выхода
-function logoutUser() {
-    signOut(auth)
-        .then(() => {
-            window.location.href = "login.html";
-        })
-        .catch((error) => {
-            console.error("Ошибка выхода:", error);
-        });
-}
-
-// Инициализация бургер-меню
-function initBurgerMenu() {
-    const menuToggle = document.querySelector(".menu-toggle");
-    const navbarList = document.querySelector(".navbar-list");
-
-    if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", () => {
-            navbarList.classList.toggle("active");
-            menuToggle.classList.toggle("active");
-        });
-    }
-}
 
 // Загрузка пользовательских тренировок
 async function loadUserWorkouts(userId) {
@@ -315,25 +214,29 @@ function loadModule(moduleName, userId) {
 
 // Инициализация страницы
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Страница загружена");
-    fetch("menu.html")
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById("navbar-container").innerHTML = html;
-            checkAuthState();
-            initBurgerMenu();
-        })
-        .catch(err => {
-            console.error("Ошибка загрузки меню:", err);
-            document.getElementById("navbar-container").innerHTML = `
-                <button class="menu-toggle"><span class="bar"></span><span class="bar"></span><span class="bar"></span></button>
-                <ul class="navbar-list">
-                    <li class="navbar-item"><a href="#" class="navbar-link">Home</a></li>
-                    <li class="navbar-item"><a href="#" class="navbar-link">Profile</a></li>
-                </ul>`;
-            checkAuthState();
-            initBurgerMenu();
-        });
+    console.log("Страница загружена (admin)");
+    loadNavbar();
+
+    checkAuthState((user, role) => {
+        const workoutsBtn = document.getElementById("workouts-button");
+        const usersBtn = document.getElementById("users-button");
+        const exercisesBtn = document.getElementById("exercises-button");
+
+        if (user && role === "admin") {
+            workoutsBtn.style.display = "block";
+            usersBtn.style.display = "block";
+            exercisesBtn.style.display = "block";
+        } else if (user && role === "user") {
+            workoutsBtn.style.display = "block";
+            usersBtn.style.display = "none";
+            exercisesBtn.style.display = "none";
+            loadModule("workouts", user.uid);
+        } else {
+            workoutsBtn.style.display = "none";
+            usersBtn.style.display = "none";
+            exercisesBtn.style.display = "none";
+        }
+    });
 
     document.getElementById("workouts-button").addEventListener("click", () => {
         loadModule("workouts", auth.currentUser?.uid);
@@ -341,25 +244,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("users-button").addEventListener("click", async () => {
         const role = await getUserRole(auth.currentUser?.uid);
-        if (role === "admin") {
-            loadModule("users", auth.currentUser?.uid);
-        } else {
-            console.log("Доступ запрещён: только для админов");
-        }
+        if (role === "admin") loadModule("users", auth.currentUser?.uid);
     });
 
     document.getElementById("exercises-button").addEventListener("click", async () => {
         const role = await getUserRole(auth.currentUser?.uid);
-        if (role === "admin") {
-            loadModule("exercises", auth.currentUser?.uid);
-        } else {
-            console.log("Доступ запрещён: только для админов");
-        }
+        if (role === "admin") loadModule("exercises", auth.currentUser?.uid);
     });
 });
 
 // Экспорт функций для HTML
-window.logoutUser = logoutUser;
 window.showWorkoutDetails = showWorkoutDetails;
 window.showExerciseHistory = showExerciseHistory;
 window.closeHistoryPopup = closeHistoryPopup;
