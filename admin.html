@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="styles.css"> <!-- Подключаем ваш файл стилей -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <!-- Navbar -->
@@ -13,32 +14,34 @@
         <div id="navbar-container"></div>
     </nav>
 
-   <!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <h3>Dashboard</h3>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>Dashboard</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <button id="workouts-button">
+                    <i class="fas fa-dumbbell"></i> Workouts
+                </button>
+            </li>
+            <li>
+                <button id="users-button">
+                    <i class="fas fa-users"></i> Users
+                </button>
+            </li>
+            <li>
+                <button id="exercises-button">
+                    <i class="fas fa-running"></i> Exercises
+                </button>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div id="user-status">Please log in</div>
+            <a href="login.html" id="login-link">Login</a>
+            <button id="logout-btn" onclick="logoutUser()">Logout</button>
+        </div>
     </div>
-    <ul class="sidebar-menu">
-        <li>
-            <button id="workouts-button">
-                <i class="fas fa-dumbbell"></i> Workouts
-            </button>
-        </li>
-        <li>
-            <button id="users-button">
-                <i class="fas fa-users"></i> Users
-            </button>
-        </li>
-        <li>
-            <button id="exercises-button">
-                <i class="fas fa-running"></i> Exercises
-            </button>
-        </li>
-    </ul>
-    <div class="sidebar-footer">
-    
-    </div>
-</div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -89,46 +92,73 @@
         const db = getFirestore(app);
         let currentChart = null;
 
-        // Check authentication state
-        function checkAuthState() {
-            const adminButton = document.getElementById("admin-panel");
+        // Получение роли пользователя
+        async function getUserRole(uid) {
+            const userDoc = await getDoc(doc(db, "users", uid));
+            return userDoc.exists() ? userDoc.data().role : null;
+        }
+
+        // Проверка состояния авторизации и настройка интерфейса
+        async function checkAuthState() {
             const userStatus = document.getElementById("user-status");
             const loginLink = document.getElementById("login-link");
             const logoutBtn = document.getElementById("logout-btn");
+            const workoutsBtn = document.getElementById("workouts-button");
+            const usersBtn = document.getElementById("users-button");
+            const exercisesBtn = document.getElementById("exercises-button");
 
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     userStatus.textContent = `Welcome, ${user.email}`;
-                    loginLink.style.display = 'none';
-                    logoutBtn.style.display = 'block';
-                    if (adminButton) adminButton.style.display = 'block';
+                    loginLink.style.display = "none";
+                    logoutBtn.style.display = "block";
+
+                    const role = await getUserRole(user.uid);
+
+                    if (role === "admin") {
+                        // Админ видит все кнопки
+                        workoutsBtn.style.display = "block";
+                        usersBtn.style.display = "block";
+                        exercisesBtn.style.display = "block";
+                    } else if (role === "user") {
+                        // Обычный пользователь видит только Workouts
+                        workoutsBtn.style.display = "block";
+                        usersBtn.style.display = "none";
+                        exercisesBtn.style.display = "none";
+                        // По умолчанию показываем только Workouts
+                        loadModule("workouts", user.uid);
+                    } else {
+                        // Если роль не определена, минимальный доступ
+                        workoutsBtn.style.display = "block";
+                        usersBtn.style.display = "none";
+                        exercisesBtn.style.display = "none";
+                    }
                 } else {
-                    userStatus.textContent = 'Please log in';
-                    loginLink.style.display = 'inline-block';
-                    logoutBtn.style.display = 'none';
-                    if (adminButton) adminButton.style.display = 'none';
+                    // Неавторизованный пользователь
+                    userStatus.textContent = "Please log in";
+                    loginLink.style.display = "inline-block";
+                    logoutBtn.style.display = "none";
+                    workoutsBtn.style.display = "none";
+                    usersBtn.style.display = "none";
+                    exercisesBtn.style.display = "none";
                 }
             });
         }
 
-        // Log out function
+        // Функция выхода
         window.logoutUser = function() {
             signOut(auth)
                 .then(() => {
-                    document.getElementById("user-status").textContent = 'Please log in';
-                    document.getElementById("login-link").style.display = 'inline-block';
-                    document.getElementById("logout-btn").style.display = 'none';
-                    const adminButton = document.getElementById("admin-panel");
-                    if (adminButton) adminButton.style.display = 'none';
+                    window.location.href = "login.html"; // Перенаправление на страницу логина
                 })
                 .catch((error) => {
-                    console.error('Error logging out:', error);
+                    console.error("Ошибка выхода:", error);
                 });
         };
 
-        // Load menu and check auth
+        // Загрузка меню и инициализация
         document.addEventListener("DOMContentLoaded", function () {
-            fetch('menu.html')
+            fetch("menu.html")
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById("navbar-container").innerHTML = html;
@@ -146,6 +176,29 @@
                     checkAuthState();
                     initBurgerMenu();
                 });
+
+            // Обработчики кнопок с проверкой роли
+            document.getElementById("workouts-button").addEventListener("click", () => {
+                loadModule("workouts", auth.currentUser?.uid);
+            });
+
+            document.getElementById("users-button").addEventListener("click", async () => {
+                const role = await getUserRole(auth.currentUser?.uid);
+                if (role === "admin") {
+                    loadModule("users", auth.currentUser?.uid);
+                } else {
+                    console.log("Доступ запрещён: только для админов");
+                }
+            });
+
+            document.getElementById("exercises-button").addEventListener("click", async () => {
+                const role = await getUserRole(auth.currentUser?.uid);
+                if (role === "admin") {
+                    loadModule("exercises", auth.currentUser?.uid);
+                } else {
+                    console.log("Доступ запрещён: только для админов");
+                }
+            });
         });
 
         // Burger menu initialization
@@ -179,25 +232,21 @@
 
         async function loadExercises(exerciseIds) {
             const exercises = [];
-
             for (let id of exerciseIds) {
                 const exerciseRef = doc(db, "exercises", id);
                 const exerciseDoc = await getDoc(exerciseRef);
-
                 if (exerciseDoc.exists()) {
                     exercises.push(exerciseDoc.data());
                 } else {
                     console.error(`Exercise with ID ${id} not found.`);
                 }
             }
-
             return exercises;
         }
 
         function displayWorkouts(workouts) {
             const container = document.getElementById("workouts-list");
             container.innerHTML = "<h2>Сохраненные тренировки</h2>";
-
             const totalWorkouts = workouts.length;
 
             workouts.forEach((workout, index) => {
@@ -246,7 +295,6 @@
             const snapshot = await getDocs(userWorkoutsRef);
 
             let exerciseHistory = [];
-
             snapshot.docs.forEach(doc => {
                 const workout = doc.data();
                 workout.exercises.forEach(exercise => {
@@ -260,7 +308,6 @@
             });
 
             const historyContainer = document.getElementById("exercise-history");
-
             if (exerciseHistory.length > 0) {
                 historyContainer.innerHTML = exerciseHistory.map(entry => 
                     `<p>${entry.date}: ${entry.weight} кг</p>`
@@ -273,16 +320,16 @@
                     currentChart.destroy();
                 }
 
-                const ctx = document.getElementById('exerciseHistoryChart').getContext('2d');
+                const ctx = document.getElementById("exerciseHistoryChart").getContext("2d");
                 currentChart = new Chart(ctx, {
-                    type: 'line',
+                    type: "line",
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Weight History',
+                            label: "Weight History",
                             data: data,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            backgroundColor: "rgba(75, 192, 192, 0.2)",
                             fill: true,
                             borderWidth: 2,
                             tension: 0.4
@@ -290,9 +337,7 @@
                     },
                     options: {
                         scales: {
-                            y: {
-                                beginAtZero: false
-                            }
+                            y: { beginAtZero: false }
                         }
                     }
                 });
@@ -327,37 +372,21 @@
             });
 
             const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-            await updateDoc(workoutRef, {
-                exercises: workoutData.exercises
-            });
+            await updateDoc(workoutRef, { exercises: workoutData.exercises });
 
             closePopup();
             loadUserWorkouts(auth.currentUser.uid);
         };
 
         function loadModule(moduleName, userId) {
-            const modules = document.querySelectorAll('.main-content > div');
-            modules.forEach(module => module.style.display = 'none');
-            document.getElementById(`${moduleName}-content`).style.display = 'block';
+            const modules = document.querySelectorAll(".main-content > div");
+            modules.forEach(module => module.style.display = "none");
+            document.getElementById(`${moduleName}-content`).style.display = "block";
 
-            if (moduleName === 'workouts' && userId) {
+            if (moduleName === "workouts" && userId) {
                 loadUserWorkouts(userId);
             }
         }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            checkAuthState();
-
-            document.getElementById('workouts-button').addEventListener('click', () => {
-                loadModule('workouts', auth.currentUser?.uid);
-            });
-            document.getElementById('users-button').addEventListener('click', () => {
-                loadModule('users', auth.currentUser?.uid);
-            });
-            document.getElementById('exercises-button').addEventListener('click', () => {
-                loadModule('exercises', auth.currentUser?.uid);
-            });
-        });
     </script>
 </body>
 </html>
