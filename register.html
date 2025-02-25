@@ -27,14 +27,24 @@
             const password = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(() => {
-                    window.location.href = "admin.html";
-                })
-                .catch((error) => {
-                    errorMessage.textContent = error.message;
-                });
-        });
+auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        const user = userCredential.user;
+        // Создаём документ в Firestore
+        return setDoc(doc(db, "users", user.uid), {
+            email: user.email,
+            role: "user" // По умолчанию обычный пользователь
+        }).then(() => user); // Возвращаем user для следующего .then
+    })
+    .then((user) => {
+        // Перенаправляем только после успешного создания пользователя и записи в Firestore
+        window.location.href = "admin.html";
+    })
+    .catch((error) => {
+        console.error("Ошибка:", error);
+        // Здесь можно добавить уведомление пользователю, например:
+        alert("Не удалось зарегистрироваться: " + error.message);
+    });
     </script>
 </head>
 <body>
