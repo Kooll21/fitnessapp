@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
         <div id="navbar-container"></div>
     </nav>
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h3>Dashboard</h3>
@@ -25,11 +25,12 @@
             <li><button id="exercises-button"><i class="fas fa-running"></i> Exercises</button></li>
         </ul>
         <div class="sidebar-footer">
-        
+            <div id="user-status">Please log in</div>
+            <a href="login.html" id="login-link">Login</a>
+            <button id="logout-btn" onclick="logoutUser()">Logout</button>
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div id="workouts-content" style="display: block;">
             <h1>Добро пожаловать в свой личный кабинет</h1>
@@ -39,7 +40,7 @@
             <h2>Users Management</h2>
             <p>This section will show user list and management.</p>
         </div>
-            <div id="exercises-content" style="display: none;">
+        <div id="exercises-content" style="display: none;">
             <h2>Exercises Management</h2>
             <button onclick="testFirestoreConnection('ex-status', 'ex-fileCount', 'ex-documentList')">Проверить подключение</button>
             <p id="ex-status"></p>
@@ -48,7 +49,6 @@
         </div>
     </div>
 
-    <!-- Popups -->
     <div id="overlay" onclick="closePopup()"></div>
     <div id="popup">
         <button class="close-btn" onclick="closePopup()">×</button>
@@ -61,7 +61,8 @@
         <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
     </div>
 
-    <script type="module" src="admin.js"></script>
-    <script type="module" src="workouts.js"></script>
+    <script src="auth.js"></script> <!-- Предполагается, что auth.js уже есть -->
+    <script src="workouts.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
