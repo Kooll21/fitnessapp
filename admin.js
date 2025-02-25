@@ -1,7 +1,9 @@
+// admin.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
+// Конфигурация Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
     authDomain: "fitnessapp-f519f.firebaseapp.com",
@@ -12,16 +14,24 @@ const firebaseConfig = {
     measurementId: "G-MJ8K8ZNQM4"
 };
 
+// Инициализация Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Получение роли пользователя
 async function getUserRole(uid) {
-    const userDoc = await getDoc(doc(db, "users", uid));
-    return userDoc.exists() ? userDoc.data().role : null;
+    try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        return userDoc.exists() ? userDoc.data().role : null;
+    } catch (error) {
+        console.error("Ошибка получения роли:", error);
+        return null;
+    }
 }
 
-async function checkAuthState() {
+// Проверка состояния авторизации
+function checkAuthState() {
     const userStatus = document.getElementById("user-status");
     const loginLink = document.getElementById("login-link");
     const logoutBtn = document.getElementById("logout-btn");
@@ -32,14 +42,14 @@ async function checkAuthState() {
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            console.log("Пользователь авторизован:", user.email); // Для отладки
+            console.log("Авторизован:", user.email);
             userStatus.textContent = `Welcome, ${user.email}`;
             loginLink.style.display = "none";
             logoutBtn.style.display = "block";
-            mainContent.style.display = "block"; // Убеждаемся, что контент виден
+            mainContent.style.display = "block";
 
             const role = await getUserRole(user.uid);
-            console.log("Роль пользователя:", role); // Для отладки
+            console.log("Роль:", role);
 
             if (role === "admin") {
                 workoutsBtn.style.display = "block";
@@ -56,18 +66,19 @@ async function checkAuthState() {
                 exercisesBtn.style.display = "none";
             }
         } else {
-            console.log("Пользователь не авторизован"); // Для отладки
+            console.log("Не авторизован");
             userStatus.textContent = "Please log in";
             loginLink.style.display = "inline-block";
             logoutBtn.style.display = "none";
             workoutsBtn.style.display = "none";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
-            mainContent.style.display = "block"; // Показываем контент даже без авторизации
+            mainContent.style.display = "block";
         }
     });
 }
 
+// Функция выхода
 function logoutUser() {
     signOut(auth)
         .then(() => {
@@ -78,13 +89,16 @@ function logoutUser() {
         });
 }
 
+// Переключение модулей
 function loadModule(moduleName, userId) {
     const modules = document.querySelectorAll(".main-content > div");
     modules.forEach(module => module.style.display = "none");
     document.getElementById(`${moduleName}-content`).style.display = "block";
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+// Инициализация
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Страница загружена");
     checkAuthState();
 
     document.getElementById("workouts-button").addEventListener("click", () => {
@@ -102,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// Экспорт функций для HTML
 window.logoutUser = logoutUser;
 window.closePopup = () => {
     document.body.classList.remove("modal-open");
