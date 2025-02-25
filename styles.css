@@ -272,31 +272,30 @@ body.modal-open #overlay {
 
 /* Sidebar Styles */
 .sidebar {
-  position: fixed; /* Keep sidebar fixed to the side */
-  top: 50px; /* Adjust depending on navbar height */
-  left: 0;
-  width: 250px; /* Sidebar width */
-  background-color: #333; /* Sidebar background */
-  padding: 10px;
-  z-index: 5; /* Keep sidebar below the navbar */
-  height: 100vh; /* Make sidebar stretch the full height */
-  box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1); /* Optional: add shadow for effect */
-  overflow-y: auto; /* Ensure scrolling if content exceeds */
-}
+            width: 250px;
+            height: 100vh;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
 
-/* Sidebar links */
-.sidebar a {
-  padding: 10px 15px;
-  text-decoration: none;
-  font-size: 18px;
-  color: white;
-  display: block;
-  transition: 0.3s;
-}
+        .sidebar button {
+            width: 100%;
+            padding: 15px;
+            background-color: #444;
+            color: white;
+            border: none;
+            margin: 10px 0;
+            cursor: pointer;
+        }
 
-.sidebar a:hover {
-  background-color: #ea2020;
-}
+        .sidebar button:hover {
+            background-color: #555;
+        }
 
 /* Main content styles */
 .main-content {
