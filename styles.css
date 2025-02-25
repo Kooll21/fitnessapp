@@ -3,8 +3,8 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #ecf0f1; /* Светлый фон, гармонирующий с sidebar */
-    color: #2c3e50; /* Тёмный текст для контраста */
+    background-color: #ecf0f1;
+    color: #2c3e50;
 }
 
 /* Navbar styles */
@@ -12,13 +12,13 @@ body {
     position: fixed;
     top: 0;
     width: 100%;
-    background: linear-gradient(90deg, #2c3e50, #34495e); /* Градиент как в sidebar */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Тень для глубины */
+    background: linear-gradient(90deg, #2c3e50, #34495e);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     z-index: 10;
     padding: 10px 0;
-    height: 50px; /* Явная высота для десктопа */
-    display: flex; /* Для выравнивания содержимого */
-    align-items: center; /* Центрирование по вертикали */
+    height: 50px;
+    display: flex;
+    align-items: center;
 }
 
 .navbar-list {
@@ -44,20 +44,20 @@ body {
 }
 
 .navbar-link:hover {
-    background-color: #e74c3c; /* Красный акцент при наведении */
+    background-color: #e74c3c;
     color: #fff;
-    transform: translateY(-2px); /* Лёгкий подъём */
+    transform: translateY(-2px);
 }
 
 .navbar-link:active {
-    background-color: #c0392b; /* Темнее при клике */
+    background-color: #c0392b;
 }
 
 /* Logout button */
 #logout-btn {
     display: none;
     color: #fff;
-    background-color: #3498db; /* Синий как в sidebar */
+    background-color: #3498db;
     padding: 8px 15px;
     font-size: 16px;
     border: none;
@@ -67,7 +67,7 @@ body {
 }
 
 #logout-btn:hover {
-    background-color: #2980b9; /* Темнее при наведении */
+    background-color: #2980b9;
 }
 
 /* Responsive menu styles */
@@ -78,8 +78,8 @@ body {
     padding: 5px;
     position: absolute;
     top: 15px;
-    right: 15px; /* Переносим в правый верхний угол */
-    left: auto; /* Убираем left */
+    right: 15px;
+    left: auto;
     z-index: 101;
 }
 
@@ -93,7 +93,7 @@ body {
 
 @media (max-width: 768px) {
     .navbar {
-        height: 60px; /* Увеличиваем высоту для мобильных устройств */
+        height: 60px;
     }
 
     .navbar-list {
@@ -103,7 +103,7 @@ body {
         width: 100%;
         text-align: center;
         position: absolute;
-        top: 60px; /* Учитываем новую высоту navbar */
+        top: 60px;
         left: 0;
         padding: 20px 0;
         z-index: 100;
@@ -116,7 +116,7 @@ body {
 
     .menu-toggle {
         display: flex;
-        top: 15px; /* Оставляем отступ сверху для выравнивания */
+        top: 15px;
     }
 
     .menu-toggle.active .bar:nth-child(1) {
@@ -139,10 +139,10 @@ body {
 /* Sidebar Styles */
 .sidebar {
     position: fixed;
-    top: 60px; /* Учитываем высоту navbar на десктопе и мобильных */
+    top: 60px;
     left: 0;
     width: 250px;
-    height: calc(100vh - 60px); /* Высота минус navbar */
+    height: calc(100vh - 60px);
     background: linear-gradient(180deg, #2c3e50, #34495e);
     padding: 20px 0;
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
@@ -253,7 +253,7 @@ body {
     min-height: 100vh;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-    margin-top: 60px; /* Учитываем высоту navbar */
+    margin-top: 60px;
     transition: margin-left 0.3s ease;
 }
 
@@ -267,6 +267,66 @@ body {
 .main-content p {
     color: #7f8c8d;
     line-height: 1.6;
+}
+
+/* Workout cards styles */
+#workouts-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Сетка с адаптивными карточками */
+    gap: 20px; /* Расстояние между карточками */
+    padding: 10px;
+}
+
+.workout-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.5s ease forwards; /* Анимация появления */
+}
+
+.workout-card:hover {
+    transform: translateY(-5px); /* Подъём при наведении */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.workout-card p {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.workout-card .exercise-count {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
+.workout-card button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.workout-card button:hover {
+    background-color: #2980b9;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Popup styles */
@@ -341,13 +401,17 @@ body.modal-open #overlay {
 @media (max-width: 768px) {
     .sidebar {
         width: 200px;
-        top: 60px; /* Учитываем новую высоту navbar */
+        top: 60px;
     }
 
     .main-content {
         margin-left: 200px;
-        margin-top: 60px; /* Учитываем новую высоту navbar */
+        margin-top: 60px;
         padding: 20px;
+    }
+
+    #workouts-list {
+        grid-template-columns: 1fr; /* Одна колонка на планшетах */
     }
 }
 
@@ -368,7 +432,7 @@ body.modal-open #overlay {
 
     .main-content {
         margin-left: 0;
-        margin-top: 60px; /* Учитываем новую высоту navbar */
+        margin-top: 60px;
         border-radius: 0;
         padding: 15px;
     }
@@ -377,5 +441,9 @@ body.modal-open #overlay {
     #history-popup {
         width: 90%;
         max-width: none;
+    }
+
+    #workouts-list {
+        grid-template-columns: 1fr; /* Одна колонка на мобильных */
     }
 }
