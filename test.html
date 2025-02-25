@@ -4,22 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
-     <!-- Firebase SDK с defer -->
-    <script defer src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
-    <!-- Ваш workouts.js с defer -->
-    <script defer src="workouts.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
         <div id="navbar-container"></div>
     </nav>
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
             <h3>Dashboard</h3>
@@ -29,13 +25,10 @@
             <li><button id="users-button"><i class="fas fa-users"></i> Users</button></li>
             <li><button id="exercises-button"><i class="fas fa-running"></i> Exercises</button></li>
         </ul>
-        <div class="sidebar-footer">
-        
-        </div>
+        <div class="sidebar-footer"></div>
     </div>
 
-    <!-- Main Content -->
-  <div class="main-content">
+    <div class="main-content">
         <div id="workouts-content" style="display: block;">
             <h1>Добро пожаловать в свой личный кабинет</h1>
             <div id="workouts-list"></div>
@@ -46,14 +39,10 @@
         </div>
         <div id="exercises-content" style="display: none;">
             <h2>Exercises Management</h2>
-            <button onclick="testFirestoreConnection('ex-status', 'ex-fileCount', 'ex-documentList')">Проверить подключение</button>
-            <p id="ex-status"></p>
-            <p id="ex-fileCount"></p>
-            <ul id="ex-documentList"></ul>
+            <p>This section will show exercises list and management.</p>
         </div>
     </div>
 
-    <!-- Popups -->
     <div id="overlay" onclick="closePopup()"></div>
     <div id="popup">
         <button class="close-btn" onclick="closePopup()">×</button>
@@ -66,7 +55,7 @@
         <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
     </div>
 
-    <script type="module" src="admin.js"></script>
     <script type="module" src="auth.js"></script>
+    <script type="module" src="admin.js"></script>
 </body>
 </html>
