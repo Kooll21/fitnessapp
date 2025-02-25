@@ -1,7 +1,7 @@
 // admin.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -39,6 +39,7 @@ function checkAuthState() {
     const usersBtn = document.getElementById("users-button");
     const exercisesBtn = document.getElementById("exercises-button");
     const mainContent = document.querySelector(".main-content");
+    const navbar = document.querySelector(".navbar");
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
@@ -47,6 +48,7 @@ function checkAuthState() {
             loginLink.style.display = "none";
             logoutBtn.style.display = "block";
             mainContent.style.display = "block";
+            navbar.style.display = "block"; // Убеждаемся, что navbar виден
 
             const role = await getUserRole(user.uid);
             console.log("Роль:", role);
@@ -59,7 +61,7 @@ function checkAuthState() {
                 workoutsBtn.style.display = "block";
                 usersBtn.style.display = "none";
                 exercisesBtn.style.display = "none";
-                loadModule("workouts", user.uid);
+                loadModule("workouts", user.uid); // Загружаем тренировки сразу
             } else {
                 workoutsBtn.style.display = "block";
                 usersBtn.style.display = "none";
@@ -74,6 +76,7 @@ function checkAuthState() {
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
             mainContent.style.display = "block";
+            navbar.style.display = "block";
         }
     });
 }
@@ -89,17 +92,73 @@ function logoutUser() {
         });
 }
 
+// Загрузка тренировок
+async function loadUserWorkouts(userId) {
+    try {
+        const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
+        const q = query(userWorkoutsRef, orderBy("date", "desc"));
+        const snapshot = await getDocs(q);
+        
+        let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        displayWorkouts(workouts);
+    } catch (error) {
+        console.error("Ошибка загрузки тренировок:", error);
+        document.getElementById("workouts-list").innerHTML = "<p>Ошибка загрузки тренировок</p>";
+    }
+}
+
+// Отображение тренировок
+function displayWorkouts(workouts) {
+    const container = document.getElementById("workouts-list");
+    container.innerHTML = "<h2>Сохраненные тренировки</h2>";
+    const totalWorkouts = workouts.length;
+
+    if (totalWorkouts === 0) {
+        container.innerHTML += "<p>Нет сохранённых тренировок</p>";
+        return;
+    }
+
+    workouts.forEach((workout, index) => {
+        const workoutNumber = totalWorkouts - index;
+        const workoutElement = document.createElement("div");
+        workoutElement.innerHTML = `
+            <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+            <button onclick="showWorkoutDetails(${index})">Подробнее</button>
+        `;
+        workoutElement.dataset.details = JSON.stringify(workout);
+        container.appendChild(workoutElement);
+    });
+}
+
 // Переключение модулей
 function loadModule(moduleName, userId) {
     const modules = document.querySelectorAll(".main-content > div");
     modules.forEach(module => module.style.display = "none");
     document.getElementById(`${moduleName}-content`).style.display = "block";
+
+    if (moduleName === "workouts" && userId) {
+        loadUserWorkouts(userId);
+    }
 }
 
-// Инициализация
+// Инициализация бургер-меню
+function initBurgerMenu() {
+    const menuToggle = document.querySelector(".menu-toggle");
+    const navbarList = document.querySelector(".navbar-list");
+
+    if (menuToggle && navbarList) {
+        menuToggle.addEventListener("click", () => {
+            navbarList.classList.toggle("active");
+            menuToggle.classList.toggle("active");
+        });
+    }
+}
+
+// Инициализация страницы
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена");
     checkAuthState();
+    initBurgerMenu();
 
     document.getElementById("workouts-button").addEventListener("click", () => {
         loadModule("workouts", auth.currentUser?.uid);
