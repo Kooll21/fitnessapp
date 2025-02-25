@@ -16,6 +16,8 @@ async function loadUserWorkouts(userId) {
                 workout.exercises = await loadExercises(workout.exerciseIds);
             }
         }
+        
+        
 
         displayWorkouts(workouts);
     } catch (error) {
@@ -42,6 +44,7 @@ async function loadExercises(exerciseIds) {
     return exercises;
 }
 
+// admin.js (фрагмент)
 function displayWorkouts(workouts) {
     const container = document.getElementById("workouts-list");
     container.innerHTML = "<h2>Сохраненные тренировки</h2>";
@@ -54,16 +57,17 @@ function displayWorkouts(workouts) {
 
     workouts.forEach((workout, index) => {
         const workoutNumber = totalWorkouts - index;
-        const workoutElement = document.createElement("div");
-        workoutElement.innerHTML = `
-            <p><strong>Тренировка № ${workoutNumber}:</strong> ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+        const workoutCard = document.createElement("div");
+        workoutCard.className = "workout-card";
+        workoutCard.innerHTML = `
+            <p><strong>Тренировка №${workoutNumber}</strong>: ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
+            <div class="exercise-count">Упражнений: ${workout.exercises ? workout.exercises.length : 0}</div>
             <button onclick="showWorkoutDetails(${index})">Подробнее</button>
         `;
-        workoutElement.dataset.details = JSON.stringify(workout);
-        container.appendChild(workoutElement);
+        workoutCard.dataset.details = JSON.stringify(workout); // Сохраняем данные для попапа
+        container.appendChild(workoutCard);
     });
 }
-
 function showWorkoutDetails(index) {
     const workoutElement = document.querySelectorAll("#workouts-list div")[index];
     const workoutData = JSON.parse(workoutElement.dataset.details);
