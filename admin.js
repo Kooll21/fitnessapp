@@ -1,17 +1,14 @@
 // admin.js
-import { auth, db, checkAuthState, loadNavbar, initBurgerMenu, getUserRole } from './auth.js';
-import { collection, getDocs, query, orderBy, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+import { auth, db, checkAuthState, getUserRole } from './auth.js';
 
 // Переменная для графика
 let currentChart = null;
 
-// Загрузка пользовательских тренировок
 async function loadUserWorkouts(userId) {
     try {
-        const userWorkoutsRef = collection(db, "userWorkouts", userId, "workouts");
-        const q = query(userWorkoutsRef, orderBy("date", "desc"));
-        const snapshot = await getDocs(q);
-        
+        const userWorkoutsRef = db.collection("userWorkouts").doc(userId).collection("workouts");
+        const snapshot = await userWorkoutsRef.orderBy("date", "desc").get();
+
         let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
         for (let workout of workouts) {
@@ -27,14 +24,13 @@ async function loadUserWorkouts(userId) {
     }
 }
 
-// Загрузка упражнений
 async function loadExercises(exerciseIds) {
     const exercises = [];
     try {
         for (let id of exerciseIds) {
-            const exerciseRef = doc(db, "exercises", id);
-            const exerciseDoc = await getDoc(exerciseRef);
-            if (exerciseDoc.exists()) {
+            const exerciseRef = db.collection("exercises").doc(id);
+            const exerciseDoc = await exerciseRef.get();
+            if (exerciseDoc.exists) {
                 exercises.push(exerciseDoc.data());
             } else {
                 console.error(`Exercise with ID ${id} not found.`);
@@ -46,7 +42,6 @@ async function loadExercises(exerciseIds) {
     return exercises;
 }
 
-// Отображение тренировок
 function displayWorkouts(workouts) {
     const container = document.getElementById("workouts-list");
     container.innerHTML = "<h2>Сохраненные тренировки</h2>";
@@ -69,7 +64,6 @@ function displayWorkouts(workouts) {
     });
 }
 
-// Показ деталей тренировки
 function showWorkoutDetails(index) {
     const workoutElement = document.querySelectorAll("#workouts-list div")[index];
     const workoutData = JSON.parse(workoutElement.dataset.details);
@@ -98,12 +92,11 @@ function showWorkoutDetails(index) {
     document.getElementById("popup").style.display = "block";
 }
 
-// Показ истории упражнений
 async function showExerciseHistory(exerciseName) {
     console.log("Fetching history for exercise:", exerciseName);
     try {
-        const userWorkoutsRef = collection(db, "userWorkouts", auth.currentUser.uid, "workouts");
-        const snapshot = await getDocs(userWorkoutsRef);
+        const userWorkoutsRef = db.collection("userWorkouts").doc(auth.currentUser.uid).collection("workouts");
+        const snapshot = await userWorkoutsRef.get();
 
         let exerciseHistory = [];
         snapshot.docs.forEach(doc => {
@@ -129,9 +122,7 @@ async function showExerciseHistory(exerciseName) {
             const labels = exerciseHistory.map(entry => entry.date);
             const data = exerciseHistory.map(entry => entry.weight);
 
-            if (currentChart) {
-                currentChart.destroy();
-            }
+            if (currentChart) currentChart.destroy();
 
             const ctx = document.getElementById("exerciseHistoryChart").getContext("2d");
             currentChart = new Chart(ctx, {
@@ -167,7 +158,6 @@ async function showExerciseHistory(exerciseName) {
     }
 }
 
-// Закрытие попапов
 function closeHistoryPopup() {
     document.body.classList.remove("modal-open");
     document.getElementById("overlay").style.display = "none";
@@ -180,7 +170,6 @@ function closePopup() {
     document.getElementById("popup").style.display = "none";
 }
 
-// Обновление тренировки
 async function updateWorkout(workoutId, workoutIndex) {
     try {
         const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
@@ -191,8 +180,8 @@ async function updateWorkout(workoutId, workoutIndex) {
             exercise.weight = parseFloat(weightInput.value) || null;
         });
 
-        const workoutRef = doc(db, "userWorkouts", auth.currentUser.uid, "workouts", workoutId);
-        await updateDoc(workoutRef, { exercises: workoutData.exercises });
+        const workoutRef = db.collection("userWorkouts").doc(auth.currentUser.uid).doc(workoutId);
+        await workoutRef.update({ exercises: workoutData.exercises });
 
         closePopup();
         loadUserWorkouts(auth.currentUser.uid);
@@ -201,7 +190,6 @@ async function updateWorkout(workoutId, workoutIndex) {
     }
 }
 
-// Переключение модулей
 function loadModule(moduleName, userId) {
     const modules = document.querySelectorAll(".main-content > div");
     modules.forEach(module => module.style.display = "none");
@@ -212,11 +200,9 @@ function loadModule(moduleName, userId) {
     }
 }
 
-// Инициализация страницы
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена (admin)");
-    loadNavbar();
-
+    loadNavbar(); // Загружаем navbar из menu.html
     checkAuthState((user, role) => {
         const workoutsBtn = document.getElementById("workouts-button");
         const usersBtn = document.getElementById("users-button");
@@ -253,7 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Экспорт функций для HTML
 window.showWorkoutDetails = showWorkoutDetails;
 window.showExerciseHistory = showExerciseHistory;
 window.closeHistoryPopup = closeHistoryPopup;
