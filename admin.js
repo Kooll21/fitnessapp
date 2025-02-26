@@ -16,11 +16,10 @@ async function loadUserWorkouts(userId) {
         console.log("Снимок данных из Firestore:", snapshot.docs.length, "тренировок");
         workoutsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-        // Проверяем данные каждой тренировки
         workoutsData.forEach(workout => {
             if (!workout.exercises || !Array.isArray(workout.exercises)) {
                 console.warn(`Тренировка ${workout.id} не содержит корректный массив exercises`);
-                workout.exercises = []; // Устанавливаем пустой массив, если данные некорректны
+                workout.exercises = [];
             }
             console.log(`Тренировка ${workout.id}:`, workout);
         });
@@ -30,6 +29,48 @@ async function loadUserWorkouts(userId) {
         console.error("Ошибка загрузки тренировок:", error);
         document.getElementById("workouts-list").innerHTML = "<p>Ошибка загрузки тренировок</p>";
     }
+}
+
+async function loadUsers() {
+    try {
+        console.log("Загрузка списка пользователей");
+        const usersRef = db.collection("users");
+        const snapshot = await usersRef.get();
+
+        console.log("Снимок пользователей из Firestore:", snapshot.docs.length, "пользователей");
+        const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        displayUsers(users);
+    } catch (error) {
+        console.error("Ошибка загрузки пользователей:", error);
+        document.getElementById("users-content").innerHTML = "<p>Ошибка загрузки пользователей</p>";
+    }
+}
+
+function displayUsers(users) {
+    const container = document.getElementById("users-content");
+    container.innerHTML = "<h2>Управление пользователями</h2>";
+
+    if (users.length === 0) {
+        container.innerHTML += "<p>Пользователи отсутствуют</p>";
+        return;
+    }
+
+    const userList = document.createElement("div");
+    userList.className = "user-list";
+
+    users.forEach(user => {
+        const userCard = document.createElement("div");
+        userCard.className = "user-card";
+        userCard.innerHTML = `
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Роль:</strong> ${user.role || "Не указана"}</p>
+            <button onclick="loadUserWorkouts('${user.id}')">Просмотреть тренировки</button>
+        `;
+        userList.appendChild(userCard);
+    });
+
+    container.appendChild(userList);
 }
 
 function displayWorkouts(workouts) {
@@ -197,6 +238,8 @@ function loadModule(moduleName, userId) {
 
     if (moduleName === "workouts" && userId) {
         loadUserWorkouts(userId);
+    } else if (moduleName === "users" && userId) {
+        loadUsers();
     }
 }
 
