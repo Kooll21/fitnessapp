@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InBody Analysis Calculator</title>
+    <style>
+        .good { color: green; }
+        .bad { color: red; }
+        .normal { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>InBody Analysis Calculator</h1>
+
+    <label for="smm">Skeletal Muscle Mass (kg):</label>
+    <input type="number" id="smm"><br><br>
+
+    <label for="bfm">Body Fat Mass (kg):</label>
+    <input type="number" id="bfm"><br><br>
+
+    <label for="wt">Weight (kg):</label>
+    <input type="number" id="wt"><br><br>
+
+    <label for="bfp">Body Fat Percentage (%):</label>
+    <input type="number" id="bfp"><br><br>
+
+    <label for="lbm">Lean Body Mass (kg):</label>
+    <input type="number" id="lbm"><br><br>
+
+    <label for="height">Height (meters) (Optional):</label>
+    <input type="number" id="height"><br><br>
+
+    <label for="desiredBfp">Desired Body Fat Percentage (%) (Optional):</label>
+    <input type="number" id="desiredBfp"><br><br>
+
+    <button onclick="calculate()">Calculate</button><br><br>
+
+    <div id="results"></div>
+
+    <script>
+        function calculate() {
+            let smm = parseFloat(document.getElementById("smm").value);
+            let bfm = parseFloat(document.getElementById("bfm").value);
+            let wt = parseFloat(document.getElementById("wt").value);
+            let bfp = parseFloat(document.getElementById("bfp").value);
+            let lbm = parseFloat(document.getElementById("lbm").value);
+            let height = parseFloat(document.getElementById("height").value);
+            let desiredBfp = parseFloat(document.getElementById("desiredBfp").value);
+
+            let lbmVerification = wt - bfm;
+            let muscleFatRatio = smm / bfm;
+            let leanMassPercentage = (lbm / wt) * 100;
+
+            let resultsHtml = "<h2>Results:</h2>";
+            resultsHtml += "<p>LBM Verification: " + lbmVerification.toFixed(2) + " kg</p>";
+
+            // Muscle-Fat Ratio Interpretation
+            let muscleFatRatioClass = "";
+            if (muscleFatRatio > 1.5) { muscleFatRatioClass = "good"; }
+            else if (muscleFatRatio < 1) { muscleFatRatioClass = "bad"; }
+            else { muscleFatRatioClass = "normal"; }
+            resultsHtml += "<p>Muscle-Fat Ratio: <span class='" + muscleFatRatioClass + "'>" + muscleFatRatio.toFixed(2) + "</span></p>";
+
+            // Lean Mass Percentage Interpretation
+            let leanMassPercentageClass = "";
+            if (leanMassPercentage > 80) { leanMassPercentageClass = "good"; }
+            else if (leanMassPercentage < 60) { leanMassPercentageClass = "bad"; }
+            else { leanMassPercentageClass = "normal"; }
+            resultsHtml += "<p>Lean Mass Percentage: <span class='" + leanMassPercentageClass + "'>" + leanMassPercentage.toFixed(2) + "%</span></p>";
+
+            if (!isNaN(height) && height > 0) {
+                let ffmi = lbm / (height * height) + 6.3 * (1.8 - height);
+                let fmi = bfm / (height * height);
+
+                // FFMI Interpretation (Approximation)
+                let ffmiClass = "";
+                if (ffmi > 25) { ffmiClass = "good"; }
+                else if (ffmi < 18) { ffmiClass = "bad"; }
+                else { ffmiClass = "normal"; }
+                resultsHtml += "<p>FFMI: <span class='" + ffmiClass + "'>" + ffmi.toFixed(2) + "</span></p>";
+
+                // FMI Interpretation (Approximation)
+                let fmiClass = "";
+                if (fmi < 5) { fmiClass = "good"; }
+                else if (fmi > 10) { fmiClass = "bad"; }
+                else { fmiClass = "normal"; }
+                resultsHtml += "<p>FMI: <span class='" + fmiClass + "'>" + fmi.toFixed(2) + "</span></p>";
+            }
+
+            if (!isNaN(desiredBfp) && desiredBfp >= 0) {
+              let targetWeight = lbm / (1 - (desiredBfp / 100));
+              resultsHtml += "<p>Target Weight: " + targetWeight.toFixed(2) + " kg</p>";
+            }
+
+            document.getElementById("results").innerHTML = resultsHtml;
+        }
+    </script>
+</body>
+</html>
