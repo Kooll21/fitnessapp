@@ -65,8 +65,16 @@ function displayUsers(users) {
         userCard.innerHTML = `
             <p><strong>Email:</strong> ${user.email}</p>
             <p><strong>Роль:</strong> ${user.role || "Не указана"}</p>
-            <button onclick="loadUserWorkouts('${user.id}')">Просмотреть тренировки</button>
+            <button class="view-workouts-btn">Просмотреть тренировки</button>
         `;
+
+        // Привязываем событие клика через addEventListener
+        const viewButton = userCard.querySelector(".view-workouts-btn");
+        viewButton.addEventListener("click", () => {
+            loadUserWorkouts(user.id);
+            loadModule("workouts", user.id); // Переключаем на раздел Workouts
+        });
+
         userList.appendChild(userCard);
     });
 
