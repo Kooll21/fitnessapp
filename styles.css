@@ -300,7 +300,7 @@ body {
     border-radius: 10px;
     margin-top: 60px;
     transition: margin-left 0.3s ease;
-    width: calc(100% - 250px); /* Устанавливаем ширину явно */
+    width: calc(100% - 250px);
 }
 
 .main-content h1,
@@ -318,7 +318,7 @@ body {
 /* Workout grid styles */
 .workout-grid {
     margin-top: 30px;
-    display: none; /* Скрыт по умолчанию */
+    display: none;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
     padding: 10px;
@@ -389,6 +389,96 @@ body {
     border: 1px solid #bdc3c7;
     border-radius: 5px;
     width: 100px;
+}
+
+/* Стили для сохраненных тренировок */
+.saved-workout-card {
+    display: flex;
+    align-items: stretch;
+    padding: 15px;
+}
+
+/* Левая часть карточки (чекбокс и кнопка) */
+.saved-workout-card .card-actions {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Кастомный чекбокс */
+.saved-workout-card .custom-checkbox {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    appearance: none;
+    background-color: #f7f9fa;
+    border: 2px solid #3498db;
+    border-radius: 4px;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.saved-workout-card .custom-checkbox:checked {
+    background-color: #3498db;
+}
+
+.saved-workout-card .custom-checkbox:checked::after {
+    content: "✔";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 16px;
+}
+
+/* Кнопка "Подробнее" */
+.saved-workout-card .card-actions .details-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+/* Правая часть карточки (детали упражнения) */
+.saved-workout-card .card-details {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 15px;
+}
+
+.saved-workout-card .card-details h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    color: #2c3e50;
+}
+
+.saved-workout-card .card-details p {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.saved-workout-card .card-details .weight-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.saved-workout-card .card-details .weight-input label {
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.saved-workout-card .card-details .weight-input input {
+    width: 100px;
+    padding: 6px;
+    font-size: 1rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
 }
 
 /* Анимация появления */
@@ -612,6 +702,23 @@ body.modal-open #overlay {
     .workout-card img {
         max-width: 120px;
     }
+
+    .saved-workout-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .saved-workout-card .card-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .saved-workout-card .card-details {
+        width: 100%;
+        padding-left: 0;
+    }
 }
 
 @media (max-width: 480px) {
@@ -647,5 +754,15 @@ body.modal-open #overlay {
 
     .replace-modal button {
         width: 100%;
+    }
+
+    .saved-workout-card .card-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .saved-workout-card .card-actions .details-btn {
+        width: 100%;
+        max-width: 150px;
     }
 }
