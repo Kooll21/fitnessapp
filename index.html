@@ -4,221 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness Tracker - Тренировочный План</title>
-      <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-      authDomain: "fitnessapp-f519f.firebaseapp.com",
-      projectId: "fitnessapp-f519f",
-      storageBucket: "fitnessapp-f519f.appspot.com",
-      messagingSenderId: "1000735476286",
-      appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-      measurementId: "G-MJ8K8ZNQM4"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Function to check authentication state
-    function checkAuthState() {
-      const adminButton = document.getElementById("admin-panel");
-      const userStatus = document.getElementById("user-status");
-      const loginLink = document.getElementById("login-link");
-      const logoutBtn = document.getElementById("logout-btn");
-
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User is logged in
-          userStatus.textContent = `Welcome, ${user.email}`;
-          loginLink.style.display = 'none';
-          logoutBtn.style.display = 'block';
-          adminButton.style.display = 'block'; // Show Admin Panel button
-        } else {
-          // User is logged out
-          userStatus.textContent = 'Please log in';
-          loginLink.style.display = 'inline-block';
-          logoutBtn.style.display = 'none';
-          adminButton.style.display = 'none'; // Hide Admin Panel button
-        }
-      });
-    }
-
-    // Log out function
-    window.logoutUser = function() {
-      signOut(auth)
-        .then(() => {
-          document.getElementById("user-status").textContent = 'Please log in';
-          document.getElementById("login-link").style.display = 'inline-block';
-          document.getElementById("logout-btn").style.display = 'none';
-          document.getElementById("admin-panel").style.display = 'none';
-        })
-        .catch((error) => {
-          console.error('Error logging out:', error);
-        });
-    };
-
-    // Загрузка меню из файла menu.html и проверка авторизации
-    document.addEventListener("DOMContentLoaded", function () {
-    fetch('menu.html')
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById("navbar-container").innerHTML = html;
-            checkAuthState();
-            initBurgerMenu(); // Запуск функции инициализации бургера после вставки меню
-        })
-        .catch(err => {
-            console.error("Ошибка загрузки меню:", err);
-            document.getElementById("navbar-container").innerHTML = `
-                <span id="user-status">Please log in</span>
-                <a href="login.html" id="login-link">Login</a>
-                <button onclick="logoutUser()" id="logout-btn" style="display:none;">Logout</button>`;
-            checkAuthState();
-        });
-});
-
-// Функция инициализации меню-бургера
-function initBurgerMenu() {
-    const menuToggle = document.querySelector(".menu-toggle");
-    const navbarList = document.querySelector(".navbar-list");
-
-    if (menuToggle && navbarList) {
-        menuToggle.addEventListener("click", function () {
-            navbarList.classList.toggle("active");
-            menuToggle.classList.toggle("active");
-        });
-    }
-}
-  </script>
-
-    <style>
-        /* Global styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .navbar {
-            background-color: #333;
-            padding: 10px 0;
-        }
-
-        .navbar-list {
-            display: flex;
-            justify-content: center;
-            list-style-type: none;
-        }
-
-        .navbar-item {
-            margin: 0 20px;
-        }
-
-        .navbar-link {
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: 500;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .navbar-link:hover {
-            color: #f1c40f;
-            transform: translateY(-3px);
-        }
-
-        .navbar-link:active {
-            color: #d35400;
-        }
-
-        /* User status text */
-        #user-status {
-            color: white;
-            font-size: 16px;
-            margin-right: 20px;
-        }
-
-        /* Logout Button */
-        #logout-btn {
-            display: none;
-            color: white;
-            background-color: #f1c40f;
-            padding: 5px 15px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #logout-btn:hover {
-            background-color: #d35400;
-        }
-
-        /* Exercise and workout section */
-        .exercise {
-            margin-bottom: 20px;
-        }
-
-        #savedWorkouts {
-            margin-top: 20px;
-        }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Навигационная панель -->
+    <nav class="navbar">
+        <div id="navbar-container"></div>
+    </nav>
 
-    <!-- Dynamic menu will be loaded here -->
-    <div id="navbar-container"></div>
+    <!-- Основной контент -->
+    <div class="main-content">
+        <header>
+            <h1>Добро пожаловать в наше фитнес-приложение!</h1>
+            <p>Достигайте своих фитнес-целей с легкостью и наслаждайтесь каждым шагом на пути к здоровью и лучшей форме.</p>
+        </header>
 
-<body>
+        <section class="content">
+            <h2>О приложении</h2>
+            <p>Мы создали приложение, которое сделает ваши тренировки не только более эффективными, но и увлекательными! Независимо от того, новичок вы или опытный атлет, наш Fitness Tracker станет вашим надежным помощником.</p>
 
-  <header>
-    <h1>Добро пожаловать в наше фитнес-приложение!</h1>
-  </header>
+            <h2>Наши особенности</h2>
+            <div class="features-list">
+                <div class="feature-card">
+                    <i class="fas fa-dumbbell"></i>
+                    <h3>Персонализированные тренировки</h3>
+                    <p>Планируйте тренировки в соответствии с вашими целями и уровнем подготовки. Наше приложение автоматически создает для вас идеальные планы, которые прогрессируют с каждым днем.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-history"></i>
+                    <h3>История упражнений</h3>
+                    <p>Будьте в курсе своего прогресса! Мы сохраняем историю всех ваших упражнений, включая веса и повторения, чтобы вы могли отслеживать свои достижения.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Интерактивные графики</h3>
+                    <p>Следите за улучшениями с помощью динамичных графиков. Визуализируйте прогресс в каждом упражнении и оставайтесь мотивированными.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-database"></i>
+                    <h3>Подробные данные</h3>
+                    <p>Сохраняйте точные данные о каждом упражнении: вес, повторения, сеты. Легко ставьте новые цели и отслеживайте успехи.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-window-restore"></i>
+                    <h3>Модальные окна с историей</h3>
+                    <p>Просматривайте подробную историю упражнений в удобных модальных окнах. Быстрый доступ к данным в любое время.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Простой интерфейс</h3>
+                    <p>Все функции доступны в пару кликов. Наслаждайтесь интуитивным дизайном, созданным для вашего удобства.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bell"></i>
+                    <h3>Мотивирующие уведомления</h3>
+                    <p>Получайте напоминания о тренировках и прогрессе, чтобы не упустить шанс улучшить свои результаты.</p>
+                </div>
+            </div>
 
-  <div class="content">
-    <h2>О приложении</h2>
-    <p>Достигайте своих фитнес-целей с легкостью и наслаждайтесь каждым шагом на пути к здоровью и лучшей форме. Мы создали приложение, которое сделает ваши тренировки не только более эффективными, но и увлекательными!</p>
+            <p class="call-to-action">Присоединяйтесь к нам и начните свое фитнес-путешествие уже сегодня!</p>
+        </section>
 
-    <h2>Наши особенности:</h2>
-    <ul class="features-list">
-      <li>
-        <h3>Персонализированные тренировки</h3>
-        <p>Планируйте тренировки в соответствии с вашими целями и уровнем подготовки. Наше приложение автоматически создает для вас идеальные тренировки, которые будут прогрессировать с каждым днем.</p>
-      </li>
-      <li>
-        <h3>История упражнений</h3>
-        <p>Всегда будьте в курсе своего прогресса! Мы сохраняем историю всех ваших упражнений, включая веса и повторения. Просматривайте подробные графики и сравнивайте результаты, чтобы видеть, как растет ваша сила.</p>
-      </li>
-      <li>
-        <h3>Интерактивные графики</h3>
-        <p>Мы предлагаем динамичные графики для визуализации вашего прогресса. Следите за улучшениями в каждом упражнении с помощью наглядных и удобных графиков, которые помогут вам оставаться мотивированными.</p>
-      </li>
-      <li>
-        <h3>Подробные данные по упражнениям</h3>
-        <p>Сохраняйте точные данные о каждом упражнении: от веса до количества повторений. Легко отслеживайте свой прогресс и ставьте новые цели!</p>
-      </li>
-      <li>
-        <h3>Модальные окна с историей</h3>
-        <p>В любой момент вы можете открыть подробную историю по любому упражнению и отслеживать, как меняются ваши результаты с течением времени. Мы обеспечили удобный интерфейс для быстрого доступа к этим данным.</p>
-      </li>
-      <li>
-        <h3>Простой и удобный интерфейс</h3>
-        <p>Все функции доступны в пару кликов. Наслаждайтесь интуитивно понятным интерфейсом, который поможет вам сосредоточиться на тренировках, а не на поиске нужных опций.</p>
-      </li>
-      <li>
-        <h3>Мотивирующие уведомления</h3>
-        <p>Получайте напоминания о тренировках и прогрессе. Не упустите шанс улучшить свои результаты с помощью наших умных уведомлений.</p>
-      </li>
-    </ul>
-    <p>Присоединяйтесь к нам и начните свою фитнес-путешествие уже сегодня! Независимо от того, новичок ли вы или опытный атлет, наше приложение будет вашим надежным помощником на пути к здоровому и активному образу жизни.</p>
-  </div>
+        <footer>
+            <p>©️ 2025 Фитнес Приложение. Все права защищены.</p>
+        </footer>
+    </div>
 
-  <footer>
-    <p>&copy; 2025 Фитнес Приложение. Все права защищены.</p>
-  </footer>
+    <!-- Скрипты -->
+    <script type="module" src="auth.js"></script>
+    <script type="module">
+        import { auth, loadNavbar } from './auth.js';
 
-</body>
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Страница загружена");
+            loadNavbar();
+            // Добавляем обработчик для проверки авторизации после загрузки navbar
+            auth.onAuthStateChanged((user) => {
+                console.log("Состояние авторизации:", user ? "Авторизован" : "Не авторизован");
+                if (user) {
+                    const adminPanel = document.getElementById("admin-panel");
+                    if (adminPanel) {
+                        adminPanel.style.display = 'block';
+                        console.log("Кнопка 'Личный кабинет' должна быть видна");
+                    } else {
+                        console.log("Элемент #admin-panel не найден в DOM");
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
