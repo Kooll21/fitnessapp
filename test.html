@@ -34,15 +34,12 @@
             <div id="workouts-list"></div>
         </div>
         <div id="users-content" style="display: none;">
-            <h2>Users Management</h2>
-            <p>This section will show user list and management.</p>
+            <h2>Управление пользователями</h2>
+            <!-- Список пользователей будет вставляться сюда динамически -->
         </div>
         <div id="exercises-content" style="display: none;">
             <h2>Exercises Management</h2>
-            <button onclick="testFirestoreConnection('ex-status', 'ex-fileCount', 'ex-documentList')">Проверить подключение</button>
-            <p id="ex-status"></p>
-            <p id="ex-fileCount"></p>
-            <ul id="ex-documentList"></ul>
+            <p>This section will show exercises list and management.</p>
         </div>
     </div>
 
@@ -60,6 +57,5 @@
 
     <script type="module" src="auth.js"></script>
     <script type="module" src="admin.js"></script>
-    <script type="module" src="workouts.js"></script>
 </body>
 </html>
