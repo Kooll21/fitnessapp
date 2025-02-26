@@ -55,7 +55,7 @@ function displayWorkouts(workouts) {
 function showWorkoutDetails(index) {
     const workoutData = workoutsData[index];
     if (!workoutData) {
-        console.error(Тренировка с индексом ${index} не найдена в workoutsData);
+        console.error("Тренировка с индексом ${index} не найдена в workoutsData");
         alert("Ошибка: данные тренировки недоступны");
         return;
     }
