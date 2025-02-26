@@ -1,70 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
-    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Fitness Tracker - Тренировочный План</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Навигационная панель -->
     <nav class="navbar">
         <div id="navbar-container"></div>
     </nav>
 
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h3>Dashboard</h3>
-        </div>
-        <ul class="sidebar-menu">
-            <li><button id="workouts-button"><i class="fas fa-dumbbell"></i> Workouts</button></li>
-            <li><button id="users-button"><i class="fas fa-users"></i> Users</button></li>
-            <li><button id="exercises-button"><i class="fas fa-running"></i> Exercises</button></li>
-            <li><button id="add-exercise-button" style="display: none;"><i class="fas fa-plus"></i> Add Exercise</button></li>
-            <li><button id="bulk-import-button" style="display: none;"><i class="fas fa-upload"></i> Bulk Import Exercises</button></li>
-        </ul>
-        <div class="sidebar-footer">
-            <p id="user-status">Войдите в свой профиль</p>
-            <button id="logout-btn" style="display: none;">Выход</button>
-        </div>
-    </div>
-
+    <!-- Основной контент -->
     <div class="main-content">
-        <div id="workouts-content" style="display: block;">
-            <h1>Добро пожаловать в свой личный кабинет</h1>
-            <div id="workouts-list"></div>
-        </div>
-        <div id="users-content" style="display: none;">
-            <h2>Users Management</h2>
-            <p>This section will show user list and management.</p>
-        </div>
-        <div id="exercises-content" style="display: none;">
-            <h2>Exercises Management</h2>
-            <button onclick="testFirestoreConnection('ex-status', 'ex-fileCount', 'ex-documentList')">Проверить подключение</button>
-            <p id="ex-status"></p>
-            <p id="ex-fileCount"></p>
-            <ul id="ex-documentList"></ul>
-        </div>
+        <header>
+            <h1>Добро пожаловать в наше фитнес-приложение!</h1>
+            <p>Достигайте своих фитнес-целей с легкостью и наслаждайтесь каждым шагом на пути к здоровью и лучшей форме.</p>
+        </header>
+
+        <section class="content">
+            <h2>О приложении</h2>
+            <p>Мы создали приложение, которое сделает ваши тренировки не только более эффективными, но и увлекательными! Независимо от того, новичок вы или опытный атлет, наш Fitness Tracker станет вашим надежным помощником.</p>
+
+            <h2>Наши особенности</h2>
+            <div class="features-list">
+                <div class="feature-card">
+                    <i class="fas fa-dumbbell"></i>
+                    <h3>Персонализированные тренировки</h3>
+                    <p>Планируйте тренировки в соответствии с вашими целями и уровнем подготовки. Наше приложение автоматически создает для вас идеальные планы, которые прогрессируют с каждым днем.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-history"></i>
+                    <h3>История упражнений</h3>
+                    <p>Будьте в курсе своего прогресса! Мы сохраняем историю всех ваших упражнений, включая веса и повторения, чтобы вы могли отслеживать свои достижения.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Интерактивные графики</h3>
+                    <p>Следите за улучшениями с помощью динамичных графиков. Визуализируйте прогресс в каждом упражнении и оставайтесь мотивированными.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-database"></i>
+                    <h3>Подробные данные</h3>
+                    <p>Сохраняйте точные данные о каждом упражнении: вес, повторения, сеты. Легко ставьте новые цели и отслеживайте успехи.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-window-restore"></i>
+                    <h3>Модальные окна с историей</h3>
+                    <p>Просматривайте подробную историю упражнений в удобных модальных окнах. Быстрый доступ к данным в любое время.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Простой интерфейс</h3>
+                    <p>Все функции доступны в пару кликов. Наслаждайтесь интуитивным дизайном, созданным для вашего удобства.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bell"></i>
+                    <h3>Мотивирующие уведомления</h3>
+                    <p>Получайте напоминания о тренировках и прогрессе, чтобы не упустить шанс улучшить свои результаты.</p>
+                </div>
+            </div>
+
+            <p class="call-to-action">Присоединяйтесь к нам и начните свое фитнес-путешествие уже сегодня!</p>
+        </section>
+
+        <footer>
+            <p>© 2025 Фитнес Приложение. Все права защищены.</p>
+        </footer>
     </div>
 
-    <div id="overlay" onclick="closePopup()"></div>
-    <div id="popup">
-        <button class="close-btn" onclick="closePopup()">×</button>
-        <div id="popup-content"></div>
-    </div>
-    <div id="history-popup">
-        <button onclick="closeHistoryPopup()">Close</button>
-        <h3>История упражнений</h3>
-        <div id="exercise-history"></div>
-        <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
-    </div>
-
+    <!-- Скрипты -->
     <script type="module" src="auth.js"></script>
-    <script type="module" src="admin.js"></script>
-    <script type="module" src="workouts.js"></script>
+    <script type="module">
+        import { auth, loadNavbar } from './auth.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Страница загружена");
+            loadNavbar();
+        });
+
+        // Глобальная функция выхода (если используется в navbar)
+        window.logoutUser = function() {
+            auth.signOut().then(() => {
+                console.log("Пользователь вышел");
+            }).catch((error) => {
+                console.error("Ошибка выхода:", error);
+            });
+        };
+    </script>
 </body>
 </html>
