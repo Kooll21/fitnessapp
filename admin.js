@@ -1,5 +1,5 @@
 // admin.js
-import { auth, db, checkAuthState, getUserRole } from './auth.js';
+import { auth, db, checkAuthState, getUserRole, loadNavbar } from './auth.js';
 
 // Переменная для графика
 let currentChart = null;
@@ -29,6 +29,24 @@ async function loadUserWorkouts(userId) {
     }
 }
 
+async function loadExercises(exerciseIds) {
+    const exercises = [];
+    try {
+        for (let id of exerciseIds) {
+            const exerciseRef = db.collection("exercises").doc(id);
+            const exerciseDoc = await exerciseRef.get();
+            if (exerciseDoc.exists) {
+                exercises.push(exerciseDoc.data());
+            } else {
+                console.error(`Упражнение с ID ${id} не найдено`);
+            }
+        }
+    } catch (error) {
+        console.error("Ошибка загрузки упражнений:", error);
+    }
+    return exercises;
+}
+
 function displayWorkouts(workouts) {
     const container = document.getElementById("workouts-list");
     container.innerHTML = "<h2>Сохраненные тренировки</h2>";
@@ -55,6 +73,7 @@ function displayWorkouts(workouts) {
 function showWorkoutDetails(index) {
     const workoutData = workoutsData[index];
     if (!workoutData) {
+        console.error(`Тренировка с индексом ${index} не найдена в workoutsData`); // Строка 58
         alert("Ошибка: данные тренировки недоступны");
         return;
     }
@@ -108,7 +127,7 @@ async function showExerciseHistory(exerciseName) {
         if (exerciseHistory.length > 0) {
             historyContainer.innerHTML = exerciseHistory.map(entry => 
                 `<p>${entry.date}: ${entry.weight} кг</p>`
-            ).join('');
+            ).join("");
             
             const labels = exerciseHistory.map(entry => entry.date);
             const data = exerciseHistory.map(entry => entry.weight);
@@ -163,7 +182,7 @@ function closePopup() {
 
 async function updateWorkout(workoutId, workoutIndex) {
     try {
-        const workoutData = workoutsData[workoutIndex]; // Используем глобальный массив вместо dataset
+        const workoutData = workoutsData[workoutIndex];
         if (!workoutData) {
             console.error(`Тренировка с индексом ${workoutIndex} не найдена`);
             return;
@@ -196,7 +215,7 @@ function loadModule(moduleName, userId) {
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена (admin)");
-    loadNavbar(); // Предполагается, что loadNavbar определён в auth.js
+    loadNavbar();
     checkAuthState((user, role) => {
         const workoutsBtn = document.getElementById("workouts-button");
         const usersBtn = document.getElementById("users-button");
