@@ -24,7 +24,7 @@
             <li><button id="workouts-button"><i class="fas fa-dumbbell"></i> Workouts</button></li>
             <li><button id="users-button"><i class="fas fa-users"></i> Users</button></li>
             <li><button id="exercises-button"><i class="fas fa-running"></i> Exercises</button></li>
-            <li><button id="add-workout-button" style="display: none;"><i class="fas fa-plus"></i> Add Workout</button></li>
+            <li><button id="add-exercise-button" style="display: none;"><i class="fas fa-plus"></i> Add Exercise</button></li>
         </ul>
         <div class="sidebar-footer"></div>
     </div>
@@ -35,7 +35,8 @@
             <div id="workouts-list"></div>
         </div>
         <div id="users-content" style="display: none;">
-            <h2>Управление пользователями</h2>
+            <h2>Users Management</h2>
+            <p>This section will show user list and management.</p>
         </div>
         <div id="exercises-content" style="display: none;">
             <h2>Exercises Management</h2>
@@ -58,55 +59,8 @@
         <canvas id="exerciseHistoryChart" width="400" height="200"></canvas>
     </div>
 
-    <div id="add-workout-popup" style="display: none;">
-        <button class="close-btn" onclick="closeAddWorkoutPopup()">×</button>
-        <div id="add-workout-content">
-            <h3>Добавить новое упражнение</h3>
-            <form id="exerciseForm">
-                <label for="category">Категория (группа мышц):</label>
-                <select id="category">
-                    <option value="Chest">Грудь</option>
-                    <option value="Biceps">Бицепс</option>
-                    <option value="Back">Спина</option>
-                    <option value="Legs">Ноги</option>
-                    <option value="Shoulders">Плечи</option>
-                    <option value="Triceps">Трицепс</option>
-                </select>
-                <br><br>
-
-                <label for="exerciseName">Название упражнения:</label>
-                <input type="text" id="exerciseName" required><br><br>
-
-                <label for="exerciseType">Тип упражнения:</label>
-                <input type="text" id="exerciseType"><br><br>
-
-                <label for="sets">Количество подходов:</label>
-                <input type="text" id="sets"><br><br>
-
-                <label for="reps">Количество повторений:</label>
-                <input type="text" id="reps"><br><br>
-
-                <label for="muscle">Основная мышца:</label>
-                <input type="text" id="muscle"><br><br>
-
-                <label for="muscleTypeAdditional">Доп. мышцы:</label>
-                <input type="text" id="muscleTypeAdditional"><br><br>
-
-                <label for="videoUrl">Ссылка на видео (YouTube):</label>
-                <input type="url" id="videoUrl"><br><br>
-
-                <label for="photoUrl">Ссылка на фото:</label>
-                <input type="url" id="photoUrl"><br><br>
-
-                <label for="description">Описание упражнения:</label><br>
-                <textarea id="description" rows="4" cols="40"></textarea><br><br>
-
-                <button type="button" id="submitExercise">Добавить упражнение</button>
-            </form>
-        </div>
-    </div>
-
     <script type="module" src="auth.js"></script>
     <script type="module" src="admin.js"></script>
+    <script type="module" src="workouts.js"></script>
 </body>
 </html>
