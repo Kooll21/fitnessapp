@@ -20,6 +20,7 @@ async function loadUserWorkouts(userId) {
             } else {
                 workout.exercises = []; // Устанавливаем пустой массив, если нет упражнений
             }
+            console.log(`Тренировка ${workout.id}:`, workout); // Отладка данных
         }
 
         displayWorkouts(workoutsData);
@@ -38,13 +39,14 @@ async function loadExercises(exerciseIds) {
             if (exerciseDoc.exists) {
                 exercises.push(exerciseDoc.data());
             } else {
-                console.error(`Упражнение с ID ${id} не найдено`);
+                console.warn(`Упражнение с ID ${id} не найдено`);
             }
         }
     } catch (error) {
         console.error("Ошибка загрузки упражнений:", error);
     }
-    return exercises;
+    console.log("Загруженные упражнения:", exercises); // Отладка
+    return exercises.length > 0 ? exercises : []; // Всегда возвращаем массив
 }
 
 function displayWorkouts(workouts) {
@@ -73,12 +75,14 @@ function displayWorkouts(workouts) {
 function showWorkoutDetails(index) {
     const workoutData = workoutsData[index];
     if (!workoutData) {
-        console.error(`Тренировка с индексом ${index} не найдена в workoutsData`); // Строка 58
+        console.error(`Тренировка с индексом ${index} не найдена в workoutsData`);
         alert("Ошибка: данные тренировки недоступны");
         return;
     }
 
-    const exercisesList = workoutData.exercises && Array.isArray(workoutData.exercises)
+    console.log(`Открытие тренировки ${index}:`, workoutData); // Отладка данных тренировки
+
+    const exercisesList = workoutData.exercises && Array.isArray(workoutData.exercises) && workoutData.exercises.length > 0
         ? workoutData.exercises.map((exercise, exerciseIndex) => 
             `<li>
                 <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
@@ -87,7 +91,7 @@ function showWorkoutDetails(index) {
                 <button onclick="showExerciseHistory('${exercise.exercisename || ''}')">История</button>
             </li>`
           ).join("")
-        : "Нет доступных данных";
+        : "<p>Упражнения отсутствуют</p>";
 
     document.getElementById("popup-content").innerHTML = `
         <h3>Детали тренировки</h3>
