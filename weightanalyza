@@ -1,40 +1,184 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>InBody Analysis Calculator</title>
+    <title>Калькулятор анализа InBody</title>
     <style>
-        .good { color: green; }
-        .bad { color: red; }
-        .normal { color: orange; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+        }
+        label {
+            flex: 1;
+            font-size: 16px;
+            color: #34495e;
+        }
+        input {
+            flex: 0.5;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .good { color: #27ae60; font-weight: bold; }
+        .bad { color: #c0392b; font-weight: bold; }
+        .normal { color: #e67e22; font-weight: bold; }
+        .scale {
+            width: 100%;
+            height: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            position: relative;
+            margin: 10px 0 20px;
+        }
+        .scale-bar {
+            height: 100%;
+            position: absolute;
+            background-color: rgba(52, 152, 219, 0.5); /* Slightly more opaque for visibility */
+            border-radius: 4px;
+        }
+        .scale-marker {
+            position: absolute;
+            top: -5px;
+            width: 3px;
+            height: 30px;
+            background-color: #2c3e50;
+            border-radius: 2px;
+        }
+        .scale-label {
+            position: absolute;
+            top: 25px;
+            font-size: 12px;
+            color: #666;
+        }
+        .boundary {
+            position: absolute;
+            top: 0;
+            width: 1px;
+            height: 20px;
+            background-color: #777;
+            opacity: 0.7;
+        }
+        .tooltip {
+            font-size: 12px;
+            color: #777;
+            font-style: italic;
+            margin: 5px 0 15px;
+        }
+        .scale-muscle-fat {
+            background: linear-gradient(to right, 
+                #f2dede 0%, #f2dede ${(1 / 2) * 100}%, 
+                #fcf3cf ${(1 / 2) * 100}%, #fcf3cf ${(1.5 / 2) * 100}%, 
+                #d4edda ${(1.5 / 2) * 100}%, #d4edda 100%);
+        }
+        .scale-lean-mass {
+            background: linear-gradient(to right, 
+                #f2dede 0%, #f2dede ${(60 / 100) * 100}%, 
+                #fcf3cf ${(60 / 100) * 100}%, #fcf3cf ${(80 / 100) * 100}%, 
+                #d4edda ${(80 / 100) * 100}%, #d4edda 100%);
+        }
+        .scale-ffmi {
+            background: linear-gradient(to right, 
+                #f2dede 0%, #f2dede ${(18 / 30) * 100}%, 
+                #fcf3cf ${(18 / 30) * 100}%, #fcf3cf ${(25 / 30) * 100}%, 
+                #d4edda ${(25 / 30) * 100}%, #d4edda 100%);
+        }
+        .scale-fmi {
+            background: linear-gradient(to right, 
+                #d4edda 0%, #d4edda ${(5 / 15) * 100}%, 
+                #fcf3cf ${(5 / 15) * 100}%, #fcf3cf ${(10 / 15) * 100}%, 
+                #f2dede ${(10 / 15) * 100}%, #f2dede 100%);
+        }
+        .bad-bg { background-color: #f2dede; }
+        .normal-bg { background-color: #fcf3cf; }
+        .good-bg { background-color: #d4edda; }
     </style>
 </head>
 <body>
-    <h1>InBody Analysis Calculator</h1>
+    <div class="container">
+        <h1>Калькулятор анализа InBody</h1>
 
-    <label for="smm">Skeletal Muscle Mass (kg):</label>
-    <input type="number" id="smm"><br><br>
+        <div class="input-group">
+            <label for="smm">Скелетная мышечная масса (кг):</label>
+            <input type="number" id="smm" step="0.1">
+        </div>
 
-    <label for="bfm">Body Fat Mass (kg):</label>
-    <input type="number" id="bfm"><br><br>
+        <div class="input-group">
+            <label for="bfm">Масса жира в теле (кг):</label>
+            <input type="number" id="bfm" step="0.1">
+        </div>
 
-    <label for="wt">Weight (kg):</label>
-    <input type="number" id="wt"><br><br>
+        <div class="input-group">
+            <label for="wt">Вес (кг):</label>
+            <input type="number" id="wt" step="0.1">
+        </div>
 
-    <label for="bfp">Body Fat Percentage (%):</label>
-    <input type="number" id="bfp"><br><br>
+        <div class="input-group">
+            <label for="bfp">Процент жира в теле (%):</label>
+            <input type="number" id="bfp" step="0.1">
+        </div>
 
-    <label for="lbm">Lean Body Mass (kg):</label>
-    <input type="number" id="lbm"><br><br>
+        <div class="input-group">
+            <label for="lbm">Масса без жира (кг):</label>
+            <input type="number" id="lbm" step="0.1">
+        </div>
 
-    <label for="height">Height (meters) (Optional):</label>
-    <input type="number" id="height"><br><br>
+        <div class="input-group">
+            <label for="height">Рост (метры) (Необязательно):</label>
+            <input type="number" id="height" step="0.01" placeholder="Напр. 1.75">
+        </div>
 
-    <label for="desiredBfp">Desired Body Fat Percentage (%) (Optional):</label>
-    <input type="number" id="desiredBfp"><br><br>
+        <div class="input-group">
+            <label for="desiredBfp">Желаемый % жира (Необязательно):</label>
+            <input type="number" id="desiredBfp" step="0.1">
+        </div>
 
-    <button onclick="calculate()">Calculate</button><br><br>
+        <button id="calculateBtn" onclick="calculate()">Рассчитать</button>
 
-    <div id="results"></div>
+        <div id="results" class="results"></div>
+    </div>
 
     <script>
         function calculate() {
@@ -46,53 +190,86 @@
             let height = parseFloat(document.getElementById("height").value);
             let desiredBfp = parseFloat(document.getElementById("desiredBfp").value);
 
+            if (isNaN(smm) || isNaN(bfm) || isNaN(wt) || isNaN(bfp) || isNaN(lbm)) {
+                document.getElementById("results").innerHTML = "<p style='color: #c0392b;'>Пожалуйста, заполните все обязательные поля!</p>";
+                return;
+            }
+
             let lbmVerification = wt - bfm;
             let muscleFatRatio = smm / bfm;
             let leanMassPercentage = (lbm / wt) * 100;
 
-            let resultsHtml = "<h2>Results:</h2>";
-            resultsHtml += "<p>LBM Verification: " + lbmVerification.toFixed(2) + " kg</p>";
+            let resultsHtml = "<h2>Ваши результаты:</h2>";
+            resultsHtml += `<p>Проверка массы без жира: ${lbmVerification.toFixed(2)} кг</p>`;
 
-            // Muscle-Fat Ratio Interpretation
-            let muscleFatRatioClass = "";
-            if (muscleFatRatio > 1.5) { muscleFatRatioClass = "good"; }
-            else if (muscleFatRatio < 1) { muscleFatRatioClass = "bad"; }
-            else { muscleFatRatioClass = "normal"; }
-            resultsHtml += "<p>Muscle-Fat Ratio: <span class='" + muscleFatRatioClass + "'>" + muscleFatRatio.toFixed(2) + "</span></p>";
+            // Muscle-Fat Ratio
+            let muscleFatRatioClass = muscleFatRatio > 1.5 ? "good" : muscleFatRatio < 1 ? "bad" : "normal";
+            let muscleFatBgClass = muscleFatRatio > 1.5 ? "good-bg" : muscleFatRatio < 1 ? "bad-bg" : "normal-bg";
+            resultsHtml += `<p>Соотношение мышц к жиру: <span class="${muscleFatRatioClass}">${muscleFatRatio.toFixed(2)}</span></p>`;
+            resultsHtml += createScale("Соотношение мышц к жиру", muscleFatRatio, 0, 1, 1.5, 2, "scale-muscle-fat", muscleFatBgClass);
+            resultsHtml += "<p class='tooltip'>Чем выше значение, тем лучше ваша мышечная форма!</p>";
 
-            // Lean Mass Percentage Interpretation
-            let leanMassPercentageClass = "";
-            if (leanMassPercentage > 80) { leanMassPercentageClass = "good"; }
-            else if (leanMassPercentage < 60) { leanMassPercentageClass = "bad"; }
-            else { leanMassPercentageClass = "normal"; }
-            resultsHtml += "<p>Lean Mass Percentage: <span class='" + leanMassPercentageClass + "'>" + leanMassPercentage.toFixed(2) + "%</span></p>";
+            // Lean Mass Percentage
+            let leanMassPercentageClass = leanMassPercentage > 80 ? "good" : leanMassPercentage < 60 ? "bad" : "normal";
+            let leanMassBgClass = leanMassPercentage > 80 ? "good-bg" : leanMassPercentage < 60 ? "bad-bg" : "normal-bg";
+            resultsHtml += `<p>Процент массы без жира: <span class="${leanMassPercentageClass}">${leanMassPercentage.toFixed(2)}%</span></p>`;
+            resultsHtml += createScale("Процент массы без жира", leanMassPercentage, 0, 60, 80, 100, "scale-lean-mass", leanMassBgClass);
+            resultsHtml += "<p class='tooltip'>Показывает, сколько вашего веса - это мышцы и кости.</p>";
 
             if (!isNaN(height) && height > 0) {
                 let ffmi = lbm / (height * height) + 6.3 * (1.8 - height);
                 let fmi = bfm / (height * height);
 
-                // FFMI Interpretation (Approximation)
-                let ffmiClass = "";
-                if (ffmi > 25) { ffmiClass = "good"; }
-                else if (ffmi < 18) { ffmiClass = "bad"; }
-                else { ffmiClass = "normal"; }
-                resultsHtml += "<p>FFMI: <span class='" + ffmiClass + "'>" + ffmi.toFixed(2) + "</span></p>";
+                let ffmiClass = ffmi > 25 ? "good" : ffmi < 18 ? "bad" : "normal";
+                let ffmiBgClass = ffmi > 25 ? "good-bg" : ffmi < 18 ? "bad-bg" : "normal-bg";
+                resultsHtml += `<p>FFMI (индекс массы без жира): <span class="${ffmiClass}">${ffmi.toFixed(2)}</span></p>`;
+                resultsHtml += createScale("FFMI", ffmi, 0, 18, 25, 30, "scale-ffmi", ffmiBgClass);
+                resultsHtml += "<p class='tooltip'>Оценивает мышечную массу с учетом роста.</p>";
 
-                // FMI Interpretation (Approximation)
-                let fmiClass = "";
-                if (fmi < 5) { fmiClass = "good"; }
-                else if (fmi > 10) { fmiClass = "bad"; }
-                else { fmiClass = "normal"; }
-                resultsHtml += "<p>FMI: <span class='" + fmiClass + "'>" + fmi.toFixed(2) + "</span></p>";
+                let fmiClass = fmi < 5 ? "good" : fmi > 10 ? "bad" : "normal";
+                let fmiBgClass = fmi < 5 ? "good-bg" : fmi > 10 ? "bad-bg" : "normal-bg";
+                resultsHtml += `<p>FMI (индекс жировой массы): <span class="${fmiClass}">${fmi.toFixed(2)}</span></p>`;
+                resultsHtml += createScale("FMI", fmi, 0, 5, 10, 15, "scale-fmi", fmiBgClass);
+                resultsHtml += "<p class='tooltip'>Чем ниже значение, тем меньше жира.</p>";
             }
 
             if (!isNaN(desiredBfp) && desiredBfp >= 0) {
-              let targetWeight = lbm / (1 - (desiredBfp / 100));
-              resultsHtml += "<p>Target Weight: " + targetWeight.toFixed(2) + " kg</p>";
+                let targetWeight = lbm / (1 - (desiredBfp / 100));
+                resultsHtml += `<p>Целевой вес для ${desiredBfp}% жира: <strong>${targetWeight.toFixed(2)} кг</strong></p>`;
             }
 
             document.getElementById("results").innerHTML = resultsHtml;
         }
+
+        function createScale(label, value, min, low, normal, high, className, bgClass) {
+            let scaleWidth = 300;
+            let range = high - min;
+            let valuePosition = ((value - min) / range) * scaleWidth;
+            valuePosition = Math.max(0, Math.min(scaleWidth, valuePosition));
+
+            let lowPosition = ((low - min) / range) * scaleWidth;
+            let normalPosition = ((normal - min) / range) * scaleWidth;
+
+            return `
+                <div class="scale ${className} ${bgClass}">
+                    <div class="scale-bar" style="width: ${valuePosition}px;"></div>
+                    <div class="scale-marker" style="left: ${valuePosition}px;"></div>
+                    <div class="scale-label" style="left: 0px;">${min}</div>
+                    <div class="scale-label" style="left: ${lowPosition - 15}px;">${low}</div>
+                    <div class="scale-label" style="left: ${normalPosition - 15}px;">${normal}</div>
+                    <div class="scale-label" style="right: 0px;">${high}</div>
+                    <div class="boundary" style="left: ${lowPosition}px;"></div>
+                    <div class="boundary" style="left: ${normalPosition}px;"></div>
+                </div>
+            `;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const btn = document.getElementById("calculateBtn");
+            if (btn) {
+                btn.addEventListener("click", calculate);
+            }
+        });
     </script>
 </body>
 </html>
