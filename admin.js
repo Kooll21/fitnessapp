@@ -1,4 +1,4 @@
-// admin.js
+// admin.js 
 import { auth, db, checkAuthState, getUserRole, loadNavbar } from './auth.js';
 import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js";
 
