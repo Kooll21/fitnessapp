@@ -268,7 +268,7 @@
             }
         }
 
-       // Сохранение тренировки
+// Сохранение тренировки
 document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
     const user = auth.currentUser;
     if (user) {
@@ -298,7 +298,7 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
             workoutPlan.forEach((exercise, index) => {
                 const weight = document.getElementById(weight-${exercise.id}).value || "не указан";
                 const savedExercise = document.createElement("div");
-                savedExercise.className = "workout-card saved-workout-card"; // Добавляем новый класс
+                savedExercise.className = "workout-card saved-workout-card";
                 savedExercise.innerHTML = `
                     <div class="card-actions">
                         <input type="checkbox" id="checkbox-${exercise.id}" class="custom-checkbox">
