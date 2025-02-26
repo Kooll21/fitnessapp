@@ -252,60 +252,53 @@ function loadModule(moduleName, userId) {
 
 // Функция отображения формы для добавления упражнения
 function showAddExerciseForm() {
-    getUserRole(auth.currentUser?.uid).then((userRole) => {
-        if (userRole !== "admin") {
-            alert("Только администраторы могут добавлять упражнения!");
-            return;
-        }
+    document.getElementById("popup-content").innerHTML = `
+        <h3>Добавить новое упражнение</h3>
+        <form id="exerciseForm">
+            <label for="category">Категория (группа мышц):</label>
+            <select id="category">
+                <option value="Chest">Грудь</option>
+                <option value="Biceps">Бицепс</option>
+                <option value="Back">Спина</option>
+                <option value="Legs">Ноги</option>
+                <option value="Shoulders">Плечи</option>
+                <option value="Triceps">Трицепс</option>
+            </select><br><br>
 
-        document.getElementById("popup-content").innerHTML = `
-            <h3>Добавить новое упражнение</h3>
-            <form id="exerciseForm">
-                <label for="category">Категория (группа мышц):</label>
-                <select id="category">
-                    <option value="Chest">Грудь</option>
-                    <option value="Biceps">Бицепс</option>
-                    <option value="Back">Спина</option>
-                    <option value="Legs">Ноги</option>
-                    <option value="Shoulders">Плечи</option>
-                    <option value="Triceps">Трицепс</option>
-                </select><br><br>
+            <label for="exerciseName">Название упражнения:</label>
+            <input type="text" id="exerciseName" required><br><br>
 
-                <label for="exerciseName">Название упражнения:</label>
-                <input type="text" id="exerciseName" required><br><br>
+            <label for="exerciseType">Тип упражнения:</label>
+            <input type="text" id="exerciseType"><br><br>
 
-                <label for="exerciseType">Тип упражнения:</label>
-                <input type="text" id="exerciseType"><br><br>
+            <label for="sets">Количество подходов:</label>
+            <input type="text" id="sets"><br><br>
 
-                <label for="sets">Количество подходов:</label>
-                <input type="text" id="sets"><br><br>
+            <label for="reps">Количество повторений:</label>
+            <input type="text" id="reps"><br><br>
 
-                <label for="reps">Количество повторений:</label>
-                <input type="text" id="reps"><br><br>
+            <label for="muscle">Основная мышца:</label>
+            <input type="text" id="muscle"><br><br>
 
-                <label for="muscle">Основная мышца:</label>
-                <input type="text" id="muscle"><br><br>
+            <label for="muscleTypeAdditional">Доп. мышцы:</label>
+            <input type="text" id="muscleTypeAdditional"><br><br>
 
-                <label for="muscleTypeAdditional">Доп. мышцы:</label>
-                <input type="text" id="muscleTypeAdditional"><br><br>
+            <label for="videoUrl">Ссылка на видео (YouTube):</label>
+            <input type="url" id="videoUrl"><br><br>
 
-                <label for="videoUrl">Ссылка на видео (YouTube):</label>
-                <input type="url" id="videoUrl"><br><br>
+            <label for="photoUrl">Ссылка на фото:</label>
+            <input type="url" id="photoUrl"><br><br>
 
-                <label for="photoUrl">Ссылка на фото:</label>
-                <input type="url" id="photoUrl"><br><br>
+            <label for="description">Описание упражнения:</label><br>
+            <textarea id="description" rows="4" cols="40"></textarea><br><br>
 
-                <label for="description">Описание упражнения:</label><br>
-                <textarea id="description" rows="4" cols="40"></textarea><br><br>
+            <button type="button" onclick="addExercise()">Добавить упражнение</button>
+        </form>
+    `;
 
-                <button type="button" onclick="addExercise()">Добавить упражнение</button>
-            </form>
-        `;
-
-        document.body.classList.add("modal-open");
-        document.getElementById("overlay").style.display = "block";
-        document.getElementById("popup").style.display = "block";
-    });
+    document.body.classList.add("modal-open");
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("popup").style.display = "block";
 }
 
 // Функция добавления упражнения в Firestore
@@ -355,17 +348,20 @@ document.addEventListener("DOMContentLoaded", () => {
             workoutsBtn.style.display = "block";
             usersBtn.style.display = "block";
             exercisesBtn.style.display = "block";
-            addExerciseBtn.style.display = "block"; // Показываем кнопку для админов
+            addExerciseBtn.style.display = "block";
+            addExerciseBtn.addEventListener("click", () => {
+                showAddExerciseForm();
+            });
         } else if (user && role === "user") {
             workoutsBtn.style.display = "block";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
-            addExerciseBtn.style.display = "none"; // Скрываем для обычных пользователей
+            addExerciseBtn.style.display = "none";
         } else {
             workoutsBtn.style.display = "none";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
-            addExerciseBtn.style.display = "none"; // Скрываем для неавторизованных
+            addExerciseBtn.style.display = "none";
         }
     });
 
@@ -382,13 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const role = await getUserRole(auth.currentUser?.uid);
         if (role === "admin") loadModule("exercises", auth.currentUser?.uid);
     });
-
-    const addExerciseBtn = document.getElementById("add-exercise-button");
-    if (addExerciseBtn) {
-        addExerciseBtn.addEventListener("click", () => {
-            showAddExerciseForm();
-        });
-    }
 });
 
 window.showWorkoutDetails = showWorkoutDetails;
