@@ -3,51 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - Fitness Tracker</title>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Навигационная панель -->
+    <nav class="navbar">
+        <div id="navbar-container"></div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="main-content">
+        <header>
+            <h1>Вход</h1>
+            <p>Войдите в свой аккаунт, чтобы продолжить фитнес-путешествие!</p>
+        </header>
+
+        <section class="content">
+            <form id="login-form" class="feature-card">
+                <h3>Введите данные</h3>
+                <label for="email">Email:</label>
+                <input type="email" id="email" required placeholder="example@domain.com">
+
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" required placeholder="Введите ваш пароль">
+
+                <button type="submit">Войти</button>
+            </form>
+            <p id="error-message" style="color: #e74c3c; text-align: center; margin-top: 15px;"></p>
+        </section>
+
+        <footer>
+            <p>© 2025 Фитнес Приложение. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <!-- Скрипты -->
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="menu.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
+        import { loadNavbar, loginUser } from './auth.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-            authDomain: "fitnessapp-f519f.firebaseapp.com",
-            projectId: "fitnessapp-f519f",
-            storageBucket: "fitnessapp-f519f.appspot.com",
-            messagingSenderId: "1000735476286",
-            appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-            measurementId: "G-MJ8K8ZNQM4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        document.addEventListener("DOMContentLoaded", () => {
+            loadNavbar(); // Загружаем navbar синхронно
+        });
 
         document.getElementById("login-form").addEventListener("submit", (e) => {
             e.preventDefault();
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
-            
-            signInWithEmailAndPassword(auth, email, password)
+
+            loginUser(email, password)
                 .then(() => {
                     window.location.href = "admin.html";
                 })
                 .catch((error) => {
-                    errorMessage.textContent = error.message;
+                    errorMessage.textContent = "Не удалось войти: " + error.message;
                 });
         });
     </script>
-</head>
-<body>
-    <h2>Login</h2>
-    <form id="login-form">
-        <label for="email">Email:</label>
-        <input type="email" id="email" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" required>
-        <br>
-        <button type="submit">Login</button>
-    </form>
-    <p id="error-message" style="color: red;"></p>
 </body>
 </html>
