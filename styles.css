@@ -262,12 +262,6 @@ body {
     padding: 0 20px;
 }
 
-#user-status {
-    font-size: 0.9rem;
-    color: #bdc3c7;
-    margin-bottom: 10px;
-}
-
 .sidebar-footer a,
 .sidebar-footer button {
     display: block;
@@ -300,19 +294,98 @@ body {
     border-radius: 10px;
     margin-top: 60px;
     transition: margin-left 0.3s ease;
-    width: calc(100% - 250px);
+    width: calc(100% - 250px); /* Enhanced from new CSS */
 }
 
-.main-content h1,
+/* Header styles for index.html and others */
+.main-content header {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(180deg, #ecf0f1, #ffffff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.main-content header h1,
 .main-content h2 {
     color: #2c3e50;
     font-weight: 600;
     margin-bottom: 20px;
 }
 
+.main-content header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.main-content header p {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
 .main-content p {
     color: #7f8c8d;
     line-height: 1.6;
+}
+
+/* Content section for index.html */
+.content {
+    padding: 30px;
+}
+
+.content h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Feature cards for index.html */
+.features-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.feature-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card i {
+    font-size: 2rem;
+    color: #3498db;
+    margin-bottom: 15px;
+}
+
+.feature-card h3 {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.feature-card p {
+    font-size: 1rem;
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+/* Call to action for index.html */
+.call-to-action {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-top: 30px;
+    font-weight: 600;
 }
 
 /* Workout grid styles */
@@ -330,7 +403,15 @@ body {
     text-align: center;
 }
 
-/* Workout cards styles */
+/* Saved workouts list for admin.html */
+#workouts-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+/* Workout cards styles (for generator.html and admin.html) */
 .workout-card {
     background-color: #fff;
     border-radius: 10px;
@@ -373,6 +454,12 @@ body {
     background-color: #2980b9;
 }
 
+.workout-card .exercise-count {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+}
+
 .workout-card .weight-input {
     margin: 10px 0;
 }
@@ -391,7 +478,7 @@ body {
     width: 100px;
 }
 
-/* Стили для сохраненных тренировок */
+/* Стили для сохраненных тренировок (admin.html) */
 .saved-workout-card {
     display: flex;
     align-items: stretch;
@@ -498,7 +585,8 @@ body.modal-open {
     overflow: hidden;
 }
 
-#popup {
+#popup,
+#history-popup {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -546,7 +634,102 @@ body.modal-open #overlay {
     color: #c0392b;
 }
 
-/* Muscle group selection */
+#history-popup button {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#history-popup button:hover {
+    background-color: #c0392b;
+}
+
+/* User list styles for admin.html */
+.user-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.user-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.user-card p {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.user-card button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.user-card button:hover {
+    background-color: #2980b9;
+}
+
+/* Add workout popup styles */
+#add-workout-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #f7f9fa);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+}
+
+#add-workout-content h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+#add-workout-content label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+#add-workout-content select,
+#add-workout-content input,
+#add-workout-content textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Muscle group selection for generator.html */
 .muscle-group-container {
     display: flex;
     flex-wrap: wrap;
@@ -604,7 +787,8 @@ body.modal-open #overlay {
     margin-bottom: 30px;
 }
 
-.button-container button {
+.button-container button,
+#add-workout-content button {
     padding: 12px 25px;
     font-size: 1rem;
     font-weight: 500;
@@ -616,7 +800,8 @@ body.modal-open #overlay {
     color: #fff;
 }
 
-.button-container button:hover {
+.button-container button:hover,
+#add-workout-content button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     background: linear-gradient(135deg, #2980b9, #2471a3);
@@ -661,6 +846,18 @@ body.modal-open #overlay {
     font-size: 1rem;
 }
 
+/* Footer styles */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(180deg, #2c3e50, #34495e);
+    color: #ecf0f1;
+    font-size: 0.9rem;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
@@ -677,6 +874,18 @@ body.modal-open #overlay {
 
     .workout-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .features-list {
+        grid-template-columns: 1fr;
+    }
+
+    #workouts-list {
+        grid-template-columns: 1fr;
+    }
+
+    .user-list {
+        grid-template-columns: 1fr;
     }
 
     .muscle-group-container {
@@ -703,21 +912,16 @@ body.modal-open #overlay {
         max-width: 120px;
     }
 
-    .saved-workout-card {
-        flex-direction: column;
-        align-items: flex-start;
+    .main-content header h1 {
+        font-size: 2rem;
     }
 
-    .saved-workout-card .card-actions {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-        margin-bottom: 10px;
+    .main-content header p {
+        font-size: 1rem;
     }
 
-    .saved-workout-card .card-details {
-        width: 100%;
-        padding-left: 0;
+    .content {
+        padding: 20px;
     }
 }
 
@@ -731,6 +935,11 @@ body.modal-open #overlay {
         padding-bottom: 10px;
     }
 
+    .sidebar-footer {
+        position: relative;
+        bottom: 0;
+    }
+
     .main-content {
         margin-left: 0;
         margin-top: 60px;
@@ -741,6 +950,24 @@ body.modal-open #overlay {
 
     .workout-grid {
         grid-template-columns: 1fr;
+    }
+
+    .features-list {
+        grid-template-columns: 1fr;
+    }
+
+    #workouts-list {
+        grid-template-columns: 1fr;
+    }
+
+    .user-list {
+        grid-template-columns: 1fr;
+    }
+
+    #popup,
+    #history-popup {
+        width: 90%;
+        max-width: none;
     }
 
     .workout-card h3 {
@@ -756,13 +983,15 @@ body.modal-open #overlay {
         width: 100%;
     }
 
-    .saved-workout-card .card-actions {
-        flex-direction: column;
-        align-items: center;
+    .main-content header {
+        padding: 20px 10px;
     }
 
-    .saved-workout-card .card-actions .details-btn {
-        width: 100%;
-        max-width: 150px;
+    .main-content header h1 {
+        font-size: 1.5rem;
+    }
+
+    .content h2 {
+        font-size: 1.5rem;
     }
 }
