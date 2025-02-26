@@ -1,5 +1,6 @@
 // admin.js
 import { auth, db, checkAuthState, getUserRole, loadNavbar } from './auth.js';
+import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js";
 
 // Переменная для графика
 let currentChart = null;
@@ -335,6 +336,116 @@ function addExercise() {
         });
 }
 
+// Функция массового импорта упражнений
+function showBulkImportForm() {
+    document.getElementById("popup-content").innerHTML = `
+        <h3>Массовый импорт упражнений</h3>
+        <label for="bulkCollectionSelect">Выберите категорию:</label>
+        <select id="bulkCollectionSelect">
+            <option value="Chest">Грудь</option>
+            <option value="Biceps">Бицепс</option>
+            <option value="Back">Спина</option>
+            <option value="Legs">Ноги</option>
+            <option value="Shoulders">Плечи</option>
+            <option value="Triceps">Трицепс</option>
+        </select><br><br>
+        <label for="bulkDataInput">Вставьте данные из Excel (разделённые табуляцией):</label><br>
+        <textarea id="bulkDataInput" rows="10" cols="50" placeholder="Скопируйте данные из Excel и вставьте сюда"></textarea><br><br>
+        <button type="button" onclick="previewBulkData()">Предпросмотр</button>
+        <div id="bulkPreviewTable" style="margin-top: 20px;"></div>
+    `;
+
+    document.body.classList.add("modal-open");
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("popup").style.display = "block";
+}
+
+function previewBulkData() {
+    const inputData = document.getElementById("bulkDataInput").value.trim();
+    const collection = document.getElementById("bulkCollectionSelect").value;
+    if (!inputData) {
+        alert("Пожалуйста, вставьте данные!");
+        return;
+    }
+
+    const rows = inputData.split("\n").map(row => row.split("\t").map(cell => cell.trim()));
+    const headers = rows[0];
+    const data = rows.slice(1).filter(row => row.some(cell => cell)); // Убираем пустые строки
+
+    let tableHTML = '<table style="width: 100%; border-collapse: collapse;">';
+    tableHTML += '<tr>' + headers.map(header => `<th style="border: 1px solid #ccc; padding: 8px;">${header}</th>`).join("") + '</tr>';
+    data.forEach(row => {
+        tableHTML += '<tr>' + row.map(cell => `<td style="border: 1px solid #ccc; padding: 8px;">${cell}</td>`).join("") + '</tr>';
+    });
+    tableHTML += '</table>';
+    tableHTML += '<button style="margin-top: 10px;" onclick="uploadBulkData()">Сохранить в базу</button>';
+
+    document.getElementById("bulkPreviewTable").innerHTML = tableHTML;
+    window.bulkData = { collection, headers, data }; // Сохраняем данные для последующего импорта
+}
+
+function uploadBulkData() {
+    const { collection, headers, data } = window.bulkData;
+    if (!collection || !data.length) {
+        alert("Нет данных для импорта!");
+        return;
+    }
+
+    const sanitizeDocumentName = (name) => name.replace(/[\/\[\]]/g, "_");
+
+    data.forEach(async (row) => {
+        const obj = {};
+        headers.forEach((header, index) => {
+            obj[header] = row[index] || "";
+        });
+        const documentName = sanitizeDocumentName(obj.exercisename || `exercise_${Date.now()}`);
+        try {
+            await db.collection("workouts").doc(collection).collection("exercises").doc(documentName).set(obj);
+            console.log("Документ добавлен:", obj);
+        } catch (error) {
+            console.error("Ошибка добавления:", error);
+        }
+    });
+
+    alert("Данные успешно загружены в " + collection);
+    closePopup();
+}
+
+// Функции авторизации через Google и GitHub
+function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            console.log("Успешный вход через Google:", result.user);
+        })
+        .catch((error) => {
+            console.error("Ошибка входа через Google:", error);
+            alert("Ошибка входа через Google: " + error.message);
+        });
+}
+
+function loginWithGitHub() {
+    const provider = new GithubAuthProvider();
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            console.log("Успешный вход через GitHub:", result.user);
+        })
+        .catch((error) => {
+            console.error("Ошибка входа через GitHub:", error);
+            alert("Ошибка входа через GitHub: " + error.message);
+        });
+}
+
+function logoutUser() {
+    signOut(auth)
+        .then(() => {
+            console.log("Пользователь вышел");
+        })
+        .catch((error) => {
+            console.error("Ошибка выхода:", error);
+        });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена (admin)");
     loadNavbar();
@@ -343,25 +454,41 @@ document.addEventListener("DOMContentLoaded", () => {
         const usersBtn = document.getElementById("users-button");
         const exercisesBtn = document.getElementById("exercises-button");
         const addExerciseBtn = document.getElementById("add-exercise-button");
+        const bulkImportBtn = document.getElementById("bulk-import-button");
+        const googleLoginBtn = document.getElementById("google-login-btn");
+        const githubLoginBtn = document.getElementById("github-login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
+        const userStatus = document.getElementById("user-status");
 
-        if (user && role === "admin") {
+        if (user) {
+            userStatus.textContent = `Welcome, ${user.email}`;
             workoutsBtn.style.display = "block";
-            usersBtn.style.display = "block";
-            exercisesBtn.style.display = "block";
-            addExerciseBtn.style.display = "block";
-            addExerciseBtn.addEventListener("click", () => {
-                showAddExerciseForm();
-            });
-        } else if (user && role === "user") {
-            workoutsBtn.style.display = "block";
-            usersBtn.style.display = "none";
-            exercisesBtn.style.display = "none";
-            addExerciseBtn.style.display = "none";
+            logoutBtn.style.display = "block";
+            googleLoginBtn.style.display = "none";
+            githubLoginBtn.style.display = "none";
+            if (role === "admin") {
+                usersBtn.style.display = "block";
+                exercisesBtn.style.display = "block";
+                addExerciseBtn.style.display = "block";
+                bulkImportBtn.style.display = "block";
+                addExerciseBtn.addEventListener("click", () => showAddExerciseForm());
+                bulkImportBtn.addEventListener("click", () => showBulkImportForm());
+            } else {
+                usersBtn.style.display = "none";
+                exercisesBtn.style.display = "none";
+                addExerciseBtn.style.display = "none";
+                bulkImportBtn.style.display = "none";
+            }
         } else {
+            userStatus.textContent = "Войдите в свой профиль";
             workoutsBtn.style.display = "none";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
             addExerciseBtn.style.display = "none";
+            bulkImportBtn.style.display = "none";
+            logoutBtn.style.display = "none";
+            googleLoginBtn.style.display = "block";
+            githubLoginBtn.style.display = "block";
         }
     });
 
@@ -378,6 +505,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const role = await getUserRole(auth.currentUser?.uid);
         if (role === "admin") loadModule("exercises", auth.currentUser?.uid);
     });
+
+    document.getElementById("google-login-btn").addEventListener("click", loginWithGoogle);
+    document.getElementById("github-login-btn").addEventListener("click", loginWithGitHub);
+    document.getElementById("logout-btn").addEventListener("click", logoutUser);
 });
 
 window.showWorkoutDetails = showWorkoutDetails;
@@ -386,3 +517,5 @@ window.closeHistoryPopup = closeHistoryPopup;
 window.closePopup = closePopup;
 window.updateWorkout = updateWorkout;
 window.addExercise = addExercise;
+window.previewBulkData = previewBulkData;
+window.uploadBulkData = uploadBulkData;
