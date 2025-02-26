@@ -64,17 +64,13 @@ export function logoutUser() {
         });
 }
 
-export function loginUser(email, password) {
-    return auth.signInWithEmailAndPassword(email, password);
-}
-
 export function loadNavbar() {
     fetch("menu.html")
         .then(response => response.text())
         .then(html => {
             document.getElementById("navbar-container").innerHTML = html;
             initBurgerMenu();
-            checkAuthState();
+            checkAuthState(); // Обновляем статус после загрузки
         })
         .catch(err => {
             console.error("Ошибка загрузки меню:", err);
@@ -91,7 +87,7 @@ export function loadNavbar() {
                     <button id="logout-btn" onclick="logoutUser()" style="display: none;">Logout</button>
                 </div>`;
             initBurgerMenu();
-            checkAuthState();
+            checkAuthState(); // Обновляем статус для запасного контента
         });
 }
 
