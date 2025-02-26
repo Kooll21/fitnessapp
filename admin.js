@@ -68,11 +68,10 @@ function displayUsers(users) {
             <button class="view-workouts-btn">Просмотреть тренировки</button>
         `;
 
-        // Привязываем событие клика через addEventListener
         const viewButton = userCard.querySelector(".view-workouts-btn");
         viewButton.addEventListener("click", () => {
             loadUserWorkouts(user.id);
-            loadModule("workouts", user.id); // Переключаем на раздел Workouts
+            loadModule("workouts", user.id);
         });
 
         userList.appendChild(userCard);
@@ -136,6 +135,51 @@ function showWorkoutDetails(index) {
     document.body.classList.add("modal-open");
     document.getElementById("overlay").style.display = "block";
     document.getElementById("popup").style.display = "block";
+}
+
+function showAddWorkoutPopup() {
+    document.body.classList.add("modal-open");
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("add-workout-popup").style.display = "block";
+}
+
+function closeAddWorkoutPopup() {
+    document.body.classList.remove("modal-open");
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("add-workout-popup").style.display = "none";
+    document.getElementById("exerciseForm").reset();
+}
+
+async function addExercise() {
+    const category = document.getElementById("category").value.trim();
+    const exerciseName = document.getElementById("exerciseName").value.trim();
+
+    if (!category || !exerciseName) {
+        alert("Выберите категорию и введите название упражнения!");
+        return;
+    }
+
+    const exerciseData = {
+        exerciseid: exerciseName,
+        exercisename: exerciseName,
+        exercisetype: document.getElementById("exerciseType").value.trim(),
+        sets: document.getElementById("sets").value.trim(),
+        reps: document.getElementById("reps").value.trim(),
+        muscle: document.getElementById("muscle").value.trim(),
+        muscletypeadditional: document.getElementById("muscleTypeAdditional").value.trim(),
+        video: document.getElementById("videoUrl").value.trim(),
+        photo: document.getElementById("photoUrl").value.trim(),
+        description: document.getElementById("description").value.trim()
+    };
+
+    try {
+        await db.collection("workouts").doc(category).collection("exercises").doc(exerciseName).set(exerciseData);
+        alert("Упражнение добавлено в " + category);
+        closeAddWorkoutPopup();
+    } catch (error) {
+        console.error("Ошибка при добавлении упражнения:", error);
+        alert("Ошибка при добавлении упражнения");
+    }
 }
 
 async function showExerciseHistory(exerciseName) {
@@ -258,20 +302,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const workoutsBtn = document.getElementById("workouts-button");
         const usersBtn = document.getElementById("users-button");
         const exercisesBtn = document.getElementById("exercises-button");
+        const addWorkoutBtn = document.getElementById("add-workout-button");
 
         if (user && role === "admin") {
             workoutsBtn.style.display = "block";
             usersBtn.style.display = "block";
             exercisesBtn.style.display = "block";
+            addWorkoutBtn.style.display = "block"; // Показываем кнопку только админу
         } else if (user && role === "user") {
             workoutsBtn.style.display = "block";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
+            addWorkoutBtn.style.display = "none"; // Скрываем для обычных пользователей
             loadModule("workouts", user.uid);
         } else {
             workoutsBtn.style.display = "none";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
+            addWorkoutBtn.style.display = "none";
         }
     });
 
@@ -288,6 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const role = await getUserRole(auth.currentUser?.uid);
         if (role === "admin") loadModule("exercises", auth.currentUser?.uid);
     });
+
+    document.getElementById("add-workout-button").addEventListener("click", () => {
+        showAddWorkoutPopup();
+    });
+
+    document.getElementById("submitExercise").addEventListener("click", addExercise);
 });
 
 window.showWorkoutDetails = showWorkoutDetails;
