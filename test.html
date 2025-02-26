@@ -51,8 +51,8 @@
             <button id="complete-workout-btn" style="display:none;">Тренировка выполнена</button>
         </div>
 
-        <div id="workoutResults"></div>
-        <div id="savedWorkout"></div>
+        <div id="workoutResults" class="workout-grid"></div>
+        <div id="savedWorkout" class="workout-grid"></div>
     </div>
 
     <!-- Модальное окно -->
@@ -232,7 +232,7 @@
             workoutPlan.forEach((exercise) => {
                 const embedUrl = exercise.video.replace("watch?v=", "embed/");
                 const exerciseElement = document.createElement("div");
-                exerciseElement.className = "workout-card"; // Используем существующий класс
+                exerciseElement.className = "workout-card";
                 exerciseElement.setAttribute('data-exercise-id', exercise.id);
                 exerciseElement.innerHTML = `
                     <h3>${exercise.exercisename}</h3>
