@@ -9,18 +9,22 @@ let workoutsData = [];
 
 async function loadUserWorkouts(userId) {
     try {
+        console.log("Загрузка тренировок для пользователя:", userId);
         const userWorkoutsRef = db.collection("userWorkouts").doc(userId).collection("workouts");
         const snapshot = await userWorkoutsRef.orderBy("date", "desc").get();
 
+        console.log("Снимок данных из Firestore:", snapshot.docs.length, "тренировок");
         workoutsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
         for (let workout of workoutsData) {
             if (workout.exerciseIds && workout.exerciseIds.length > 0) {
+                console.log(`Загрузка упражнений для тренировки ${workout.id}, exerciseIds:`, workout.exerciseIds);
                 workout.exercises = await loadExercises(workout.exerciseIds);
             } else {
-                workout.exercises = []; // Устанавливаем пустой массив, если нет упражнений
+                console.log(`Тренировка ${workout.id} не содержит exerciseIds`);
+                workout.exercises = [];
             }
-            console.log(`Тренировка ${workout.id}:`, workout); // Отладка данных
+            console.log(`Тренировка ${workout.id} после загрузки:`, workout);
         }
 
         displayWorkouts(workoutsData);
@@ -33,6 +37,7 @@ async function loadUserWorkouts(userId) {
 async function loadExercises(exerciseIds) {
     const exercises = [];
     try {
+        console.log("Загрузка упражнений для exerciseIds:", exerciseIds);
         for (let id of exerciseIds) {
             const exerciseRef = db.collection("exercises").doc(id);
             const exerciseDoc = await exerciseRef.get();
@@ -45,8 +50,8 @@ async function loadExercises(exerciseIds) {
     } catch (error) {
         console.error("Ошибка загрузки упражнений:", error);
     }
-    console.log("Загруженные упражнения:", exercises); // Отладка
-    return exercises.length > 0 ? exercises : []; // Всегда возвращаем массив
+    console.log("Результат загрузки упражнений:", exercises);
+    return exercises; // Всегда возвращаем массив, даже если он пустой
 }
 
 function displayWorkouts(workouts) {
@@ -80,18 +85,25 @@ function showWorkoutDetails(index) {
         return;
     }
 
-    console.log(`Открытие тренировки ${index}:`, workoutData); // Отладка данных тренировки
+    console.log(`Детали тренировки ${index}:`, workoutData); // Отладка перед отображением
 
-    const exercisesList = workoutData.exercises && Array.isArray(workoutData.exercises) && workoutData.exercises.length > 0
-        ? workoutData.exercises.map((exercise, exerciseIndex) => 
-            `<li>
-                <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
-                <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-                <span>${exercise.reps || 0} повторений, ${exercise.sets || 0} сета</span>
-                <button onclick="showExerciseHistory('${exercise.exercisename || ''}')">История</button>
-            </li>`
-          ).join("")
-        : "<p>Упражнения отсутствуют</p>";
+    let exercisesList = "";
+    if (workoutData.exercises && Array.isArray(workoutData.exercises)) {
+        if (workoutData.exercises.length > 0) {
+            exercisesList = workoutData.exercises.map((exercise, exerciseIndex) => {
+                return `<li>
+                    <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>:
+                    <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
+                    <span>${exercise.reps || 0} повторений, ${exercise.sets || 0} сета</span>
+                    <button onclick="showExerciseHistory('${exercise.exercisename || ''}')">История</button>
+                </li>`;
+            }).join("");
+        } else {
+            exercisesList = "<p>Упражнения отсутствуют</p>";
+        }
+    } else {
+        exercisesList = "<p>Данные об упражнениях недоступны</p>";
+    }
 
     document.getElementById("popup-content").innerHTML = `
         <h3>Детали тренировки</h3>
