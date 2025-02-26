@@ -62,14 +62,26 @@
 
     <!-- Скрипты -->
     <script type="module" src="auth.js"></script>
-    <script type="module" src="menu.js"></script>
     <script type="module">
         import { auth, db, loadNavbar } from './auth.js';
 
-        // Загрузка navbar и запуск страницы
-        document.addEventListener("DOMContentLoaded", () => {
-            loadNavbar();
+        // Загружаем navbar и только потом запускаем остальную логику
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadNavbar(); // Ожидаем завершения загрузки navbar
             loadWorkouts();
+
+            auth.onAuthStateChanged((user) => {
+                console.log("Состояние авторизации:", user ? "Авторизован" : "Не авторизован");
+                if (user) {
+                    const adminPanel = document.getElementById("admin-panel");
+                    if (adminPanel) {
+                        adminPanel.style.display = 'block';
+                        console.log("Кнопка 'Личный кабинет' должна быть видна");
+                    } else {
+                        console.log("Элемент #admin-panel не найден в DOM");
+                    }
+                }
+            });
         });
 
         // Загрузка групп мышц
@@ -101,7 +113,6 @@
         let workoutPlan = [];
         let currentWorkoutDocRef = null;
 
-        // Генерация тренировки
         document.getElementById("generateWorkout").addEventListener("click", async () => {
             const selectedWorkouts = getSelectedWorkouts();
             if (selectedWorkouts.length === 0) {
@@ -209,7 +220,6 @@
             overlay.style.display = "block";
             document.body.classList.add("modal-open");
 
-            // Привязываем обработчик для кнопки закрытия
             const closeBtn = popup.querySelector('.close-btn');
             closeBtn.addEventListener('click', closePopup);
         }
@@ -268,66 +278,64 @@
             }
         }
 
-// Сохранение тренировки
-document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
-    const user = auth.currentUser;
-    if (user) {
-        const workoutData = workoutPlan.map(exercise => {
-            const weight = document.getElementById(weight-${exercise.id}).value || "не указан";
-            return {
-                exerciseid: exercise.id,
-                exercisename: exercise.exercisename,
-                reps: exercise.reps,
-                sets: exercise.sets,
-                weight: weight
-            };
+        document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
+            const user = auth.currentUser;
+            if (user) {
+                const workoutData = workoutPlan.map(exercise => {
+                    const weight = document.getElementById(`weight-${exercise.id}`)?.value || "не указан";
+                    return {
+                        exerciseid: exercise.id,
+                        exercisename: exercise.exercisename,
+                        reps: exercise.reps,
+                        sets: exercise.sets,
+                        weight: weight
+                    };
+                });
+
+                const userDocRef = db.collection("userWorkouts").doc(user.uid);
+                userDocRef.collection("workouts").add({
+                    exercises: workoutData,
+                    date: new Date(),
+                    status: "saved"
+                }).then(docRef => {
+                    currentWorkoutDocRef = docRef;
+                    console.log("Тренировка сохранена успешно!");
+                    const savedContainer = document.getElementById("savedWorkout");
+                    savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
+                    savedContainer.style.display = "grid";
+
+                    workoutPlan.forEach((exercise, index) => {
+                        const weight = document.getElementById(`weight-${exercise.id}`)?.value || "не указан";
+                        const savedExercise = document.createElement("div");
+                        savedExercise.className = "workout-card saved-workout-card";
+                        savedExercise.innerHTML = `
+                            <div class="card-actions">
+                                <input type="checkbox" id="checkbox-${exercise.id}" class="custom-checkbox">
+                                <button class="details-btn">Подробнее</button>
+                            </div>
+                            <div class="card-details">
+                                <h3>${index + 1}. ${exercise.exercisename}</h3>
+                                <p>Повторы: ${exercise.reps}</p>
+                                <p>Подходы: ${exercise.sets}</p>
+                                <div class="weight-input">
+                                    <label for="saved-weight-${exercise.id}">Вес (кг):</label>
+                                    <input type="text" id="saved-weight-${exercise.id}" value="${weight}" placeholder="Введите вес">
+                                </div>
+                            </div>
+                        `;
+                        savedContainer.appendChild(savedExercise);
+
+                        savedExercise.querySelector('.details-btn').addEventListener('click', () => showDetailsPopup(exercise.id));
+                    });
+
+                    document.getElementById("workoutResults").style.display = "none";
+                    toggleButtons(true);
+                }).catch(error => {
+                    console.error("Ошибка сохранения тренировки:", error);
+                });
+            }
         });
 
-        const userDocRef = db.collection("userWorkouts").doc(user.uid);
-        userDocRef.collection("workouts").add({
-            exercises: workoutData,
-            date: new Date(),
-            status: "saved"
-        }).then(docRef => {
-            currentWorkoutDocRef = docRef;
-            console.log("Тренировка сохранена успешно!");
-            const savedContainer = document.getElementById("savedWorkout");
-            savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
-            savedContainer.style.display = "grid";
-
-            workoutPlan.forEach((exercise, index) => {
-                const weight = document.getElementById(weight-${exercise.id}).value || "не указан";
-                const savedExercise = document.createElement("div");
-                savedExercise.className = "workout-card saved-workout-card";
-                savedExercise.innerHTML = `
-                    <div class="card-actions">
-                        <input type="checkbox" id="checkbox-${exercise.id}" class="custom-checkbox">
-                        <button class="details-btn">Подробнее</button>
-                    </div>
-                    <div class="card-details">
-                        <h3>${index + 1}. ${exercise.exercisename}</h3>
-                        <p>Повторы: ${exercise.reps}</p>
-                        <p>Подходы: ${exercise.sets}</p>
-                        <div class="weight-input">
-                            <label for="saved-weight-${exercise.id}">Вес (кг):</label>
-                            <input type="text" id="saved-weight-${exercise.id}" value="${weight}" placeholder="Введите вес">
-                        </div>
-                    </div>
-                `;
-                savedContainer.appendChild(savedExercise);
-
-                savedExercise.querySelector('.details-btn').addEventListener('click', () => showDetailsPopup(exercise.id));
-            });
-
-            document.getElementById("workoutResults").style.display = "none";
-            toggleButtons(true);
-        }).catch(error => {
-            console.error("Ошибка сохранения тренировки:", error);
-        });
-    }
-});
-
-        // Удаление тренировки
         document.getElementById("deleteWorkoutBtn").addEventListener("click", async function() {
             const user = auth.currentUser;
             if (user && currentWorkoutDocRef) {
@@ -344,7 +352,6 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
             }
         });
 
-        // Завершение тренировки
         document.getElementById("complete-workout-btn").addEventListener("click", function () {
             const button = this;
             if (button.disabled) return;
@@ -404,7 +411,6 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
             overlay.style.display = "block";
             document.body.classList.add("modal-open");
 
-            // Привязываем обработчик для кнопки закрытия
             const closeBtn = popup.querySelector('.close-btn');
             closeBtn.addEventListener('click', closePopup);
         }
@@ -417,26 +423,6 @@ document.getElementById("saveWorkoutBtn").addEventListener("click", function () 
             document.body.classList.remove("modal-open");
         }
     </script>
-
-    <script type="module">
-        import { auth, loadNavbar } from './auth.js';
-
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("Страница загружена");
-            loadNavbar();
-            auth.onAuthStateChanged((user) => {
-                console.log("Состояние авторизации:", user ? "Авторизован" : "Не авторизован");
-                if (user) {
-                    const adminPanel = document.getElementById("admin-panel");
-                    if (adminPanel) {
-                        adminPanel.style.display = 'block';
-                        console.log("Кнопка 'Личный кабинет' должна быть видна");
-                    } else {
-                        console.log("Элемент #admin-panel не найден в DOM");
-                    }
-                }
-            });
-        });
-    </script>
+    <script type="module" src="menu.js"></script>
 </body>
 </html>
