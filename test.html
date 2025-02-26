@@ -378,5 +378,29 @@
             document.body.classList.remove("modal-open");
         }
     </script>
+
+     <!-- Скрипты -->
+    <script type="module" src="auth.js"></script>
+    <script type="module">
+        import { auth, loadNavbar } from './auth.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Страница загружена");
+            loadNavbar();
+            // Добавляем обработчик для проверки авторизации после загрузки navbar
+            auth.onAuthStateChanged((user) => {
+                console.log("Состояние авторизации:", user ? "Авторизован" : "Не авторизован");
+                if (user) {
+                    const adminPanel = document.getElementById("admin-panel");
+                    if (adminPanel) {
+                        adminPanel.style.display = 'block';
+                        console.log("Кнопка 'Личный кабинет' должна быть видна");
+                    } else {
+                        console.log("Элемент #admin-panel не найден в DOM");
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
