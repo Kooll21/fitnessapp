@@ -137,7 +137,7 @@
             document.getElementById("saveWorkoutBtn").style.display = "inline-block";
             document.getElementById("deleteWorkoutBtn").style.display = "none";
             document.getElementById("complete-workout-btn").style.display = "none";
-            document.getElementById("workoutResults").style.display = "grid"; // Явно устанавливаем grid
+            document.getElementById("workoutResults").style.display = "grid";
         });
 
         function shuffleArray(array) {
@@ -164,7 +164,8 @@
         function displayWorkout(workoutPlan) {
             const container = document.getElementById("workoutResults");
             container.innerHTML = "<h2>Сгенерированная тренировка:</h2>";
-            container.style.display = "grid"; // Убеждаемся, что контейнер отображается как сетка
+            container.style.display = "grid";
+
             workoutPlan.forEach((exercise) => {
                 const embedUrl = exercise.video.replace("watch?v=", "embed/");
                 const exerciseElement = document.createElement("div");
@@ -181,12 +182,33 @@
                         <label for="weight-${exercise.id}">Вес (кг):</label>
                         <input type="number" id="weight-${exercise.id}" placeholder="Введите вес" min="0">
                     </div>
-                    <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
-                    <button onclick="openReplaceModal('${exercise.id}', '${exercise.muscle}', '${exercise.exercisetype}')">Заменить</button>
+                    <button class="details-btn">Подробнее</button>
+                    <button class="replace-btn">Заменить</button>
                     <div class="exercise-details" style="display:none;"></div>
                 `;
                 container.appendChild(exerciseElement);
+
+                // Добавляем обработчики событий для кнопок
+                const detailsBtn = exerciseElement.querySelector('.details-btn');
+                const replaceBtn = exerciseElement.querySelector('.replace-btn');
+
+                detailsBtn.addEventListener('click', () => toggleDetails(detailsBtn, embedUrl, exercise.description));
+                replaceBtn.addEventListener('click', () => openReplaceModal(exercise.id, exercise.muscle, exercise.exercisetype));
             });
+        }
+
+        function toggleDetails(button, videoUrl, description) {
+            const popup = document.getElementById("popup");
+            const overlay = document.getElementById("overlay");
+            popup.innerHTML = `
+                <h2>Детали упражнения</h2>
+                <iframe width="100%" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <p>${description}</p>
+                <button class="close-btn" onclick="closePopup()">X</button>
+            `;
+            popup.style.display = "block";
+            overlay.style.display = "block";
+            document.body.classList.add("modal-open");
         }
 
         function openReplaceModal(exerciseid, muscle, type) {
@@ -197,9 +219,15 @@
             modal.className = "replace-modal";
             modal.innerHTML = `
                 <select id="replace-select-${exerciseid}">${options}</select>
-                <button onclick="applyReplacement('${exerciseid}')">Заменить</button>
+                <button class="apply-replace-btn">Заменить</button>
             `;
-            document.getElementById(`exercise-${exerciseid}`)?.appendChild(modal) || console.error(`Элемент exercise-${exerciseid} не найден`);
+            const exerciseElement = document.querySelector(`[data-exercise-id="${exerciseid}"]`);
+            if (exerciseElement) {
+                exerciseElement.appendChild(modal);
+                modal.querySelector('.apply-replace-btn').addEventListener('click', () => applyReplacement(exerciseid));
+            } else {
+                console.error(`Элемент с exercise-id ${exerciseid} не найден`);
+            }
         }
 
         function applyReplacement(exerciseid) {
@@ -209,6 +237,7 @@
 
             if (newExercise && oldElement) {
                 oldElement.setAttribute('data-exercise-id', newExercise.id);
+                const embedUrl = newExercise.video.replace("watch?v=", "embed/");
                 oldElement.innerHTML = `
                     <h3>${newExercise.exercisename}</h3>
                     <img src="${newExercise.photo}" alt="${newExercise.exercisename}">
@@ -220,10 +249,16 @@
                         <label for="weight-${newExercise.id}">Вес (кг):</label>
                         <input type="number" id="weight-${newExercise.id}" placeholder="Введите вес" min="0">
                     </div>
-                    <button onclick="toggleDetails(this, '${newExercise.video.replace('watch?v=', 'embed/')}', '${newExercise.description}')">Подробнее</button>
-                    <button onclick="openReplaceModal('${newExercise.id}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
+                    <button class="details-btn">Подробнее</button>
+                    <button class="replace-btn">Заменить</button>
                     <div class="exercise-details" style="display:none;"></div>
                 `;
+
+                // Перепривязываем обработчики для новых кнопок
+                const detailsBtn = oldElement.querySelector('.details-btn');
+                const replaceBtn = oldElement.querySelector('.replace-btn');
+                detailsBtn.addEventListener('click', () => toggleDetails(detailsBtn, embedUrl, newExercise.description));
+                replaceBtn.addEventListener('click', () => openReplaceModal(newExercise.id, newExercise.muscle, newExercise.exercisetype));
 
                 workoutPlan = workoutPlan.map(exercise =>
                     exercise.id === exerciseid ? newExercise : exercise
@@ -270,10 +305,13 @@
                                 ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов,
                                 Вес: <input type="text" id="saved-weight-${exercise.id}" value="${weight}" placeholder="Введите вес">
                             </label>
-                            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+                            <button class="details-btn">Подробнее</button>
                         `;
                         savedExercise.insertBefore(checkbox, savedExercise.firstChild);
                         savedContainer.appendChild(savedExercise);
+
+                        // Привязываем обработчик для "Подробнее" в сохраненной тренировке
+                        savedExercise.querySelector('.details-btn').addEventListener('click', () => showDetailsPopup(exercise.id));
                     });
 
                     document.getElementById("workoutResults").style.display = "none";
@@ -345,20 +383,6 @@
             document.getElementById("saveWorkoutBtn").style.display = isSaved ? "none" : "inline-block";
         }
 
-        function toggleDetails(button, videoUrl, description) {
-            const popup = document.getElementById("popup");
-            const overlay = document.getElementById("overlay");
-            popup.innerHTML = `
-                <h2>Детали упражнения</h2>
-                <iframe width="100%" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                <p>${description}</p>
-                <button class="close-btn" onclick="closePopup()">X</button>
-            `;
-            popup.style.display = "block";
-            overlay.style.display = "block";
-            document.body.classList.add("modal-open");
-        }
-
         function showDetailsPopup(exerciseId) {
             const popup = document.getElementById("popup");
             const overlay = document.getElementById("overlay");
@@ -385,7 +409,6 @@
         }
     </script>
 
-    <script type="module" src="auth.js"></script>
     <script type="module">
         import { auth, loadNavbar } from './auth.js';
 
