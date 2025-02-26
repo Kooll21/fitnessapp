@@ -72,23 +72,6 @@
     </div>
 
     <!-- Скрипты -->
-    <script type="module" src="auth.js"></script>
-    <script type="module">
-        import { auth, loadNavbar } from './auth.js';
-
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("Страница загружена");
-            loadNavbar();
-        });
-
-        // Глобальная функция выхода (если используется в navbar)
-        window.logoutUser = function() {
-            auth.signOut().then(() => {
-                console.log("Пользователь вышел");
-            }).catch((error) => {
-                console.error("Ошибка выхода:", error);
-            });
-        };
-    </script>
+        <script type="module" src="auth.js"></script>
 </body>
 </html>
