@@ -4,47 +4,31 @@ import { auth, db, checkAuthState, getUserRole } from './auth.js';
 // Переменная для графика
 let currentChart = null;
 
+// Глобальный массив для хранения данных тренировок
+let workoutsData = [];
+
 async function loadUserWorkouts(userId) {
     try {
         const userWorkoutsRef = db.collection("userWorkouts").doc(userId).collection("workouts");
         const snapshot = await userWorkoutsRef.orderBy("date", "desc").get();
 
-        let workouts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        workoutsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-        for (let workout of workouts) {
+        for (let workout of workoutsData) {
             if (workout.exerciseIds && workout.exerciseIds.length > 0) {
                 workout.exercises = await loadExercises(workout.exerciseIds);
+            } else {
+                workout.exercises = []; // Устанавливаем пустой массив, если нет упражнений
             }
         }
-        
-        
 
-        displayWorkouts(workouts);
+        displayWorkouts(workoutsData);
     } catch (error) {
         console.error("Ошибка загрузки тренировок:", error);
         document.getElementById("workouts-list").innerHTML = "<p>Ошибка загрузки тренировок</p>";
     }
 }
 
-async function loadExercises(exerciseIds) {
-    const exercises = [];
-    try {
-        for (let id of exerciseIds) {
-            const exerciseRef = db.collection("exercises").doc(id);
-            const exerciseDoc = await exerciseRef.get();
-            if (exerciseDoc.exists) {
-                exercises.push(exerciseDoc.data());
-            } else {
-                console.error(`Exercise with ID ${id} not found.`);
-            }
-        }
-    } catch (error) {
-        console.error("Ошибка загрузки упражнений:", error);
-    }
-    return exercises;
-}
-
-// admin.js (фрагмент)
 function displayWorkouts(workouts) {
     const container = document.getElementById("workouts-list");
     container.innerHTML = "<h2>Сохраненные тренировки</h2>";
@@ -64,23 +48,27 @@ function displayWorkouts(workouts) {
             <div class="exercise-count">Упражнений: ${workout.exercises ? workout.exercises.length : 0}</div>
             <button onclick="showWorkoutDetails(${index})">Подробнее</button>
         `;
-        workoutCard.dataset.details = JSON.stringify(workout); // Сохраняем данные для попапа
         container.appendChild(workoutCard);
     });
 }
-function showWorkoutDetails(index) {
-    const workoutElement = document.querySelectorAll("#workouts-list div")[index];
-    const workoutData = JSON.parse(workoutElement.dataset.details);
 
-    const exercisesList = workoutData.exercises
+function showWorkoutDetails(index) {
+    const workoutData = workoutsData[index];
+    if (!workoutData) {
+        console.error(Тренировка с индексом ${index} не найдена в workoutsData);
+        alert("Ошибка: данные тренировки недоступны");
+        return;
+    }
+
+    const exercisesList = workoutData.exercises && Array.isArray(workoutData.exercises)
         ? workoutData.exercises.map((exercise, exerciseIndex) => 
             `<li>
                 <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
                 <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-                <span>${exercise.reps} повторений, ${exercise.sets} сета</span>
-                <button onclick="showExerciseHistory('${exercise.exercisename}')">История</button>
+                <span>${exercise.reps || 0} повторений, ${exercise.sets || 0} сета</span>
+                <button onclick="showExerciseHistory('${exercise.exercisename || ''}')">История</button>
             </li>`
-        ).join("")
+          ).join("")
         : "Нет доступных данных";
 
     document.getElementById("popup-content").innerHTML = `
