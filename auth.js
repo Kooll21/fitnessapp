@@ -1,21 +1,19 @@
 // auth.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+if (!firebase.apps.length) {
+    var firebaseConfig = {
+        apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
+        authDomain: "fitnessapp-f519f.firebaseapp.com",
+        projectId: "fitnessapp-f519f",
+        storageBucket: "fitnessapp-f519f.appspot.com",
+        messagingSenderId: "1000735476286",
+        appId: "1:1000735476286:web:4a62a875917834dd215f6f",
+        measurementId: "G-MJ8K8ZNQM4"
+    };
+    firebase.initializeApp(firebaseConfig);
+}
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCIXtcjkj6kLTqwStdD7RtMCuiycrKBH0k",
-    authDomain: "fitnessapp-f519f.firebaseapp.com",
-    projectId: "fitnessapp-f519f",
-    storageBucket: "fitnessapp-f519f.appspot.com",
-    messagingSenderId: "1000735476286",
-    appId: "1:1000735476286:web:4a62a875917834dd215f6f",
-    measurementId: "G-MJ8K8ZNQM4"
-};
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = firebase.auth();
+export const db = firebase.firestore();
 
 export function getUserRole(uid) {
     return db.collection("users").doc(uid).get()
@@ -27,7 +25,7 @@ export function getUserRole(uid) {
 }
 
 export function checkAuthState(callback) {
-    onAuthStateChanged(auth, async (user) => {
+    auth.onAuthStateChanged(async (user) => {
         const userStatus = document.getElementById("user-status");
         const loginLink = document.getElementById("login-link");
         const registerLink = document.getElementById("register-link");
@@ -57,7 +55,7 @@ export function checkAuthState(callback) {
 }
 
 export function logoutUser() {
-    signOut(auth)
+    auth.signOut()
         .then(() => {
             window.location.href = "login.html";
         })
@@ -67,7 +65,7 @@ export function logoutUser() {
 }
 
 export function loginUser(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+    return auth.signInWithEmailAndPassword(email, password);
 }
 
 export function loadNavbar() {
@@ -113,4 +111,3 @@ window.checkAuthState = checkAuthState;
 window.logoutUser = logoutUser;
 window.loadNavbar = loadNavbar;
 window.initBurgerMenu = initBurgerMenu;
-window.loginUser = loginUser;
