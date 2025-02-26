@@ -1,6 +1,5 @@
-// admin.js 
+// admin.js
 import { auth, db, checkAuthState, getUserRole, loadNavbar } from './auth.js';
-import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js";
 
 // Переменная для графика
 let currentChart = null;
@@ -411,41 +410,6 @@ function uploadBulkData() {
     closePopup();
 }
 
-// Функции авторизации через Google и GitHub
-function loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            console.log("Успешный вход через Google:", result.user);
-        })
-        .catch((error) => {
-            console.error("Ошибка входа через Google:", error);
-            alert("Ошибка входа через Google: " + error.message);
-        });
-}
-
-function loginWithGitHub() {
-    const provider = new GithubAuthProvider();
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            console.log("Успешный вход через GitHub:", result.user);
-        })
-        .catch((error) => {
-            console.error("Ошибка входа через GitHub:", error);
-            alert("Ошибка входа через GitHub: " + error.message);
-        });
-}
-
-function logoutUser() {
-    signOut(auth)
-        .then(() => {
-            console.log("Пользователь вышел");
-        })
-        .catch((error) => {
-            console.error("Ошибка выхода:", error);
-        });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена (admin)");
     loadNavbar();
@@ -455,8 +419,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const exercisesBtn = document.getElementById("exercises-button");
         const addExerciseBtn = document.getElementById("add-exercise-button");
         const bulkImportBtn = document.getElementById("bulk-import-button");
-        const googleLoginBtn = document.getElementById("google-login-btn");
-        const githubLoginBtn = document.getElementById("github-login-btn");
         const logoutBtn = document.getElementById("logout-btn");
         const userStatus = document.getElementById("user-status");
 
@@ -464,8 +426,6 @@ document.addEventListener("DOMContentLoaded", () => {
             userStatus.textContent = `Welcome, ${user.email}`;
             workoutsBtn.style.display = "block";
             logoutBtn.style.display = "block";
-            googleLoginBtn.style.display = "none";
-            githubLoginBtn.style.display = "none";
             if (role === "admin") {
                 usersBtn.style.display = "block";
                 exercisesBtn.style.display = "block";
@@ -487,8 +447,6 @@ document.addEventListener("DOMContentLoaded", () => {
             addExerciseBtn.style.display = "none";
             bulkImportBtn.style.display = "none";
             logoutBtn.style.display = "none";
-            googleLoginBtn.style.display = "block";
-            githubLoginBtn.style.display = "block";
         }
     });
 
@@ -506,9 +464,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (role === "admin") loadModule("exercises", auth.currentUser?.uid);
     });
 
-    document.getElementById("google-login-btn").addEventListener("click", loginWithGoogle);
-    document.getElementById("github-login-btn").addEventListener("click", loginWithGitHub);
-    document.getElementById("logout-btn").addEventListener("click", logoutUser);
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        auth.signOut().then(() => {
+            console.log("Пользователь вышел");
+        }).catch((error) => {
+            console.error("Ошибка выхода:", error);
+        });
+    });
 });
 
 window.showWorkoutDetails = showWorkoutDetails;
