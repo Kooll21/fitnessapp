@@ -244,3 +244,4 @@ window.showExerciseHistory = showExerciseHistory;
 window.closeHistoryPopup = closeHistoryPopup;
 window.closePopup = closePopup;
 window.updateWorkout = updateWorkout;
+window.loadUserWorkouts = loadUserWorkouts;
