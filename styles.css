@@ -487,3 +487,57 @@ body.modal-open #overlay {
 .user-card button:hover {
     background-color: #2980b9;
 }
+
+/* Add workout popup styles */
+#add-workout-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #ffffff, #f7f9fa);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+}
+
+#add-workout-content h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+#add-workout-content label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+#add-workout-content select,
+#add-workout-content input,
+#add-workout-content textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#add-workout-content button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#add-workout-content button:hover {
+    background-color: #2980b9;
+}
