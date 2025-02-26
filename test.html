@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Fitness Tracker</title>
+    <title>Fitness Tracker - Выбор тренировки</title>
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -19,52 +20,394 @@
     <!-- Основной контент -->
     <div class="main-content">
         <header>
-            <h1>Вход</h1>
-            <p>Войдите в свой аккаунт, чтобы продолжить фитнес-путешествие!</p>
+            <h1>Выбери тренировку на сегодня</h1>
+            <p>Создай тренировку на свой вкус: выбери одну группу мышц или комбинацию из двух-трёх.</p>
         </header>
 
-        <section class="content">
-            <form id="login-form" class="feature-card">
-                <h3>Введите данные</h3>
-                <label for="email">Email:</label>
-                <input type="email" id="email" required placeholder="example@domain.com">
-
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" required placeholder="Введите ваш пароль">
-
-                <button type="submit">Войти</button>
-            </form>
-            <p id="error-message" style="color: #e74c3c; text-align: center; margin-top: 15px;"></p>
+        <section class="muscle-group-container">
+            <div class="muscle-group-card">
+                <label for="workout1">Первая группа мышц:</label>
+                <select id="workout1" class="workout-select">
+                    <option value="">Выберите группу мышц</option>
+                </select>
+            </div>
+            <div class="muscle-group-card">
+                <label for="workout2">Вторая группа мышц:</label>
+                <select id="workout2" class="workout-select">
+                    <option value="">Выберите группу мышц</option>
+                </select>
+            </div>
+            <div class="muscle-group-card">
+                <label for="workout3">Третья группа мышц:</label>
+                <select id="workout3" class="workout-select">
+                    <option value="">Выберите группу мышц</option>
+                </select>
+            </div>
         </section>
 
-        <footer>
-            <p>© 2025 Фитнес Приложение. Все права защищены.</p>
-        </footer>
+        <div class="button-container">
+            <button id="generateWorkout">Сгенерировать тренировку</button>
+            <button id="saveWorkoutBtn" style="display:none;">Сохранить тренировку</button>
+            <button id="deleteWorkoutBtn" style="display:none;">Удалить тренировку</button>
+            <button id="complete-workout-btn" style="display:none;">Тренировка выполнена</button>
+        </div>
+
+        <div id="workoutResults" class="workout-matrix"></div>
+        <div id="savedWorkout" class="workout-grid"></div>
     </div>
+
+    <!-- Модальное окно -->
+    <div id="overlay" class="overlay" onclick="closePopup()"></div>
+    <div id="popup" class="popup"></div>
 
     <!-- Скрипты -->
     <script type="module" src="auth.js"></script>
     <script type="module" src="menu.js"></script>
     <script type="module">
-        import { loadNavbar, loginUser } from './auth.js';
+        import { auth, db, loadNavbar } from './auth.js';
 
         document.addEventListener("DOMContentLoaded", () => {
-            loadNavbar(); // Загружаем navbar синхронно
+            loadNavbar();
+            loadWorkouts();
         });
 
-        document.getElementById("login-form").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const errorMessage = document.getElementById("error-message");
+        let allWorkouts = [];
+        async function loadWorkouts() {
+            try {
+                const snapshot = await db.collection("workouts").get();
+                allWorkouts = snapshot.docs.map(doc => doc.id);
+                updateDropdowns();
+            } catch (error) {
+                console.error("Ошибка загрузки тренировок:", error);
+            }
+        }
 
-            loginUser(email, password)
-                .then(() => {
-                    window.location.href = "admin.html";
-                })
-                .catch((error) => {
-                    errorMessage.textContent = "Не удалось войти: " + error.message;
+        function updateDropdowns() {
+            const selects = document.querySelectorAll(".workout-select");
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">Выберите группу мышц</option>';
+                allWorkouts.forEach(workout => {
+                    let option = document.createElement("option");
+                    option.value = workout;
+                    option.textContent = workout;
+                    select.appendChild(option);
                 });
+            });
+        }
+
+        let allExercises = [];
+        let workoutPlan = [];
+        let currentWorkoutDocRef = null;
+
+        document.getElementById("generateWorkout").addEventListener("click", async () => {
+            const selectedWorkouts = getSelectedWorkouts();
+            if (selectedWorkouts.length === 0) {
+                alert("Выберите хотя бы одну группу мышц!");
+                return;
+            }
+
+            workoutPlan = [];
+            allExercises = [];
+            let muscleCount = {};
+
+            for (const workout of selectedWorkouts) {
+                const snapshot = await db.collection("workouts").doc(workout).collection("exercises").get();
+                const exercises = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                allExercises.push(...exercises);
+
+                let mainExercises = exercises.filter(e => e.exercisetype === "Основное");
+                let isolationExercises = exercises.filter(e => e.exercisetype === "Изолирующее");
+
+                shuffleArray(mainExercises);
+                shuffleArray(isolationExercises);
+
+                if (selectedWorkouts.length === 1) {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 4, muscleCount), ...getFilteredExercises(isolationExercises, 4, muscleCount));
+                } else if (selectedWorkouts.length === 2) {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 2, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+                } else {
+                    workoutPlan.push(...getFilteredExercises(mainExercises, 1, muscleCount), ...getFilteredExercises(isolationExercises, 2, muscleCount));
+                }
+            }
+
+            displayWorkout(workoutPlan);
+            document.getElementById("saveWorkoutBtn").style.display = "inline-block";
+            document.getElementById("deleteWorkoutBtn").style.display = "none";
+            document.getElementById("complete-workout-btn").style.display = "none";
+            document.getElementById("workoutResults").style.display = "block";
+        });
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function getFilteredExercises(exercises, count, muscleCount) {
+            let filtered = [];
+            exercises.forEach(exercise => {
+                if (!muscleCount[exercise.muscle] || muscleCount[exercise.muscle] < 2) {
+                    filtered.push(exercise);
+                    muscleCount[exercise.muscle] = (muscleCount[exercise.muscle] || 0) + 1;
+                }
+            });
+            return filtered.slice(0, count);
+        }
+
+        function getSelectedWorkouts() {
+            return Array.from(document.querySelectorAll(".workout-select"))
+                .map(select => select.value)
+                .filter(value => value);
+        }
+
+        function displayWorkout(workoutPlan) {
+            const container = document.getElementById("workoutResults");
+            container.innerHTML = "<h2>Сгенерированная тренировка:</h2>";
+
+            // Создаем таблицу
+            const table = document.createElement("table");
+            table.className = "exercise-matrix";
+
+            // Заголовки таблицы
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            const headers = ["Название", "Тип", "Мышцы", "Подходы", "Повторы", "Действия"];
+            headers.forEach(headerText => {
+                const th = document.createElement("th");
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Тело таблицы
+            const tbody = document.createElement("tbody");
+            workoutPlan.forEach(exercise => {
+                const embedUrl = exercise.video.replace("watch?v=", "embed/");
+                const row = document.createElement("tr");
+                row.setAttribute('data-exercise-id', exercise.id);
+
+                // Ячейки с данными
+                row.innerHTML = `
+                    <td>${exercise.exercisename}</td>
+                    <td>${exercise.exercisetype}</td>
+                    <td>${exercise.muscle}</td>
+                    <td>${exercise.sets}</td>
+                    <td>${exercise.reps}</td>
+                    <td>
+                        <button onclick="toggleDetails(this, '${embedUrl}', '${exercise.description}')">Подробнее</button>
+                        <button onclick="openReplaceModal('${exercise.id}', '${exercise.muscle}', '${exercise.exercisetype}')">Заменить</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+
+            container.appendChild(table);
+        }
+
+        // Остальные функции остаются без изменений
+        function openReplaceModal(exerciseid, muscle, type) {
+            const replacements = allExercises.filter(ex => ex.muscle === muscle && ex.exercisetype === type && ex.id !== exerciseid);
+            let options = replacements.map(ex => `<option value="${ex.id}">${ex.exercisename}</option>`).join("");
+
+            let modal = document.createElement("div");
+            modal.className = "replace-modal";
+            modal.innerHTML = `
+                <select id="replace-select-${exerciseid}">${options}</select>
+                <button onclick="applyReplacement('${exerciseid}')">Заменить</button>
+            `;
+            const row = document.querySelector(`tr[data-exercise-id="${exerciseid}"]`);
+            if (row) row.appendChild(modal);
+        }
+
+        function applyReplacement(exerciseid) {
+            let selectedId = document.getElementById(`replace-select-${exerciseid}`).value;
+            let newExercise = allExercises.find(ex => ex.id === selectedId);
+            let oldRow = document.querySelector(`tr[data-exercise-id="${exerciseid}"]`);
+
+            if (newExercise && oldRow) {
+                const embedUrl = newExercise.video.replace("watch?v=", "embed/");
+                oldRow.setAttribute('data-exercise-id', newExercise.id);
+                oldRow.innerHTML = `
+                    <td>${newExercise.exercisename}</td>
+                    <td>${newExercise.exercisetype}</td>
+                    <td>${newExercise.muscle}</td>
+                    <td>${newExercise.sets}</td>
+                    <td>${newExercise.reps}</td>
+                    <td>
+                        <button onclick="toggleDetails(this, '${embedUrl}', '${newExercise.description}')">Подробнее</button>
+                        <button onclick="openReplaceModal('${newExercise.id}', '${newExercise.muscle}', '${newExercise.exercisetype}')">Заменить</button>
+                    </td>
+                `;
+                workoutPlan = workoutPlan.map(exercise =>
+                    exercise.id === exerciseid ? newExercise : exercise
+                );
+            }
+        }
+
+        document.getElementById("saveWorkoutBtn").addEventListener("click", function () {
+            const user = auth.currentUser;
+            if (user) {
+                const workoutData = workoutPlan.map(exercise => ({
+                    exerciseid: exercise.id,
+                    exercisename: exercise.exercisename,
+                    reps: exercise.reps,
+                    sets: exercise.sets,
+                    weight: "не указан" // Вес не отображается в матрице, оставляем как есть
+                }));
+
+                const userDocRef = db.collection("userWorkouts").doc(user.uid);
+                userDocRef.collection("workouts").add({
+                    exercises: workoutData,
+                    date: new Date(),
+                    status: "saved"
+                }).then(docRef => {
+                    currentWorkoutDocRef = docRef;
+                    console.log("Тренировка сохранена успешно!");
+                    const savedContainer = document.getElementById("savedWorkout");
+                    savedContainer.innerHTML = "<h2>Сохраненная тренировка:</h2>";
+                    savedContainer.style.display = "block";
+
+                    workoutPlan.forEach((exercise, index) => {
+                        const savedExercise = document.createElement("div");
+                        savedExercise.className = "workout-card";
+                        const checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.id = `checkbox-${exercise.id}`;
+                        savedExercise.innerHTML = `
+                            <label for="checkbox-${exercise.id}">
+                                ${index + 1}. ${exercise.exercisename}, ${exercise.reps} повторов, ${exercise.sets} подходов,
+                                Вес: <input type="text" id="saved-weight-${exercise.id}" value="не указан" placeholder="Введите вес">
+                            </label>
+                            <button onclick="showDetailsPopup('${exercise.id}')">Подробнее</button>
+                        `;
+                        savedExercise.insertBefore(checkbox, savedExercise.firstChild);
+                        savedContainer.appendChild(savedExercise);
+                    });
+
+                    document.getElementById("workoutResults").style.display = "none";
+                    toggleButtons(true);
+                }).catch(error => {
+                    console.error("Ошибка сохранения тренировки:", error);
+                });
+            }
+        });
+
+        document.getElementById("deleteWorkoutBtn").addEventListener("click", async function() {
+            const user = auth.currentUser;
+            if (user && currentWorkoutDocRef) {
+                try {
+                    await currentWorkoutDocRef.delete();
+                    console.log("Тренировка удалена успешно!");
+                    document.getElementById("savedWorkout").innerHTML = "";
+                    document.getElementById("workoutResults").style.display = "none";
+                    toggleButtons(false);
+                } catch (error) {
+                    console.error("Ошибка удаления тренировки:", error);
+                }
+            }
+        });
+
+        document.getElementById("complete-workout-btn").addEventListener("click", function () {
+            const button = this;
+            if (button.disabled) return;
+
+            button.disabled = true;
+            const user = auth.currentUser;
+            if (user && currentWorkoutDocRef) {
+                const workoutData = workoutPlan.map(exercise => {
+                    const weight = document.getElementById(`saved-weight-${exercise.id}`).value || "не указан";
+                    return {
+                        exerciseid: exercise.id,
+                        exercisename: exercise.exercisename,
+                        reps: exercise.reps,
+                        sets: exercise.sets,
+                        weight: weight
+                    };
+                });
+
+                currentWorkoutDocRef.update({
+                    exercises: workoutData,
+                    date: new Date(),
+                    status: "completed"
+                }).then(() => {
+                    console.log("Тренировка завершена!");
+                    alert("Тренировка завершена!");
+                    document.getElementById("savedWorkout").innerHTML = "";
+                    workoutPlan = [];
+                    document.getElementById("workoutResults").style.display = "none";
+                    toggleButtons(false);
+                }).catch(error => {
+                    console.error("Ошибка завершения тренировки:", error);
+                    button.disabled = false;
+                });
+            }
+        });
+
+        function toggleButtons(isSaved) {
+            document.getElementById("deleteWorkoutBtn").style.display = isSaved ? "inline-block" : "none";
+            document.getElementById("complete-workout-btn").style.display = isSaved ? "inline-block" : "none";
+            document.getElementById("saveWorkoutBtn").style.display = isSaved ? "none" : "inline-block";
+        }
+
+        function toggleDetails(button, videoUrl, description) {
+            const popup = document.getElementById("popup");
+            const overlay = document.getElementById("overlay");
+            popup.innerHTML = `
+                <h2>Детали упражнения</h2>
+                <iframe width="100%" height="315" src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <p>${description}</p>
+                <button class="close-btn" onclick="closePopup()">X</button>
+            `;
+            popup.style.display = "block";
+            overlay.style.display = "block";
+            document.body.classList.add("modal-open");
+        }
+
+        function showDetailsPopup(exerciseId) {
+            const popup = document.getElementById("popup");
+            const overlay = document.getElementById("overlay");
+            const exercise = workoutPlan.find(ex => ex.id === exerciseId);
+            const embedUrl = exercise.video.replace("watch?v=", "embed/");
+            popup.innerHTML = `
+                <h2>${exercise.exercisename}</h2>
+                <img src="${exercise.photo}" alt="${exercise.exercisename}" style="width: 100%; max-height: 300px; object-fit: cover;">
+                <p>${exercise.description || "Нет описания"}</p>
+                <iframe width="100%" height="315" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <button class="close-btn" onclick="closePopup()">X</button>
+            `;
+            popup.style.display = "block";
+            overlay.style.display = "block";
+            document.body.classList.add("modal-open");
+        }
+
+        function closePopup() {
+            const popup = document.getElementById("popup");
+            const overlay = document.getElementById("overlay");
+            popup.style.display = "none";
+            overlay.style.display = "none";
+            document.body.classList.remove("modal-open");
+        }
+    </script>
+
+    <script type="module" src="auth.js"></script>
+    <script type="module">
+        import { auth, loadNavbar } from './auth.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Страница загружена");
+            loadNavbar();
+            auth.onAuthStateChanged((user) => {
+                console.log("Состояние авторизации:", user ? "Авторизован" : "Не авторизован");
+                if (user) {
+                    const adminPanel = document.getElementById("admin-panel");
+                    if (adminPanel) {
+                        adminPanel.style.display = 'block';
+                        console.log("Кнопка 'Личный кабинет' должна быть видна");
+                    } else {
+                        console.log("Элемент #admin-panel не найден в DOM");
+                    }
+                }
+            });
         });
     </script>
 </body>
