@@ -1,4 +1,4 @@
-/* General body styles  */
+/* General body styles */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -15,11 +15,11 @@ body {
     background: linear-gradient(90deg, #1a2a44, #2e4066);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-    padding: 0 10px; /* Добавлен небольшой горизонтальный отступ */
+    padding: 0 10px;
     height: 60px;
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Распределяем содержимое */
+    justify-content: space-between;
     transition: background 0.3s ease;
 }
 
@@ -87,18 +87,18 @@ body {
 
 /* User status */
 #user-status {
-    color: #ecf0f1; /* Более яркий цвет для читаемости */
-    font-size: 0.95rem; /* Чуть меньше для компактности */
+    color: #ecf0f1;
+    font-size: 0.95rem;
     padding: 8px 15px;
-    background: rgba(255, 255, 255, 0.1); /* Лёгкий фон */
-    border-radius: 6px; /* Скругление */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 200px; /* Ограничение ширины */
-    white-space: nowrap; /* Текст в одну строку */
+    max-width: 200px;
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Обрезка длинного email */
+    text-overflow: ellipsis;
 }
 
 /* Responsive menu styles */
@@ -106,17 +106,17 @@ body {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    padding: 8px; /* Увеличенный отступ */
-    position: relative; /* Изменим на relative для лучшей интеграции */
+    padding: 8px;
+    position: relative;
     z-index: 1010;
-    margin-right: 10px; /* Отступ от края */
+    margin-right: 10px;
 }
 
 .menu-toggle .bar {
     background-color: #ecf0f1;
-    height: 3px; /* Уменьшена толщина для аккуратности */
-    width: 25px; /* Уменьшена ширина */
-    margin: 4px 0; /* Меньший отступ между полосками */
+    height: 3px;
+    width: 25px;
+    margin: 4px 0;
     border-radius: 2px;
     transition: all 0.3s ease;
 }
@@ -177,7 +177,7 @@ body {
     }
 
     .menu-toggle.active .bar:nth-child(1) {
-        transform: translateY(7px) rotate(45deg); /* Уменьшено смещение */
+        transform: translateY(7px) rotate(45deg);
     }
 
     .menu-toggle.active .bar:nth-child(2) {
@@ -185,9 +185,10 @@ body {
     }
 
     .menu-toggle.active .bar:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg); /* Уменьшено смещение */
+        transform: translateY(-7px) rotate(-45deg);
     }
 }
+
 /* Sidebar Styles */
 .sidebar {
     position: fixed;
@@ -289,14 +290,6 @@ body {
     background-color: #2980b9;
 }
 
-#logout-btn {
-    display: none;
-}
-
-#login-link {
-    display: inline-block;
-}
-
 /* Main content styles */
 .main-content {
     margin-left: 250px;
@@ -307,6 +300,7 @@ body {
     border-radius: 10px;
     margin-top: 60px;
     transition: margin-left 0.3s ease;
+    width: calc(100% - 250px); /* Устанавливаем ширину явно */
 }
 
 .main-content h1,
@@ -321,25 +315,33 @@ body {
     line-height: 1.6;
 }
 
-/* Workout cards styles */
-#workouts-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Сетка с адаптивными карточками */
-    gap: 20px; /* Расстояние между карточками */
+/* Workout grid styles */
+.workout-grid {
+    margin-top: 30px;
+    display: none; /* Скрыт по умолчанию */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
     padding: 10px;
+    animation: fadeIn 0.5s ease forwards;
 }
 
+.workout-grid h2 {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+/* Workout cards styles */
 .workout-card {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: fadeIn 0.5s ease forwards; /* Анимация появления */
+    animation: fadeIn 0.5s ease forwards;
 }
 
 .workout-card:hover {
-    transform: translateY(-5px); /* Подъём при наведении */
+    transform: translateY(-5px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -349,9 +351,10 @@ body {
     color: #2c3e50;
 }
 
-.workout-card .exercise-count {
-    font-size: 0.9rem;
-    color: #7f8c8d;
+.workout-card img {
+    width: 100%;
+    max-width: 150px;
+    border-radius: 8px;
     margin-bottom: 10px;
 }
 
@@ -363,10 +366,29 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-right: 5px;
 }
 
 .workout-card button:hover {
     background-color: #2980b9;
+}
+
+.workout-card .weight-input {
+    margin: 10px 0;
+}
+
+.workout-card .weight-input label {
+    font-size: 1rem;
+    color: #2c3e50;
+    margin-right: 10px;
+}
+
+.workout-card .weight-input input {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    width: 100px;
 }
 
 /* Анимация появления */
@@ -386,8 +408,7 @@ body.modal-open {
     overflow: hidden;
 }
 
-#popup,
-#history-popup {
+#popup {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -435,297 +456,7 @@ body.modal-open #overlay {
     color: #c0392b;
 }
 
-#history-popup button {
-    background-color: #e74c3c;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#history-popup button:hover {
-    background-color: #c0392b;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 200px;
-        top: 60px;
-    }
-
-    .main-content {
-        margin-left: 200px;
-        margin-top: 60px;
-        padding: 20px;
-    }
-
-    #workouts-list {
-        grid-template-columns: 1fr; /* Одна колонка на планшетах */
-    }
-}
-
-@media (max-width: 480px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        top: 60;
-        box-shadow: none;
-        padding-bottom: 10px;
-    }
-
-    .sidebar-footer {
-        position: relative;
-        bottom: 0;
-    }
-
-    .main-content {
-        margin-left: 0;
-        margin-top: 60px;
-        border-radius: 0;
-        padding: 15px;
-    }
-
-    #popup,
-    #history-popup {
-        width: 90%;
-        max-width: none;
-    }
-
-    #workouts-list {
-        grid-template-columns: 1fr; /* Одна колонка на мобильных */
-    }
-}
-/* User list styles */
-.user-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 10px;
-}
-
-.user-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.user-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.user-card p {
-    margin: 0 0 10px 0;
-    font-size: 1.1rem;
-    color: #2c3e50;
-}
-
-.user-card button {
-    background-color: #3498db;
-    color: #fff;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.user-card button:hover {
-    background-color: #2980b9;
-}
-
-/* Add workout popup styles */
-#add-workout-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    background: linear-gradient(180deg, #ffffff, #f7f9fa);
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    z-index: 1001;
-}
-
-#add-workout-content h3 {
-    margin-top: 0;
-    color: #2c3e50;
-}
-
-#add-workout-content label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: 500;
-    color: #2c3e50;
-}
-
-#add-workout-content select,
-#add-workout-content input,
-#add-workout-content textarea {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #bdc3c7;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-#add-workout-content button {
-    background-color: #3498db;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#add-workout-content button:hover {
-    background-color: #2980b9;
-}
-
-/* Стили для главной страницы */
-.main-content header {
-    text-align: center;
-    padding: 40px 20px;
-    background: linear-gradient(180deg, #ecf0f1, #ffffff);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.main-content header h1 {
-    font-size: 2.5rem;
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-.main-content header p {
-    font-size: 1.2rem;
-    color: #7f8c8d;
-}
-
-.content {
-    padding: 30px;
-}
-
-.content h2 {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 20px;
-}
-
-.features-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 10px;
-}
-
-.feature-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: fadeIn 0.5s ease forwards;
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.feature-card i {
-    font-size: 2rem;
-    color: #3498db;
-    margin-bottom: 15px;
-}
-
-.feature-card h3 {
-    font-size: 1.3rem;
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-.feature-card p {
-    font-size: 1rem;
-    color: #7f8c8d;
-    line-height: 1.6;
-}
-
-.call-to-action {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #2c3e50;
-    margin-top: 30px;
-    font-weight: 600;
-}
-
-footer {
-    text-align: center;
-    padding: 20px;
-    background: linear-gradient(180deg, #2c3e50, #34495e);
-    color: #ecf0f1;
-    font-size: 0.9rem;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .main-content header h1 {
-        font-size: 2rem;
-    }
-
-    .main-content header p {
-        font-size: 1rem;
-    }
-
-    .content {
-        padding: 20px;
-    }
-
-    .features-list {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .navbar {
-        height: 60px;
-    }
-
-    .main-content {
-        margin-top: 60px; /* Учитываем высоту navbar на мобильных */
-        padding: 15px;
-    }
-
-    .main-content header {
-        padding: 20px 10px;
-    }
-
-    .main-content header h1 {
-        font-size: 1.5rem;
-    }
-
-    .content h2 {
-        font-size: 1.5rem;
-    }
-}
-
-/* Стили для страницы выбора тренировки */
-
-/* Контейнер выбора групп мышц */
+/* Muscle group selection */
 .muscle-group-container {
     display: flex;
     flex-wrap: wrap;
@@ -774,7 +505,7 @@ footer {
     background: #e0e6ed;
 }
 
-/* Кнопки */
+/* Buttons */
 .button-container {
     display: flex;
     justify-content: center;
@@ -817,53 +548,7 @@ footer {
     background: linear-gradient(135deg, #27ae60, #219653);
 }
 
-/* Результаты тренировки в виде сетки */
-.workout-grid {
-    display: none;
-    margin-top: 30px;
-    animation: fadeIn 0.5s ease forwards;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 10px;
-}
-
-.workout-grid h2 {
-    grid-column: 1 / -1; /* Заголовок занимает всю ширину */
-    text-align: center;
-}
-
-/* Переиспользуем .workout-card для упражнений */
-.workout-card img {
-    width: 100%;
-    max-width: 150px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-.workout-card .weight-input {
-    margin: 10px 0;
-}
-
-.workout-card .weight-input label {
-    font-size: 1rem;
-    color: #2c3e50;
-    margin-right: 10px;
-}
-
-.workout-card .weight-input input {
-    padding: 8px;
-    font-size: 1rem;
-    border: 1px solid #bdc3c7;
-    border-radius: 5px;
-    width: 100px;
-}
-
-.exercise-details {
-    margin-top: 10px;
-}
-
-/* Модальное окно замены */
+/* Replace modal */
 .replace-modal {
     margin-top: 10px;
     padding: 10px;
@@ -886,8 +571,24 @@ footer {
     font-size: 1rem;
 }
 
-/* Адаптивность для страницы выбора тренировки */
+/* Responsive Design */
 @media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+        top: 60px;
+    }
+
+    .main-content {
+        margin-left: 200px;
+        margin-top: 60px;
+        padding: 20px;
+        width: calc(100% - 200px);
+    }
+
+    .workout-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
     .muscle-group-container {
         flex-direction: column;
         align-items: center;
@@ -908,18 +609,31 @@ footer {
         margin: 0 auto;
     }
 
-    .workout-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Уменьшаем размер карточек */
-    }
-
     .workout-card img {
         max-width: 120px;
     }
 }
 
 @media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 60px;
+        box-shadow: none;
+        padding-bottom: 10px;
+    }
+
+    .main-content {
+        margin-left: 0;
+        margin-top: 60px;
+        border-radius: 0;
+        padding: 15px;
+        width: 100%;
+    }
+
     .workout-grid {
-        grid-template-columns: 1fr; /* Одна колонка на маленьких экранах */
+        grid-template-columns: 1fr;
     }
 
     .workout-card h3 {
