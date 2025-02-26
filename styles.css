@@ -447,3 +447,43 @@ body.modal-open #overlay {
         grid-template-columns: 1fr; /* Одна колонка на мобильных */
     }
 }
+/* User list styles */
+.user-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.user-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.user-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.user-card p {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.user-card button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.user-card button:hover {
+    background-color: #2980b9;
+}
