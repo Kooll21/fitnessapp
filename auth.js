@@ -113,3 +113,4 @@ window.checkAuthState = checkAuthState;
 window.logoutUser = logoutUser;
 window.loadNavbar = loadNavbar;
 window.initBurgerMenu = initBurgerMenu;
+window.loginUser = loginUser;
