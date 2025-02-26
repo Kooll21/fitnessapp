@@ -541,3 +541,132 @@ body.modal-open #overlay {
 #add-workout-content button:hover {
     background-color: #2980b9;
 }
+
+/* Стили для главной страницы */
+.main-content header {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(180deg, #ecf0f1, #ffffff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.main-content header h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.main-content header p {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+}
+
+.content {
+    padding: 30px;
+}
+
+.content h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.features-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.feature-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card i {
+    font-size: 2rem;
+    color: #3498db;
+    margin-bottom: 15px;
+}
+
+.feature-card h3 {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.feature-card p {
+    font-size: 1rem;
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+.call-to-action {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-top: 30px;
+    font-weight: 600;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(180deg, #2c3e50, #34495e);
+    color: #ecf0f1;
+    font-size: 0.9rem;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .main-content header h1 {
+        font-size: 2rem;
+    }
+
+    .main-content header p {
+        font-size: 1rem;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .features-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        height: 60px;
+    }
+
+    .main-content {
+        margin-top: 60px; /* Учитываем высоту navbar на мобильных */
+        padding: 15px;
+    }
+
+    .main-content header {
+        padding: 20px 10px;
+    }
+
+    .main-content header h1 {
+        font-size: 1.5rem;
+    }
+
+    .content h2 {
+        font-size: 1.5rem;
+    }
+}
