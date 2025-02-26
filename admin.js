@@ -16,42 +16,20 @@ async function loadUserWorkouts(userId) {
         console.log("Снимок данных из Firestore:", snapshot.docs.length, "тренировок");
         workoutsData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-        for (let workout of workoutsData) {
-            if (workout.exerciseIds && workout.exerciseIds.length > 0) {
-                console.log(`Загрузка упражнений для тренировки ${workout.id}, exerciseIds:`, workout.exerciseIds);
-                workout.exercises = await loadExercises(workout.exerciseIds);
-            } else {
-                console.log(`Тренировка ${workout.id} не содержит exerciseIds`);
-                workout.exercises = [];
+        // Проверяем данные каждой тренировки
+        workoutsData.forEach(workout => {
+            if (!workout.exercises || !Array.isArray(workout.exercises)) {
+                console.warn(`Тренировка ${workout.id} не содержит корректный массив exercises`);
+                workout.exercises = []; // Устанавливаем пустой массив, если данные некорректны
             }
-            console.log(`Тренировка ${workout.id} после загрузки:`, workout);
-        }
+            console.log(`Тренировка ${workout.id}:`, workout);
+        });
 
         displayWorkouts(workoutsData);
     } catch (error) {
         console.error("Ошибка загрузки тренировок:", error);
         document.getElementById("workouts-list").innerHTML = "<p>Ошибка загрузки тренировок</p>";
     }
-}
-
-async function loadExercises(exerciseIds) {
-    const exercises = [];
-    try {
-        console.log("Загрузка упражнений для exerciseIds:", exerciseIds);
-        for (let id of exerciseIds) {
-            const exerciseRef = db.collection("exercises").doc(id);
-            const exerciseDoc = await exerciseRef.get();
-            if (exerciseDoc.exists) {
-                exercises.push(exerciseDoc.data());
-            } else {
-                console.warn(`Упражнение с ID ${id} не найдено`);
-            }
-        }
-    } catch (error) {
-        console.error("Ошибка загрузки упражнений:", error);
-    }
-    console.log("Результат загрузки упражнений:", exercises);
-    return exercises; // Всегда возвращаем массив, даже если он пустой
 }
 
 function displayWorkouts(workouts) {
@@ -70,7 +48,7 @@ function displayWorkouts(workouts) {
         workoutCard.className = "workout-card";
         workoutCard.innerHTML = `
             <p><strong>Тренировка №${workoutNumber}</strong>: ${new Date(workout.date.seconds * 1000).toLocaleDateString("ru-RU")}</p>
-            <div class="exercise-count">Упражнений: ${workout.exercises ? workout.exercises.length : 0}</div>
+            <div class="exercise-count">Упражнений: ${workout.exercises.length}</div>
             <button onclick="showWorkoutDetails(${index})">Подробнее</button>
         `;
         container.appendChild(workoutCard);
@@ -85,25 +63,18 @@ function showWorkoutDetails(index) {
         return;
     }
 
-    console.log(`Детали тренировки ${index}:`, workoutData); // Отладка перед отображением
+    console.log(`Детали тренировки ${index}:`, workoutData);
 
-    let exercisesList = "";
-    if (workoutData.exercises && Array.isArray(workoutData.exercises)) {
-        if (workoutData.exercises.length > 0) {
-            exercisesList = workoutData.exercises.map((exercise, exerciseIndex) => {
-                return `<li>
-                    <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>:
-                    <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
-                    <span>${exercise.reps || 0} повторений, ${exercise.sets || 0} сета</span>
-                    <button onclick="showExerciseHistory('${exercise.exercisename || ''}')">История</button>
-                </li>`;
-            }).join("");
-        } else {
-            exercisesList = "<p>Упражнения отсутствуют</p>";
-        }
-    } else {
-        exercisesList = "<p>Данные об упражнениях недоступны</p>";
-    }
+    const exercisesList = workoutData.exercises.length > 0
+        ? workoutData.exercises.map((exercise, exerciseIndex) => 
+            `<li>
+                <strong>${exercise.exercisename || "Unnamed Exercise"}</strong>: 
+                <input type="number" value="${exercise.weight || ""}" id="weight-${index}-${exerciseIndex}" placeholder="Weight (kg)" /><span> кг,</span>
+                <span>${exercise.reps || 0} повторений, ${exercise.sets || 0} сета</span>
+                <button onclick="showExerciseHistory('${exercise.exercisename || ''}')">История</button>
+            </li>`
+          ).join("")
+        : "<p>Упражнения отсутствуют</p>";
 
     document.getElementById("popup-content").innerHTML = `
         <h3>Детали тренировки</h3>
