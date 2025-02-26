@@ -7,7 +7,6 @@ body {
     color: #2c3e50;
 }
 
-/* Navbar styles */
 /* Navbar styles (общие) */
 .navbar {
     position: fixed;
@@ -15,11 +14,12 @@ body {
     width: 100%;
     background: linear-gradient(90deg, #1a2a44, #2e4066);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    z-index: 1000; /* Увеличенный z-index для приоритета */
-    padding: 0;
+    z-index: 1000;
+    padding: 0 10px; /* Добавлен небольшой горизонтальный отступ */
     height: 60px;
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Распределяем содержимое */
     transition: background 0.3s ease;
 }
 
@@ -87,11 +87,18 @@ body {
 
 /* User status */
 #user-status {
-    color: #bdc3c7;
-    font-size: 1rem;
-    padding: 10px 18px;
+    color: #ecf0f1; /* Более яркий цвет для читаемости */
+    font-size: 0.95rem; /* Чуть меньше для компактности */
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.1); /* Лёгкий фон */
+    border-radius: 6px; /* Скругление */
     display: flex;
     align-items: center;
+    justify-content: center;
+    max-width: 200px; /* Ограничение ширины */
+    white-space: nowrap; /* Текст в одну строку */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Обрезка длинного email */
 }
 
 /* Responsive menu styles */
@@ -99,18 +106,17 @@ body {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    padding: 5px;
-    position: absolute;
-    top: 18px;
-    right: 15px;
-    z-index: 1010; /* Ещё выше, чем выпадающее меню */
+    padding: 8px; /* Увеличенный отступ */
+    position: relative; /* Изменим на relative для лучшей интеграции */
+    z-index: 1010;
+    margin-right: 10px; /* Отступ от края */
 }
 
 .menu-toggle .bar {
     background-color: #ecf0f1;
-    height: 4px;
-    width: 30px;
-    margin: 5px 0;
+    height: 3px; /* Уменьшена толщина для аккуратности */
+    width: 25px; /* Уменьшена ширина */
+    margin: 4px 0; /* Меньший отступ между полосками */
     border-radius: 2px;
     transition: all 0.3s ease;
 }
@@ -119,23 +125,24 @@ body {
 @media (max-width: 768px) {
     .navbar {
         height: 60px;
+        padding: 0 10px;
     }
 
     .navbar-list {
-        display: none; /* Скрыто по умолчанию */
+        display: none;
         flex-direction: column;
         background: linear-gradient(180deg, #1a2a44, #2e4066);
         width: 100%;
-        position: fixed; /* Фиксируем для надёжности */
+        position: fixed;
         top: 60px;
         left: 0;
         padding: 15px 0;
-        z-index: 900; /* Под бургер-меню, но выше контента */
+        z-index: 900;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        min-height: calc(100vh - 60px); /* Полная высота экрана минус navbar */
-        opacity: 0; /* Для анимации */
-        transform: translateY(-10px); /* Начальное смещение для анимации */
-        transition: opacity 0.3s ease, transform 0.3s ease; /* Плавное появление */
+        min-height: calc(100vh - 60px);
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     .navbar-list.active {
@@ -145,17 +152,17 @@ body {
     }
 
     .navbar-item {
-        margin: 20px 0; /* Увеличенный отступ для простора */
-        width: 100%; /* Полная ширина для центрирования */
+        margin: 20px 0;
+        width: 100%;
         text-align: center;
     }
 
     .navbar-link {
         padding: 14px 20px;
-        font-size: 1.3rem; /* Более крупный шрифт */
-        width: 80%; /* Ограниченная ширина кнопок */
+        font-size: 1.3rem;
+        width: 80%;
         margin: 0 auto;
-        background: rgba(255, 255, 255, 0.1); /* Чуть ярче фон */
+        background: rgba(255, 255, 255, 0.1);
     }
 
     #logout-btn {
@@ -170,7 +177,7 @@ body {
     }
 
     .menu-toggle.active .bar:nth-child(1) {
-        transform: translateY(9px) rotate(45deg);
+        transform: translateY(7px) rotate(45deg); /* Уменьшено смещение */
     }
 
     .menu-toggle.active .bar:nth-child(2) {
@@ -178,7 +185,7 @@ body {
     }
 
     .menu-toggle.active .bar:nth-child(3) {
-        transform: translateY(-9px) rotate(-45deg);
+        transform: translateY(-7px) rotate(-45deg); /* Уменьшено смещение */
     }
 }
 /* Sidebar Styles */
