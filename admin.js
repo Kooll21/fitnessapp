@@ -55,7 +55,7 @@ function displayWorkouts(workouts) {
 function showWorkoutDetails(index) {
     const workoutData = workoutsData[index];
     if (!workoutData) {
-        console.error("Тренировка с индексом ${index} не найдена в workoutsData");
+        console.error(`Тренировка с индексом ${index} не найдена в workoutsData`); // Исправлена строка 58
         alert("Ошибка: данные тренировки недоступны");
         return;
     }
@@ -164,8 +164,11 @@ function closePopup() {
 
 async function updateWorkout(workoutId, workoutIndex) {
     try {
-        const workoutElement = document.querySelectorAll("#workouts-list div")[workoutIndex];
-        const workoutData = JSON.parse(workoutElement.dataset.details);
+        const workoutData = workoutsData[workoutIndex]; // Используем глобальный массив вместо dataset
+        if (!workoutData) {
+            console.error(`Тренировка с индексом ${workoutIndex} не найдена`);
+            return;
+        }
         
         workoutData.exercises.forEach((exercise, exerciseIndex) => {
             const weightInput = document.getElementById(`weight-${workoutIndex}-${exerciseIndex}`);
@@ -194,7 +197,7 @@ function loadModule(moduleName, userId) {
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена (admin)");
-    loadNavbar(); // Загружаем navbar из menu.html
+    loadNavbar(); // Предполагается, что loadNavbar определён в auth.js
     checkAuthState((user, role) => {
         const workoutsBtn = document.getElementById("workouts-button");
         const usersBtn = document.getElementById("users-button");
