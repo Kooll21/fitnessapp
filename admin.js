@@ -137,51 +137,6 @@ function showWorkoutDetails(index) {
     document.getElementById("popup").style.display = "block";
 }
 
-function showAddWorkoutPopup() {
-    document.body.classList.add("modal-open");
-    document.getElementById("overlay").style.display = "block";
-    document.getElementById("add-workout-popup").style.display = "block";
-}
-
-function closeAddWorkoutPopup() {
-    document.body.classList.remove("modal-open");
-    document.getElementById("overlay").style.display = "none";
-    document.getElementById("add-workout-popup").style.display = "none";
-    document.getElementById("exerciseForm").reset();
-}
-
-async function addExercise() {
-    const category = document.getElementById("category").value.trim();
-    const exerciseName = document.getElementById("exerciseName").value.trim();
-
-    if (!category || !exerciseName) {
-        alert("Выберите категорию и введите название упражнения!");
-        return;
-    }
-
-    const exerciseData = {
-        exerciseid: exerciseName,
-        exercisename: exerciseName,
-        exercisetype: document.getElementById("exerciseType").value.trim(),
-        sets: document.getElementById("sets").value.trim(),
-        reps: document.getElementById("reps").value.trim(),
-        muscle: document.getElementById("muscle").value.trim(),
-        muscletypeadditional: document.getElementById("muscleTypeAdditional").value.trim(),
-        video: document.getElementById("videoUrl").value.trim(),
-        photo: document.getElementById("photoUrl").value.trim(),
-        description: document.getElementById("description").value.trim()
-    };
-
-    try {
-        await db.collection("workouts").doc(category).collection("exercises").doc(exerciseName).set(exerciseData);
-        alert("Упражнение добавлено в " + category);
-        closeAddWorkoutPopup();
-    } catch (error) {
-        console.error("Ошибка при добавлении упражнения:", error);
-        alert("Ошибка при добавлении упражнения");
-    }
-}
-
 async function showExerciseHistory(exerciseName) {
     console.log("Fetching history for exercise:", exerciseName);
     try {
@@ -273,7 +228,7 @@ async function updateWorkout(workoutId, workoutIndex) {
             exercise.weight = parseFloat(weightInput.value) || null;
         });
 
-        const workoutRef = db.collection("userWorkouts").doc(auth.currentUser.uid).doc(workoutId);
+        const workoutRef = db.collection("userWorkouts").doc(auth.currentUser.uid).collection("workouts").doc(workoutId);
         await workoutRef.update({ exercises: workoutData.exercises });
 
         closePopup();
@@ -295,6 +250,98 @@ function loadModule(moduleName, userId) {
     }
 }
 
+// Функция отображения формы для добавления упражнения
+function showAddExerciseForm() {
+    getUserRole(auth.currentUser?.uid).then((userRole) => {
+        if (userRole !== "admin") {
+            alert("Только администраторы могут добавлять упражнения!");
+            return;
+        }
+
+        document.getElementById("popup-content").innerHTML = `
+            <h3>Добавить новое упражнение</h3>
+            <form id="exerciseForm">
+                <label for="category">Категория (группа мышц):</label>
+                <select id="category">
+                    <option value="Chest">Грудь</option>
+                    <option value="Biceps">Бицепс</option>
+                    <option value="Back">Спина</option>
+                    <option value="Legs">Ноги</option>
+                    <option value="Shoulders">Плечи</option>
+                    <option value="Triceps">Трицепс</option>
+                </select><br><br>
+
+                <label for="exerciseName">Название упражнения:</label>
+                <input type="text" id="exerciseName" required><br><br>
+
+                <label for="exerciseType">Тип упражнения:</label>
+                <input type="text" id="exerciseType"><br><br>
+
+                <label for="sets">Количество подходов:</label>
+                <input type="text" id="sets"><br><br>
+
+                <label for="reps">Количество повторений:</label>
+                <input type="text" id="reps"><br><br>
+
+                <label for="muscle">Основная мышца:</label>
+                <input type="text" id="muscle"><br><br>
+
+                <label for="muscleTypeAdditional">Доп. мышцы:</label>
+                <input type="text" id="muscleTypeAdditional"><br><br>
+
+                <label for="videoUrl">Ссылка на видео (YouTube):</label>
+                <input type="url" id="videoUrl"><br><br>
+
+                <label for="photoUrl">Ссылка на фото:</label>
+                <input type="url" id="photoUrl"><br><br>
+
+                <label for="description">Описание упражнения:</label><br>
+                <textarea id="description" rows="4" cols="40"></textarea><br><br>
+
+                <button type="button" onclick="addExercise()">Добавить упражнение</button>
+            </form>
+        `;
+
+        document.body.classList.add("modal-open");
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("popup").style.display = "block";
+    });
+}
+
+// Функция добавления упражнения в Firestore
+function addExercise() {
+    const category = document.getElementById("category").value.trim();
+    const exerciseName = document.getElementById("exerciseName").value.trim();
+
+    if (!category || !exerciseName) {
+        alert("Выберите категорию и введите название упражнения!");
+        return;
+    }
+
+    const exerciseData = {
+        exerciseid: exerciseName,
+        exercisename: exerciseName,
+        exercisetype: document.getElementById("exerciseType").value.trim(),
+        sets: document.getElementById("sets").value.trim(),
+        reps: document.getElementById("reps").value.trim(),
+        muscle: document.getElementById("muscle").value.trim(),
+        muscletypeadditional: document.getElementById("muscleTypeAdditional").value.trim(),
+        video: document.getElementById("videoUrl").value.trim(),
+        photo: document.getElementById("photoUrl").value.trim(),
+        description: document.getElementById("description").value.trim()
+    };
+
+    db.collection("workouts").doc(category).collection("exercises").doc(exerciseName).set(exerciseData)
+        .then(() => {
+            alert("Упражнение добавлено в " + category);
+            closePopup();
+        })
+        .catch((error) => {
+            console.error("Ошибка при добавлении упражнения: ", error);
+            alert("Ошибка при добавлении упражнения!");
+        });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Страница загружена (admin)");
     loadNavbar();
@@ -302,24 +349,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const workoutsBtn = document.getElementById("workouts-button");
         const usersBtn = document.getElementById("users-button");
         const exercisesBtn = document.getElementById("exercises-button");
-        const addWorkoutBtn = document.getElementById("add-workout-button");
+        const addExerciseBtn = document.getElementById("add-exercise-button");
 
         if (user && role === "admin") {
             workoutsBtn.style.display = "block";
             usersBtn.style.display = "block";
             exercisesBtn.style.display = "block";
-            addWorkoutBtn.style.display = "block"; // Показываем кнопку только админу
+            addExerciseBtn.style.display = "block"; // Показываем кнопку для админов
         } else if (user && role === "user") {
             workoutsBtn.style.display = "block";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
-            addWorkoutBtn.style.display = "none"; // Скрываем для обычных пользователей
-            loadModule("workouts", user.uid);
+            addExerciseBtn.style.display = "none"; // Скрываем для обычных пользователей
         } else {
             workoutsBtn.style.display = "none";
             usersBtn.style.display = "none";
             exercisesBtn.style.display = "none";
-            addWorkoutBtn.style.display = "none";
+            addExerciseBtn.style.display = "none"; // Скрываем для неавторизованных
         }
     });
 
@@ -337,11 +383,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (role === "admin") loadModule("exercises", auth.currentUser?.uid);
     });
 
-    document.getElementById("add-workout-button").addEventListener("click", () => {
-        showAddWorkoutPopup();
-    });
-
-    document.getElementById("submitExercise").addEventListener("click", addExercise);
+    const addExerciseBtn = document.getElementById("add-exercise-button");
+    if (addExerciseBtn) {
+        addExerciseBtn.addEventListener("click", () => {
+            showAddExerciseForm();
+        });
+    }
 });
 
 window.showWorkoutDetails = showWorkoutDetails;
@@ -349,3 +396,4 @@ window.showExerciseHistory = showExerciseHistory;
 window.closeHistoryPopup = closeHistoryPopup;
 window.closePopup = closePopup;
 window.updateWorkout = updateWorkout;
+window.addExercise = addExercise;
