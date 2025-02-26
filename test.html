@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <!-- Навигационная панель  -->
+    <!-- Навигационная панель -->
     <nav class="navbar">
         <div id="navbar-container"></div>
     </nav>
@@ -71,11 +71,19 @@
         </section>
 
         <footer>
-            <p>© 2025 Фитнес Приложение. Все права защищены.</p>
+            <p>©️ 2025 Фитнес Приложение. Все права защищены.</p>
         </footer>
     </div>
 
     <!-- Скрипты -->
-        <script type="module" src="auth.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script type="module">
+        import { loadNavbar } from './auth.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Страница загружена");
+            loadNavbar();
+        });
+    </script>
 </body>
 </html>
